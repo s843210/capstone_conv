@@ -1,41 +1,28 @@
--- 1. 상품 정보 테이블 (현재의 상태 관리)
+-- 1. 상품 마스터 테이블 (기준 정보)
 CREATE TABLE product (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    category VARCHAR(50),
-    current_stock INT DEFAULT 0, -- 대시보드용 최신 재고 (매일 18시 업데이트되는 값)
-    is_active BOOLEAN DEFAULT TRUE
+                         id            BIGSERIAL PRIMARY KEY,           -- 시스템 내부 고유 ID
+                         plu_code      VARCHAR(50) NOT NULL UNIQUE,     -- 실제 상품 바코드 (가장 중요한 식별자)
+                         name          VARCHAR(255) NOT NULL,           -- 상품명 (예: 참치마요 삼각김밥)
+                         category      VARCHAR(100) DEFAULT '기타/미분류', -- 상품 카테고리 (대분류)
+                         current_stock INT DEFAULT 0,                   -- 현재 매장 재고 수량
+                         is_active     BOOLEAN DEFAULT TRUE,            -- 판매 중단 여부
+                         updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 마지막 재고 업데이트 시점
 );
 
--- 2. 일별 판매 및 마감 통계 (과거 이력/AI 학습용)
-CREATE TABLE daily_sales_stats (
-    id BIGSERIAL PRIMARY KEY,
-    product_id BIGINT NOT NULL,
-    sale_date DATE NOT NULL,
-    closing_stock_18h INT NOT NULL, -- AI 피처: 해당 날짜 18시 시점의 재고 기록
-    daily_sale_qty INT DEFAULT 0,   -- 해당 날짜의 총 판매량
-    is_promotion BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (product_id) REFERENCES product(id)
+-- 2. AI 발주 예측 결과 테이블 (트랜잭션 데이터)
+CREATE TABLE ai_prediction (
+                               id                BIGSERIAL PRIMARY KEY,       -- 예측 기록 고유 ID
+                               product_id        BIGINT NOT NULL,             -- 어떤 상품에 대한 예측인지 (FK)
+                               target_date       DATE NOT NULL,               -- '언제'에 대한 예측인가 (예: 2026-04-03)
+                               predicted_sales   INT NOT NULL,                -- AI가 예측한 예상 판매량
+                               recommended_order INT NOT NULL,                -- AI가 제안하는 권장 발주량
+                               confidence_score  FLOAT,                       -- 예측 신뢰도 (0.0 ~ 1.0)
+                               ai_insight        VARCHAR(255),                -- 사장님께 보여줄 한 줄 근거
+                               created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- AI가 데이터를 던져준 시점
+
+    -- 외래키 설정: 상품이 삭제되면 해당 예측 데이터도 관리되도록 설정
+                               CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES product(id) ON DELETE CASCADE
 );
 
--- 3. 날씨 데이터 (AI 예측 피처)
-CREATE TABLE weather_data (
-    id BIGSERIAL PRIMARY KEY,
-    target_date DATE NOT NULL UNIQUE,
-    temp FLOAT,
-    condition_code VARCHAR(20),
-    rain_yn BOOLEAN
-);
-
--- 4. AI 발주 추천 결과
-CREATE TABLE order_recommendation (
-    id BIGSERIAL PRIMARY KEY,
-    product_id BIGINT NOT NULL,
-    predicted_demand INT NOT NULL,     -- AI 예측 수요
-    recommended_qty INT NOT NULL,      -- 최종 추천 발주량
-    prediction_confidence FLOAT,       -- 예측 신뢰도
-    weather_impact_rate INT DEFAULT 0, -- 날씨 영향 가중치 (%)
-    ai_insight_reason VARCHAR(100),    -- 추천 사유 (예: "내일 비 소식으로 인한 우산 수요 증가")
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES product(id)
-);
+-- 3. 빠른 조회를 위한 인덱스 (옵션)
+CREATE INDEX idx_prediction_date ON ai_prediction(target_date);

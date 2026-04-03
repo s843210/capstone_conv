@@ -12,6 +12,9 @@ public class DashboardResponseDto {
     @Builder
     @AllArgsConstructor
     public static class MainDashboard {
+        private final long totalItems;
+        private final long normalItems;
+        private final long lowStockItems;
         private final List<InventoryStat> inventoryStats;
         private final List<OrderRecommendation> recommendations;
         private final List<Insight> insights;

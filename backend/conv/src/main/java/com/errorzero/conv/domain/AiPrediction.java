@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "ai_prediction")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED) //개발자가 New porduct를 생성할떄 나오는 오류를 막아주는 역할
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class AiPrediction {
@@ -41,4 +41,11 @@ public class AiPrediction {
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public void updatePrediction(int predictedSales, int recommendedOrder, Double confidenceScore, String aiInsight) {
+        this.predictedSales = predictedSales;
+        this.recommendedOrder = recommendedOrder;
+        this.confidenceScore = confidenceScore;
+        this.aiInsight = aiInsight;
+    }
 }

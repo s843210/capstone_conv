@@ -3,7 +3,6 @@ CREATE TABLE product (
                          id            BIGSERIAL PRIMARY KEY,           -- 시스템 내부 고유 ID
                          plu_code      VARCHAR(50) NOT NULL UNIQUE,     -- 실제 상품 바코드 (가장 중요한 식별자)
                          name          VARCHAR(255) NOT NULL,           -- 상품명 (예: 참치마요 삼각김밥)
-                         category      VARCHAR(100) DEFAULT '기타/미분류', -- 상품 카테고리 (대분류)
                          current_stock INT DEFAULT 0,                   -- 현재 매장 재고 수량
                          is_active     BOOLEAN DEFAULT TRUE,            -- 판매 중단 여부
                          updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 마지막 재고 업데이트 시점

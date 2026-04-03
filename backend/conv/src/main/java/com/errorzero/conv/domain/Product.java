@@ -3,7 +3,6 @@ package com.errorzero.conv.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "product")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)  //개발자가 New porduct를 생성할떄 나오는 오류를 막아주는 역할
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class Product {
@@ -26,11 +25,11 @@ public class Product {
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(length = 100)
-    @ColumnDefault("'기타/미분류'")
-    private String category;
+    @Builder.Default
+    @Column(nullable = false, length = 100)
+    private String category = "기타/미분류";
 
-    @Column(name = "current_stock")
+    @Column(name = "current_stock", nullable = false)
     @ColumnDefault("0")
     private Integer currentStock;
 

@@ -31,6 +31,7 @@ class DailyRunService:
     def run(self, db: Session, req: DailyRunRequest, bundle: ModelBundle) -> DailyRunResponse:
         run_id = f"{req.target_date.isoformat()}-{uuid4().hex[:8]}"
         run_dir = create_run_dir(run_id)
+        validation_report = self._build_validation_report(req)
 
         run = JobRun(
             run_id=run_id,
@@ -47,9 +48,19 @@ class DailyRunService:
         db.add(run)
         db.commit()
 
-        save_json(run_dir, "request_summary.json", req.model_dump(by_alias=True, mode="json"))
+        save_json(
+            run_dir,
+            "request_summary.json",
+            {
+                "request": req.model_dump(by_alias=True, mode="json"),
+                "validation": validation_report,
+            },
+        )
 
         try:
+            if not validation_report["isValid"]:
+                raise ValueError(validation_report["message"])
+
             self._upsert_context(db, req)
             self._upsert_inventory(db, req)
             self._upsert_sales(db, req)
@@ -125,6 +136,42 @@ class DailyRunService:
                 db.commit()
             save_text(run_dir, "errors.log", str(exc))
             raise
+
+    @staticmethod
+    def _build_validation_report(req: DailyRunRequest) -> dict:
+        feature_date = req.target_date - timedelta(days=1)
+        feature_date_match = feature_date == req.run_date
+
+        required_start = feature_date - timedelta(days=13)
+        sales_days_by_plu: dict[str, set] = defaultdict(set)
+        for row in req.sales_history:
+            if required_start <= row.sales_date <= feature_date:
+                sales_days_by_plu[row.plu_code].add(row.sales_date)
+
+        item_plu_codes = {item.plu_code for item in req.items}
+        short_plu_codes = sorted(
+            plu for plu in item_plu_codes if len(sales_days_by_plu.get(plu, set())) < 14
+        )
+        has_min_14_days = len(short_plu_codes) == 0
+
+        message_parts = []
+        if not feature_date_match:
+            message_parts.append(
+                f"feature_date({feature_date.isoformat()}) must equal runDate({req.run_date.isoformat()})"
+            )
+        if not has_min_14_days:
+            sample = ", ".join(short_plu_codes[:10])
+            message_parts.append(f"salesHistory must include at least 14 days for each item. short plu: {sample}")
+
+        return {
+            "featureDate": feature_date.isoformat(),
+            "requiredSalesStartDate": required_start.isoformat(),
+            "featureDateMatchRunDate": feature_date_match,
+            "hasMin14DaysPerItem": has_min_14_days,
+            "shortPluCodesCount": len(short_plu_codes),
+            "isValid": feature_date_match and has_min_14_days,
+            "message": "; ".join(message_parts) if message_parts else "ok",
+        }
 
     def get_job(self, db: Session, run_id: str) -> JobStatusResponse | None:
         run = db.get(JobRun, run_id)

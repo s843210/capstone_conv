@@ -544,6 +544,131 @@
   font-size: 14px;
 }
 
+/* 판매 업로드 설정 */
+.sales-upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sales-upload-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.sales-upload-field input[type="file"],
+.sales-upload-field input[type="date"] {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.sales-upload-field small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.sales-upload-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.sales-upload-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.sales-upload-button {
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #fff;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sales-upload-button:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.sales-upload-result {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.sales-upload-result h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: #1e293b;
+}
+
+.sales-upload-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.sales-upload-metrics > div {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sales-upload-metrics strong {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.sales-upload-metrics span {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sales-upload-message {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #334155;
+}
+
+.sales-upload-unmatched {
+  margin-top: 12px;
+}
+
+.sales-upload-unmatched strong {
+  font-size: 13px;
+  color: #334155;
+}
+
+.sales-upload-unmatched ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  max-height: 120px;
+  overflow: auto;
+}
+
+.sales-upload-unmatched li {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.4;
+}
+
 /* 플레이스홀더 패널 */
 .placeholder-panel {
   min-height: 200px;

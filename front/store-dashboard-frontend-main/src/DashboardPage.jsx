@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import DashboardHeader from "./components/DashboardHeader";
 import DashboardOverview from "./components/DashboardOverview";
 import InventoryPanel from "./components/InventoryPanel";
+import SalesUploadPanel from "./components/SalesUploadPanel";
 import { useDashboardData } from "./hooks/useDashboardData";
 
 function DashboardPage({ onLogout }) {
@@ -73,15 +74,7 @@ function DashboardPage({ onLogout }) {
         )}
 
         {activePage === "settings" && (
-          <div className="panel placeholder-panel">
-            <div className="panel-header">
-              <div className="panel-title">
-                <span className="panel-icon">⚙️</span>
-                <h2>설정</h2>
-              </div>
-            </div>
-            <p className="placeholder-text">설정 기능 준비 중입니다.</p>
-          </div>
+          <SalesUploadPanel />
         )}
       </main>
     </div>

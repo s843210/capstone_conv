@@ -66,6 +66,32 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 잘못된 요청 값 (400)
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
+        log.warn("잘못된 요청: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    /**
+     * 잘못된 상태/사전조건 미충족 (400)
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException e) {
+        log.warn("요청 처리 불가 상태: {}", e.getMessage());
+        ErrorResponse response = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    /**
      * 그 외 예상하지 못한 서버 에러 (500)
      */
     @ExceptionHandler(Exception.class)

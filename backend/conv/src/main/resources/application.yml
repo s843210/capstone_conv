@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:${DB_PORT}/${DB_NAME}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:campus_store}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -16,3 +16,17 @@ spring:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 100
+
+app:
+  weather:
+    enabled: ${WEATHER_ENABLED:false}
+    base-url: ${WEATHER_BASE_URL:https://api.openweathermap.org}
+    forecast-path: ${WEATHER_FORECAST_PATH:/data/2.5/forecast}
+    api-key: ${WEATHER_API_KEY:}
+    latitude: ${WEATHER_LAT:37.2941}
+    longitude: ${WEATHER_LON:127.0448}
+    timeout-sec: ${WEATHER_TIMEOUT_SEC:10}
+    retry-count: ${WEATHER_RETRY:3}
+    retry-backoff-millis: ${WEATHER_RETRY_BACKOFF_MS:500}
+    schedule-cron: ${WEATHER_SCHEDULE_CRON:0 40 17 * * *}
+    schedule-zone: ${WEATHER_SCHEDULE_ZONE:Asia/Seoul}

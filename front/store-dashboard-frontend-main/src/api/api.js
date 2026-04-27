@@ -94,3 +94,28 @@ export function fetchInventory({
 export function fetchInventoryCategories() {
   return fetchWithErrorHandling("/api/inventory/categories");
 }
+
+/** 판매 파일 업로드 후 daily_sales 적재 */
+export function uploadDailySales({
+  salesFiles,
+  masterFiles,
+  salesDate = "",
+  dryRun = false,
+}) {
+  const formData = new FormData();
+
+  salesFiles.forEach((file) => formData.append("salesFiles", file));
+  masterFiles.forEach((file) => formData.append("masterFiles", file));
+
+  const trimmedDate = salesDate.trim();
+  if (trimmedDate) {
+    formData.append("salesDate", trimmedDate);
+  }
+
+  formData.append("dryRun", String(dryRun));
+
+  return fetchWithErrorHandling("/api/admin/sales/upload", {
+    method: "POST",
+    body: formData,
+  });
+}

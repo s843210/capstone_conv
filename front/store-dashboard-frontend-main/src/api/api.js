@@ -119,3 +119,35 @@ export function uploadDailySales({
     body: formData,
   });
 }
+
+/** 학사일정/유동인구 CSV 업로드 */
+export function uploadAcademicContext({
+  academicFile,
+  headcountFile,
+  dryRun = false,
+}) {
+  const formData = new FormData();
+  formData.append("academicFile", academicFile);
+  if (headcountFile) {
+    formData.append("headcountFile", headcountFile);
+  }
+  formData.append("dryRun", String(dryRun));
+
+  return fetchWithErrorHandling("/api/admin/context/academic/upload", {
+    method: "POST",
+    body: formData,
+  });
+}
+
+/** 학사 컨텍스트 기간 백필 */
+export function backfillAcademicContext({ from, to, maxDays = 365 }) {
+  const params = new URLSearchParams({
+    from,
+    to,
+    maxDays: String(maxDays),
+  });
+
+  return fetchWithErrorHandling(`/api/admin/context/academic/backfill?${params.toString()}`, {
+    method: "POST",
+  });
+}

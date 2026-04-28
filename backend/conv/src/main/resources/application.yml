@@ -30,3 +30,13 @@ app:
     retry-backoff-millis: ${WEATHER_RETRY_BACKOFF_MS:500}
     schedule-cron: ${WEATHER_SCHEDULE_CRON:0 40 17 * * *}
     schedule-zone: ${WEATHER_SCHEDULE_ZONE:Asia/Seoul}
+  holiday:
+    enabled: ${HOLIDAY_ENABLED:true}
+    include-weekend: ${HOLIDAY_INCLUDE_WEEKEND:true}
+    api-enabled: ${HOLIDAY_API_ENABLED:true}
+    base-url: ${HOLIDAY_BASE_URL:https://date.nager.at}
+    public-holiday-path: ${HOLIDAY_PUBLIC_HOLIDAY_PATH:/api/v3/PublicHolidays/{year}/{countryCode}}
+    country-code: ${HOLIDAY_COUNTRY_CODE:KR}
+    timeout-sec: ${HOLIDAY_TIMEOUT_SEC:8}
+    retry-count: ${HOLIDAY_RETRY:2}
+    retry-backoff-millis: ${HOLIDAY_RETRY_BACKOFF_MS:300}

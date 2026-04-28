@@ -20,10 +20,19 @@
 - `targetDate` 미지정 시: KST 기준 내일 날짜 사용
 - `dryRun=true`면 DB 저장 없이 조회만 수행
 
+### 1-1) 단건 공휴일 업서트
+- `POST /api/admin/context/holiday?targetDate=YYYY-MM-DD`
+- `targetDate` 미지정 시: KST 기준 내일 날짜 사용
+- 해당 날짜 행이 없으면 생성 후 `is_holiday` 업서트
+
 ### 2) 기간 백필
 - `POST /api/admin/context/weather/backfill?from=YYYY-MM-DD&to=YYYY-MM-DD&maxDays=365`
 - 범위 내 날짜를 순차 적재
 - 실패 건은 응답 `errors`에 일부 포함
+
+### 2-1) 공휴일 기간 백필
+- `POST /api/admin/context/holiday/backfill?from=YYYY-MM-DD&to=YYYY-MM-DD&maxDays=365`
+- 범위 내 날짜를 순차 업서트
 
 ## 스케줄
 - 기본 크론: `0 40 17 * * *` (KST)
@@ -40,6 +49,15 @@
 - `WEATHER_RETRY_BACKOFF_MS`
 - `WEATHER_SCHEDULE_CRON`
 - `WEATHER_SCHEDULE_ZONE`
+- `HOLIDAY_ENABLED`
+- `HOLIDAY_INCLUDE_WEEKEND`
+- `HOLIDAY_API_ENABLED`
+- `HOLIDAY_BASE_URL`
+- `HOLIDAY_PUBLIC_HOLIDAY_PATH`
+- `HOLIDAY_COUNTRY_CODE`
+- `HOLIDAY_TIMEOUT_SEC`
+- `HOLIDAY_RETRY`
+- `HOLIDAY_RETRY_BACKOFF_MS`
 
 ## 실패/재시도
 - API 호출 실패 시 최대 `WEATHER_RETRY` 횟수만큼 지수 백오프 재시도

@@ -3,11 +3,12 @@ package com.errorzero.conv.service.weather;
 import com.errorzero.conv.config.WeatherProperties;
 import com.errorzero.conv.domain.DailyContext;
 import com.errorzero.conv.repository.DailyContextRepository;
+import com.errorzero.conv.service.academic.AcademicContextService;
+import com.errorzero.conv.service.holiday.HolidayContextService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,6 +31,12 @@ class WeatherContextServiceTest {
     @Mock
     private WeatherApiClient weatherApiClient;
 
+    @Mock
+    private HolidayContextService holidayContextService;
+
+    @Mock
+    private AcademicContextService academicContextService;
+
     private WeatherProperties weatherProperties;
 
     private WeatherContextService weatherContextService;
@@ -41,7 +48,13 @@ class WeatherContextServiceTest {
         weatherProperties.setRetryCount(3);
         weatherProperties.setRetryBackoffMillis(1L);
 
-        weatherContextService = new WeatherContextService(dailyContextRepository, weatherApiClient, weatherProperties);
+        weatherContextService = new WeatherContextService(
+                dailyContextRepository,
+                weatherApiClient,
+                weatherProperties,
+                holidayContextService,
+                academicContextService
+        );
     }
 
     @Test
@@ -55,6 +68,9 @@ class WeatherContextServiceTest {
 
         when(weatherApiClient.fetchDailyWeather(targetDate))
                 .thenReturn(new WeatherSnapshot(17.5, 2.4, (short) 1));
+        when(holidayContextService.resolveHolidayFlag(targetDate)).thenReturn((short) 1);
+        when(academicContextService.resolveAcademicEvent(targetDate)).thenReturn(2);
+        when(academicContextService.resolveBuildingHeadcount(targetDate, 2)).thenReturn(20);
         when(dailyContextRepository.findById(targetDate)).thenReturn(Optional.of(existing));
         when(dailyContextRepository.save(any(DailyContext.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -65,7 +81,7 @@ class WeatherContextServiceTest {
         assertThat(saved.getIsRain()).isEqualTo((short) 1);
         assertThat(saved.getIsHoliday()).isEqualTo((short) 1);
         assertThat(saved.getAcademicEvent()).isEqualTo(2);
-        assertThat(saved.getBuildingHeadcount()).isEqualTo(1234);
+        assertThat(saved.getBuildingHeadcount()).isEqualTo(20);
     }
 
     @Test
@@ -74,6 +90,9 @@ class WeatherContextServiceTest {
 
         when(weatherApiClient.fetchDailyWeather(targetDate))
                 .thenReturn(new WeatherSnapshot(20.0, 0.0, (short) 0));
+        when(holidayContextService.resolveHolidayFlag(targetDate)).thenReturn((short) 0);
+        when(academicContextService.resolveAcademicEvent(targetDate)).thenReturn(1);
+        when(academicContextService.resolveBuildingHeadcount(targetDate, 1)).thenReturn(111);
         when(dailyContextRepository.findById(targetDate)).thenReturn(Optional.empty());
         when(dailyContextRepository.save(any(DailyContext.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -81,8 +100,8 @@ class WeatherContextServiceTest {
 
         assertThat(saved.getTargetDate()).isEqualTo(targetDate);
         assertThat(saved.getIsHoliday()).isEqualTo((short) 0);
-        assertThat(saved.getAcademicEvent()).isEqualTo(0);
-        assertThat(saved.getBuildingHeadcount()).isEqualTo(0);
+        assertThat(saved.getAcademicEvent()).isEqualTo(1);
+        assertThat(saved.getBuildingHeadcount()).isEqualTo(111);
     }
 
     @Test
@@ -114,6 +133,9 @@ class WeatherContextServiceTest {
 
         when(weatherApiClient.fetchDailyWeather(targetDate))
                 .thenReturn(new WeatherSnapshot(14.0, -3.2, (short) 1));
+        when(holidayContextService.resolveHolidayFlag(targetDate)).thenReturn((short) 0);
+        when(academicContextService.resolveAcademicEvent(targetDate)).thenReturn(0);
+        when(academicContextService.resolveBuildingHeadcount(targetDate, 0)).thenReturn(20);
         when(dailyContextRepository.findById(targetDate)).thenReturn(Optional.empty());
         when(dailyContextRepository.save(any(DailyContext.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

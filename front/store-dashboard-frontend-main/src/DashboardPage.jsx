@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import DashboardHeader from "./components/DashboardHeader";
 import DashboardOverview from "./components/DashboardOverview";
 import InventoryPanel from "./components/InventoryPanel";
+import AcademicContextPanel from "./components/AcademicContextPanel";
 import SalesUploadPanel from "./components/SalesUploadPanel";
 import { useDashboardData } from "./hooks/useDashboardData";
 
@@ -74,7 +75,10 @@ function DashboardPage({ onLogout }) {
         )}
 
         {activePage === "settings" && (
-          <SalesUploadPanel />
+          <div className="settings-stack">
+            <AcademicContextPanel />
+            <SalesUploadPanel />
+          </div>
         )}
       </main>
     </div>

@@ -2,6 +2,8 @@ package com.errorzero.conv.service.sales;
 
 import com.errorzero.conv.dto.SalesUploadResponseDto;
 import com.errorzero.conv.repository.DailySalesRepository;
+import com.errorzero.conv.service.academic.AcademicContextService;
+import com.errorzero.conv.service.holiday.HolidayContextService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -25,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -37,7 +38,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -56,6 +56,8 @@ public class SalesUploadService {
     );
 
     private final DailySalesRepository dailySalesRepository;
+    private final HolidayContextService holidayContextService;
+    private final AcademicContextService academicContextService;
 
     @Transactional
     public SalesUploadResponseDto upload(List<MultipartFile> salesFiles,
@@ -161,6 +163,12 @@ public class SalesUploadService {
                 } else {
                     insertedCount++;
                 }
+            }
+
+            // 판매 업로드가 끝난 날짜 기준으로 공휴일 플래그를 자동 업서트한다.
+            for (LocalDate date : dates) {
+                holidayContextService.upsertHoliday(date);
+                academicContextService.upsertAcademicContext(date);
             }
         }
 

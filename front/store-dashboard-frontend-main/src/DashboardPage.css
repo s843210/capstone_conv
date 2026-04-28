@@ -691,3 +691,27 @@
   color: #64748b;
   font-size: 14px;
 }
+
+.settings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.academic-backfill-form {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.academic-backfill-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 780px) {
+  .academic-backfill-grid {
+    grid-template-columns: 1fr;
+  }
+}

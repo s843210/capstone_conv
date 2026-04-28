@@ -3,6 +3,8 @@ package com.errorzero.conv.service.weather;
 import com.errorzero.conv.config.WeatherProperties;
 import com.errorzero.conv.domain.DailyContext;
 import com.errorzero.conv.repository.DailyContextRepository;
+import com.errorzero.conv.service.academic.AcademicContextService;
+import com.errorzero.conv.service.holiday.HolidayContextService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ public class WeatherContextService {
     private final DailyContextRepository dailyContextRepository;
     private final WeatherApiClient weatherApiClient;
     private final WeatherProperties weatherProperties;
+    private final HolidayContextService holidayContextService;
+    private final AcademicContextService academicContextService;
 
     @Transactional(readOnly = true)
     public WeatherSnapshot fetchWeatherWithRetry(LocalDate targetDate) {
@@ -57,16 +61,11 @@ public class WeatherContextService {
         context.setAvgTempC(snapshot.avgTempC());
         context.setPrecipitationMm(Math.max(0.0, snapshot.precipitationMm()));
         context.setIsRain(snapshot.isRain() == 1 ? (short) 1 : (short) 0);
-
-        if (context.getIsHoliday() == null) {
-            context.setIsHoliday((short) 0);
-        }
-        if (context.getAcademicEvent() == null) {
-            context.setAcademicEvent(0);
-        }
-        if (context.getBuildingHeadcount() == null) {
-            context.setBuildingHeadcount(0);
-        }
+        context.setIsHoliday(holidayContextService.resolveHolidayFlag(targetDate));
+        int academicEvent = academicContextService.resolveAcademicEvent(targetDate);
+        int buildingHeadcount = academicContextService.resolveBuildingHeadcount(targetDate, academicEvent);
+        context.setAcademicEvent(academicEvent);
+        context.setBuildingHeadcount(buildingHeadcount);
 
         return dailyContextRepository.save(context);
     }
@@ -79,16 +78,11 @@ public class WeatherContextService {
         context.setAvgTempC(snapshot.avgTempC());
         context.setPrecipitationMm(Math.max(0.0, snapshot.precipitationMm()));
         context.setIsRain(snapshot.isRain() == 1 ? (short) 1 : (short) 0);
-
-        if (context.getIsHoliday() == null) {
-            context.setIsHoliday((short) 0);
-        }
-        if (context.getAcademicEvent() == null) {
-            context.setAcademicEvent(0);
-        }
-        if (context.getBuildingHeadcount() == null) {
-            context.setBuildingHeadcount(0);
-        }
+        context.setIsHoliday(holidayContextService.resolveHolidayFlag(targetDate));
+        int academicEvent = academicContextService.resolveAcademicEvent(targetDate);
+        int buildingHeadcount = academicContextService.resolveBuildingHeadcount(targetDate, academicEvent);
+        context.setAcademicEvent(academicEvent);
+        context.setBuildingHeadcount(buildingHeadcount);
 
         return dailyContextRepository.save(context);
     }

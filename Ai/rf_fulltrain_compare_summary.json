@@ -1,0 +1,198 @@
+{
+  "train_rows": 536847,
+  "test_rows": 22960,
+  "feature_cols": [
+    "plu_id",
+    "category_l_id",
+    "category_m_id",
+    "category_s_id",
+    "sales",
+    "lag_1",
+    "lag_3",
+    "lag_7",
+    "rolling_7_mean",
+    "rolling_7_std",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_holiday_filled",
+    "academic_event_filled",
+    "academic_event_2026_flag",
+    "weather_missing",
+    "avg_temp_c_filled",
+    "precipitation_mm_filled",
+    "is_rain_filled",
+    "timetable_class_count",
+    "timetable_headcount",
+    "timetable_large_class_count",
+    "timetable_max_class_headcount",
+    "timetable_is_class_day"
+  ],
+  "baseline_metrics": {
+    "MAE": 0.027918118466898956,
+    "RMSE": 0.16734762167666511,
+    "WAPE": 0.15695396669931438,
+    "ACC_1_minus_WAPE": 0.8430460333006856
+  },
+  "rf_candidates": [
+    {
+      "model_key": "rf_100_default",
+      "params": {
+        "n_estimators": 100,
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "metrics": {
+        "MAE": 0.04897544839272909,
+        "RMSE": 0.1761363211306415,
+        "WAPE": 0.2753369968406121,
+        "ACC_1_minus_WAPE": 0.7246630031593879
+      }
+    },
+    {
+      "model_key": "rf_50_fast",
+      "params": {
+        "n_estimators": 50,
+        "max_depth": 20,
+        "min_samples_leaf": 2,
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "metrics": {
+        "MAE": 0.04606266199910996,
+        "RMSE": 0.16392178120011244,
+        "WAPE": 0.2589614886139972,
+        "ACC_1_minus_WAPE": 0.7410385113860027
+      }
+    },
+    {
+      "model_key": "rf_200_depth20_leaf2",
+      "params": {
+        "n_estimators": 200,
+        "max_depth": 20,
+        "min_samples_leaf": 2,
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "metrics": {
+        "MAE": 0.04604725918896523,
+        "RMSE": 0.1630806098364319,
+        "WAPE": 0.2588748949506958,
+        "ACC_1_minus_WAPE": 0.7411251050493042
+      }
+    },
+    {
+      "model_key": "rf_300_depth30_leaf1",
+      "params": {
+        "n_estimators": 300,
+        "max_depth": 30,
+        "min_samples_leaf": 1,
+        "random_state": 42,
+        "n_jobs": -1
+      },
+      "metrics": {
+        "MAE": 0.04868133087215165,
+        "RMSE": 0.17416456523059454,
+        "WAPE": 0.2736834860001474,
+        "ACC_1_minus_WAPE": 0.7263165139998526
+      }
+    }
+  ],
+  "best_model_key": "rf_200_depth20_leaf2",
+  "best_model_metrics": {
+    "MAE": 0.04604725918896523,
+    "RMSE": 0.1630806098364319,
+    "WAPE": 0.2588748949506958,
+    "ACC_1_minus_WAPE": 0.7411251050493042
+  },
+  "best_vs_baseline": {
+    "MAE_lower_is_better": false,
+    "RMSE_lower_is_better": true,
+    "WAPE_lower_is_better": false,
+    "ACC_higher_is_better": false
+  },
+  "top20_feature_importance": [
+    {
+      "feature": "sales",
+      "importance": 0.4808693346150673
+    },
+    {
+      "feature": "rolling_7_std",
+      "importance": 0.16885209612838606
+    },
+    {
+      "feature": "rolling_7_mean",
+      "importance": 0.07741323467983668
+    },
+    {
+      "feature": "day_of_week",
+      "importance": 0.06194899605022652
+    },
+    {
+      "feature": "plu_id",
+      "importance": 0.035941529415494534
+    },
+    {
+      "feature": "avg_temp_c_filled",
+      "importance": 0.03001303693817437
+    },
+    {
+      "feature": "lag_3",
+      "importance": 0.019034240570953865
+    },
+    {
+      "feature": "category_s_id",
+      "importance": 0.018908309223769848
+    },
+    {
+      "feature": "lag_1",
+      "importance": 0.018756276414615233
+    },
+    {
+      "feature": "month",
+      "importance": 0.017193713156347608
+    },
+    {
+      "feature": "lag_7",
+      "importance": 0.015683702742279308
+    },
+    {
+      "feature": "category_m_id",
+      "importance": 0.013131247323903217
+    },
+    {
+      "feature": "timetable_max_class_headcount",
+      "importance": 0.0095098583240027
+    },
+    {
+      "feature": "category_l_id",
+      "importance": 0.008795752642860623
+    },
+    {
+      "feature": "academic_event_filled",
+      "importance": 0.005220798558509393
+    },
+    {
+      "feature": "weather_missing",
+      "importance": 0.00502628721822265
+    },
+    {
+      "feature": "precipitation_mm_filled",
+      "importance": 0.0038854833993987445
+    },
+    {
+      "feature": "timetable_headcount",
+      "importance": 0.0030487895801468933
+    },
+    {
+      "feature": "timetable_class_count",
+      "importance": 0.002775366701278336
+    },
+    {
+      "feature": "timetable_large_class_count",
+      "importance": 0.00195344354483926
+    }
+  ],
+  "predictions_path": "C:/Users/LG/OneDrive/바탕 화면/cap\\rf_test_predictions_fulltrain.csv",
+  "model_path": "C:/Users/LG/OneDrive/바탕 화면/cap\\rf_product_nextday_model_fulltrain.pkl"
+}

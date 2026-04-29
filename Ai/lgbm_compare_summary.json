@@ -1,0 +1,148 @@
+{
+  "train_rows": 536847,
+  "test_rows": 22960,
+  "feature_cols": [
+    "plu_id",
+    "category_l_id",
+    "category_m_id",
+    "category_s_id",
+    "sales",
+    "lag_1",
+    "lag_3",
+    "lag_7",
+    "rolling_7_mean",
+    "rolling_7_std",
+    "day_of_week",
+    "month",
+    "is_weekend",
+    "is_holiday_filled",
+    "academic_event_filled",
+    "academic_event_2026_flag",
+    "weather_missing",
+    "avg_temp_c_filled",
+    "precipitation_mm_filled",
+    "is_rain_filled",
+    "timetable_class_count",
+    "timetable_headcount",
+    "timetable_large_class_count",
+    "timetable_max_class_headcount",
+    "timetable_is_class_day"
+  ],
+  "lgbm_params": {
+    "objective": "mae",
+    "n_estimators": 1200,
+    "learning_rate": 0.03,
+    "num_leaves": 63,
+    "max_depth": -1,
+    "subsample": 0.8,
+    "subsample_freq": 1,
+    "colsample_bytree": 0.8,
+    "reg_alpha": 0.0,
+    "reg_lambda": 1.0,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "best_iteration_": 1200,
+  "lgbm_metrics": {
+    "MAE": 0.03000312311386938,
+    "RMSE": 0.1688462426848883,
+    "WAPE": 0.16867573621313442,
+    "ACC_1_minus_WAPE": 0.8313242637868656
+  },
+  "baseline_metrics": {
+    "MAE": 0.027918118466898956,
+    "RMSE": 0.16734762167666511,
+    "WAPE": 0.15695396669931438,
+    "ACC_1_minus_WAPE": 0.8430460333006856
+  },
+  "lgbm_better_than_baseline": {
+    "MAE": false,
+    "RMSE": false,
+    "WAPE": false,
+    "ACC": false
+  },
+  "top20_feature_importance": [
+    {
+      "feature": "month",
+      "importance": 11209
+    },
+    {
+      "feature": "day_of_week",
+      "importance": 9539
+    },
+    {
+      "feature": "rolling_7_mean",
+      "importance": 7775
+    },
+    {
+      "feature": "plu_id",
+      "importance": 6669
+    },
+    {
+      "feature": "sales",
+      "importance": 6150
+    },
+    {
+      "feature": "rolling_7_std",
+      "importance": 5929
+    },
+    {
+      "feature": "lag_1",
+      "importance": 4109
+    },
+    {
+      "feature": "lag_7",
+      "importance": 3332
+    },
+    {
+      "feature": "category_s_id",
+      "importance": 2827
+    },
+    {
+      "feature": "lag_3",
+      "importance": 2634
+    },
+    {
+      "feature": "category_l_id",
+      "importance": 2616
+    },
+    {
+      "feature": "avg_temp_c_filled",
+      "importance": 2607
+    },
+    {
+      "feature": "timetable_class_count",
+      "importance": 2152
+    },
+    {
+      "feature": "category_m_id",
+      "importance": 1857
+    },
+    {
+      "feature": "timetable_max_class_headcount",
+      "importance": 1003
+    },
+    {
+      "feature": "timetable_headcount",
+      "importance": 994
+    },
+    {
+      "feature": "is_weekend",
+      "importance": 754
+    },
+    {
+      "feature": "academic_event_filled",
+      "importance": 667
+    },
+    {
+      "feature": "weather_missing",
+      "importance": 658
+    },
+    {
+      "feature": "precipitation_mm_filled",
+      "importance": 604
+    }
+  ],
+  "predictions_path": "C:/Users/LG/OneDrive/바탕 화면/cap\\lgbm_test_predictions.csv",
+  "model_path": "C:/Users/LG/OneDrive/바탕 화면/cap\\lgbm_product_nextday_model.pkl"
+}

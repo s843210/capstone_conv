@@ -1,16 +1,16 @@
 ﻿import {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 export type Product = {
-  id: string;
+  pluCode: string;
   name: string;
   category: string;
-  stock: number;
-  description: string;
+  stock?: number;
+  description?: string;
 };
 
 export type RequestItem = {
   id: string;
-  productId: string;
+  pluCode: string;
   productName: string;
   qty: number;
   createdAt: string;

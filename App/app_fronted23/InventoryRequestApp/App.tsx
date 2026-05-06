@@ -134,7 +134,7 @@ export default function App() {
         </Stack.Screen>
         <Stack.Screen name="ProductDetail" component={ProductDetailScreen} options={{title: '상품 상세'}} />
         <Stack.Screen name="RequestQty" options={{title: '수량 요청'}}>
-          {props => <RequestQtyScreen {...props} addRequest={addRequest} />}
+          {props => <RequestQtyScreen {...props} addRequest={addRequest} currentUser={currentUser} />}
         </Stack.Screen>
         <Stack.Screen name="RequestDone" component={RequestDoneScreen} options={{title: '요청 완료'}} />
         <Stack.Screen name="MyRequests" options={{title: '내 요청'}}>

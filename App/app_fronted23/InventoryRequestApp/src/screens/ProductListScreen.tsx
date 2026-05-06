@@ -1,8 +1,8 @@
-﻿import React, {useMemo, useState} from 'react';
+﻿import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {SafeAreaView, Text, TextInput, Pressable, FlatList, View, Alert} from 'react-native';
-import {ProductListScreenProps} from '../types';
+import {Product, ProductListScreenProps} from '../types';
 import {styles} from '../styles/commonStyles';
-import {PRODUCTS} from '../data/products';
+import {fetchStudentProducts} from '../api/studentApi';
 
 type Props = ProductListScreenProps & {
   currentUser: string;
@@ -10,19 +10,42 @@ type Props = ProductListScreenProps & {
 };
 
 export default function ProductListScreen({navigation, currentUser, logoutUser}: Props) {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('전체');
   const hasKeyword = keyword.trim().length > 0;
 
-  const categories = ['전체', ...new Set(PRODUCTS.map(p => p.category))];
+  // 상품 목록 API를 호출해 화면 상태를 갱신(실패 시 기존 목록 유지)
+  const loadProducts = useCallback(async () => {
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      const data = await fetchStudentProducts();
+      setProducts(data);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '상품 목록 조회 실패';
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  const categories = ['전체', ...new Set(products.map(p => p.category))];
 
   const filtered = useMemo(() => {
-    return PRODUCTS.filter(p => {
+    return products.filter(p => {
       const categoryOk = category === '전체' || p.category === category;
-      const keywordOk = p.name.includes(keyword) || p.description.includes(keyword);
+      const keywordOk = p.name.includes(keyword) || p.category.includes(keyword);
       return categoryOk && keywordOk;
     });
-  }, [keyword, category]);
+  }, [products, keyword, category]);
 
   const handleLogout = () => {
     Alert.alert('로그아웃', '로그아웃하시겠습니까?', [
@@ -79,33 +102,42 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
       </View>
       <Text style={styles.resultCountText}>검색 결과 {filtered.length}개</Text>
 
-      <FlatList
-        data={filtered}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
-          <Pressable
-            style={[styles.card, item.stock <= 0 && styles.cardDisabled]}
-            onPress={() => navigation.navigate('ProductDetail', {product: item})}>
-            <Text style={styles.cardTitle}>{item.name}</Text>
-            <View style={styles.statusRow}>
-              <Text style={styles.cardMeta}>카테고리: {item.category}</Text>
-              <Text style={item.stock > 0 ? styles.statusText : styles.soldOutText}>
-                {item.stock > 0 ? '요청 가능' : '품절'}
-              </Text>
-            </View>
-            <Text style={styles.cardMeta}>
-              재고 상태: {item.stock > 0 ? `${item.stock}개 남음` : '재고 없음'}
-            </Text>
+      {loading && <Text style={styles.emptyText}>상품 목록을 불러오는 중입니다...</Text>}
+
+      {!loading && !!errorMessage && (
+        <View style={styles.card}>
+          <Text style={styles.emptyText}>{errorMessage}</Text>
+          <Pressable style={styles.primaryBtn} onPress={loadProducts}>
+            <Text style={styles.primaryBtnText}>다시 시도</Text>
           </Pressable>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            {PRODUCTS.length === 0
-              ? '등록된 상품이 없습니다.'
-              : '조건에 맞는 상품이 없습니다. 검색어를 다시 확인해 주세요.'}
-          </Text>
-        }
-      />
+        </View>
+      )}
+
+      {!loading && (
+        <FlatList
+          data={filtered}
+          keyExtractor={item => item.pluCode}
+          renderItem={({item}) => (
+            <Pressable
+              style={styles.card}
+              onPress={() => navigation.navigate('ProductDetail', {product: item})}>
+              <Text style={styles.cardTitle}>{item.name}</Text>
+              <View style={styles.statusRow}>
+                <Text style={styles.cardMeta}>카테고리: {item.category}</Text>
+                <Text style={styles.statusText}>신청 가능</Text>
+              </View>
+              <Text style={styles.cardMeta}>상품 코드: {item.pluCode}</Text>
+            </Pressable>
+          )}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              {products.length === 0
+                ? '등록된 상품이 없습니다.'
+                : '조건에 맞는 상품이 없습니다. 검색어를 다시 확인해 주세요.'}
+            </Text>
+          }
+        />
+      )}
 
       <Pressable style={styles.secondaryBtn} onPress={() => navigation.navigate('MyRequests')}>
         <Text style={styles.secondaryBtnText}>내 요청 목록 보기</Text>

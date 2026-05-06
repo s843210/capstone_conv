@@ -9,11 +9,37 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface DailySalesRepository extends JpaRepository<DailySales, Long> {
 
     @Query("select d.pluCode from DailySales d where d.salesDate = :salesDate and d.pluCode in :pluCodes")
     List<String> findExistingPluCodes(@Param("salesDate") LocalDate salesDate, @Param("pluCodes") Collection<String> pluCodes);
+
+    @Query("select max(d.salesDate) from DailySales d")
+    Optional<LocalDate> findLatestSalesDate();
+
+    @Query(value = """
+            SELECT
+                p.plu_code AS "pluCode",
+                p.name AS name,
+                p.category AS category
+            FROM daily_sales d
+            JOIN product p ON p.plu_code = d.plu_code
+            WHERE d.sales_date = :salesDate
+              AND p.is_active = true
+              AND (
+                    (:category IS NOT NULL AND p.category = :category)
+                    OR (:keyword IS NOT NULL AND p.name ILIKE CONCAT('%', :keyword, '%'))
+              )
+            GROUP BY p.plu_code, p.name, p.category
+            ORDER BY p.name ASC
+            """, nativeQuery = true)
+    List<StudentProductCandidateProjection> findStudentProductCandidates(
+            @Param("salesDate") LocalDate salesDate,
+            @Param("category") String category,
+            @Param("keyword") String keyword
+    );
 
     @Modifying
     @Query(value = """

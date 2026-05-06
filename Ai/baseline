@@ -1,0 +1,29 @@
+import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+# 1) 테스트 데이터 로드
+# - 반드시 sales(오늘 판매량), target_sales(실제 내일 판매량) 컬럼이 있어야 함
+df = pd.read_csv("capstone_conv/Ai/baseline/in/feature_ai/rf_test_compact.csv")
+
+
+# 2) Baseline 예측: pred = sales
+y_true = df["target_sales"].fillna(0).to_numpy(dtype=float)
+y_pred = df["sales"].fillna(0).to_numpy(dtype=float)
+
+# 3) 성능 지표 계산
+mae = float(mean_absolute_error(y_true, y_pred))
+rmse = float(np.sqrt(mean_squared_error(y_true, y_pred)))
+wape = float(np.sum(np.abs(y_true - y_pred)) / np.sum(np.abs(y_true)))
+acc = 1 - wape  # 참고용 정확도 표현
+
+print(f"MAE  : {mae:.6f}")
+print(f"RMSE : {rmse:.6f}")
+print(f"WAPE : {wape:.6f}")
+print(f"ACC(1-WAPE): {acc:.4%}")
+
+# 4) 예측 결과 저장(선택)
+out = df.copy()
+out["baseline_predicted_target_sales"] = y_pred
+out.to_csv("baseline_test_predictions.csv", index=False, encoding="utf-8-sig")
+print("saved: baseline_test_predictions.csv")

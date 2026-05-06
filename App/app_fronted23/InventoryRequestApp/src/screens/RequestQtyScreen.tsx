@@ -3,14 +3,17 @@ import {SafeAreaView, Text, TextInput, Pressable, Alert} from 'react-native';
 import {RequestItem, RequestQtyScreenProps} from '../types';
 import {styles} from '../styles/commonStyles';
 import {MAX_REQUEST_QTY} from '../data/appConstants';
+import {submitStudentRequest} from '../api/studentApi';
 
 type Props = RequestQtyScreenProps & {
   addRequest: (item: RequestItem) => Promise<boolean>;
+  currentUser: string;
 };
 
-export default function RequestQtyScreen({navigation, route, addRequest}: Props) {
+export default function RequestQtyScreen({navigation, route, addRequest, currentUser}: Props) {
   const {product} = route.params;
   const [qty, setQty] = useState('1');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <SafeAreaView style={styles.page}>
@@ -25,8 +28,13 @@ export default function RequestQtyScreen({navigation, route, addRequest}: Props)
       />
 
       <Pressable
-        style={styles.primaryBtn}
+        style={[styles.primaryBtn, isSubmitting && styles.primaryBtnDisabled]}
+        disabled={isSubmitting}
         onPress={async () => {
+          if (isSubmitting) {
+            return;
+          }
+
           const trimmedQty = qty.trim();
           if (!trimmedQty) {
             Alert.alert('입력 오류', '요청 수량을 입력해 주세요.');
@@ -51,25 +59,45 @@ export default function RequestQtyScreen({navigation, route, addRequest}: Props)
             return;
           }
 
-          const item: RequestItem = {
-            id: `r-${Date.now()}`,
-            productId: product.id,
-            productName: product.name,
-            qty: num,
-            createdAt: new Date().toLocaleString('ko-KR'),
-          };
+          setIsSubmitting(true);
 
-          const saved = await addRequest(item);
-          if (!saved) {
-            Alert.alert('저장 오류', '요청 저장 중 오류가 발생했습니다.');
+          try {
+            // 백엔드에 학생 요청을 먼저 저장
+            await submitStudentRequest({
+              studentId: currentUser,
+              items: [
+                {
+                  pluCode: product.pluCode,
+                  quantity: num,
+                },
+              ],
+            });
+
+            const item: RequestItem = {
+              id: `r-${Date.now()}`,
+              pluCode: product.pluCode,
+              productName: product.name,
+              qty: num,
+              createdAt: new Date().toLocaleString('ko-KR'),
+            };
+
+            const saved = await addRequest(item);
+            if (!saved) {
+              Alert.alert('저장 오류', '요청 저장 중 오류가 발생했습니다.');
+              return;
+            }
+
+            navigation.navigate('RequestDone', {item});
+          } catch (error) {
+            const message = error instanceof Error ? error.message : '신청 저장 실패';
+            Alert.alert('신청 오류', message);
             return;
+          } finally {
+            setIsSubmitting(false);
           }
-
-          navigation.navigate('RequestDone', {item});
         }}>
-        <Text style={styles.primaryBtnText}>요청 접수하기</Text>
+        <Text style={styles.primaryBtnText}>{isSubmitting ? '신청 중...' : '요청 접수하기'}</Text>
       </Pressable>
     </SafeAreaView>
   );
 }
-

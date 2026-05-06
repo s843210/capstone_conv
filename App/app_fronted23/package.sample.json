@@ -1,0 +1,23 @@
+﻿{
+  "name": "InventoryRequestApp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*",
+    "@react-navigation/native": "*",
+    "@react-navigation/native-stack": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-screens": "*"
+  },
+  "devDependencies": {
+    "typescript": "*"
+  }
+}

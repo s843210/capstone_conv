@@ -1,6 +1,7 @@
 import InventoryChart from "./InventoryChart";
 import OrderRecommendation from "./OrderRecommendation";
 import InsightPanel from "./InsightPanel";
+import StudentRequestPanel from "./StudentRequestPanel";
 
 function DashboardOverview({
   inventoryList,
@@ -10,6 +11,7 @@ function DashboardOverview({
   orderList,
   insights,
   onNavigateInventory,
+  onNavigateStudentRequests,
 }) {
   return (
     <section className="content-grid">
@@ -22,6 +24,11 @@ function DashboardOverview({
       />
       <OrderRecommendation orderList={orderList} />
       <InsightPanel insights={insights} />
+      <StudentRequestPanel
+        limit={15}
+        subtitle="최근 15개 자동 갱신"
+        onViewAll={onNavigateStudentRequests}
+      />
     </section>
   );
 }

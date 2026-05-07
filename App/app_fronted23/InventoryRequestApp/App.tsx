@@ -1,8 +1,8 @@
 ﻿import React, {useEffect, useState} from 'react';
-import {SafeAreaView, Text} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SplashScreen from 'expo-splash-screen';
 import {RequestItem, RootStackParamList} from './src/types';
 import StartScreen from './src/screens/StartScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -11,10 +11,13 @@ import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import RequestQtyScreen from './src/screens/RequestQtyScreen';
 import RequestDoneScreen from './src/screens/RequestDoneScreen';
 import MyRequestsScreen from './src/screens/MyRequestsScreen';
-import {styles} from './src/styles/commonStyles';
 import {STORAGE_KEYS} from './src/data/appConstants';
+import {deleteStudentRequest, fetchStudentRequests, submitStudentRequest} from './src/api/studentApi';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const SPLASH_TEST_DELAY_MS = 2000;
+
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function App() {
   const [requests, setRequests] = useState<RequestItem[]>([]);
@@ -30,6 +33,7 @@ export default function App() {
         const [storedRequests, storedUser] = await Promise.all([
           AsyncStorage.getItem(STORAGE_KEYS.requests),
           AsyncStorage.getItem(STORAGE_KEYS.user),
+          new Promise(resolve => setTimeout(resolve, SPLASH_TEST_DELAY_MS)),
         ]);
 
         if (storedRequests) {
@@ -53,11 +57,51 @@ export default function App() {
         setRequests(nextRequests);
         setCurrentUser(nextUser);
         setIsInitializing(false);
+        SplashScreen.hideAsync().catch(() => undefined);
       }
     };
 
     initializeApp();
   }, []);
+
+  useEffect(() => {
+    if (isInitializing || !currentUser) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const syncRequests = async () => {
+      try {
+        const serverRequests = await fetchStudentRequests(currentUser);
+        if (cancelled) {
+          return;
+        }
+
+        const nextRequests = serverRequests.map(request => ({
+          id: `${request.salesDate}-${request.pluCode}`,
+          pluCode: request.pluCode,
+          productName: request.productName,
+          qty: request.quantity,
+          createdAt: new Date(request.requestedAt).toLocaleString('ko-KR'),
+          salesDate: request.salesDate,
+        }));
+
+        await AsyncStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(nextRequests));
+        if (!cancelled) {
+          setRequests(nextRequests);
+        }
+      } catch {
+        // 서버 동기화 실패 시에는 마지막 로컬 요청 목록을 유지
+      }
+    };
+
+    syncRequests();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser, isInitializing]);
 
   const addRequest = async (item: RequestItem): Promise<boolean> => {
     try {
@@ -72,6 +116,17 @@ export default function App() {
 
   const removeRequest = async (requestId: string): Promise<boolean> => {
     try {
+      const targetRequest = requests.find(request => request.id === requestId);
+      if (!targetRequest) {
+        return true;
+      }
+
+      await deleteStudentRequest({
+        studentId: currentUser,
+        salesDate: targetRequest.salesDate,
+        pluCode: targetRequest.pluCode,
+      });
+
       const nextRequests = requests.filter(request => request.id !== requestId);
       await AsyncStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(nextRequests));
       setRequests(nextRequests);
@@ -83,8 +138,24 @@ export default function App() {
 
   const updateRequestQty = async (requestId: string, qty: number): Promise<boolean> => {
     try {
+      const targetRequest = requests.find(request => request.id === requestId);
+      if (!targetRequest) {
+        return false;
+      }
+
+      const response = await submitStudentRequest({
+        studentId: currentUser,
+        salesDate: targetRequest.salesDate,
+        items: [
+          {
+            pluCode: targetRequest.pluCode,
+            quantity: qty,
+          },
+        ],
+      });
+
       const nextRequests = requests.map(request =>
-        request.id === requestId ? {...request, qty} : request,
+        request.id === requestId ? {...request, qty, salesDate: response.salesDate} : request,
       );
       await AsyncStorage.setItem(STORAGE_KEYS.requests, JSON.stringify(nextRequests));
       setRequests(nextRequests);
@@ -115,11 +186,7 @@ export default function App() {
   };
 
   if (isInitializing) {
-    return (
-      <SafeAreaView style={styles.page}>
-        <Text style={styles.emptyText}>앱 정보를 불러오는 중입니다...</Text>
-      </SafeAreaView>
-    );
+    return null;
   }
 
   return (
@@ -153,4 +220,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-

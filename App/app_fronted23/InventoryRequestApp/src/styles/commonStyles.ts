@@ -103,6 +103,38 @@ export const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 10,
   },
+  categoryExpandedBox: {
+    marginBottom: 10,
+  },
+  categoryExpandedList: {
+    maxHeight: 170,
+  },
+  categoryExpandedContent: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    paddingBottom: 8,
+  },
+  categoryExpandedFooter: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 8,
+  },
+  categoryCollapsedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  categoryScroll: {
+    flex: 1,
+  },
+  categoryScrollContent: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingRight: 2,
+  },
   chip: {
     borderRadius: 999,
     borderWidth: 1,
@@ -117,6 +149,18 @@ export const styles = StyleSheet.create({
   },
   chipText: {color: '#334155'},
   chipTextActive: {color: '#FFF'},
+  categoryMoreBtn: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#0B3D91',
+    backgroundColor: '#EAF1FF',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  categoryMoreBtnText: {
+    color: '#0B3D91',
+    fontWeight: '700',
+  },
   card: {
     backgroundColor: '#FFF',
     borderRadius: 14,

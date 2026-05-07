@@ -1,5 +1,14 @@
 ﻿import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {SafeAreaView, Text, TextInput, Pressable, FlatList, View, Alert} from 'react-native';
+import {
+  SafeAreaView,
+  Text,
+  TextInput,
+  Pressable,
+  FlatList,
+  View,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import {Product, ProductListScreenProps} from '../types';
 import {styles} from '../styles/commonStyles';
 import {fetchStudentProducts} from '../api/studentApi';
@@ -15,6 +24,7 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
   const [errorMessage, setErrorMessage] = useState('');
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('전체');
+  const [categoryExpanded, setCategoryExpanded] = useState(false);
   const hasKeyword = keyword.trim().length > 0;
 
   // 상품 목록 API를 호출해 화면 상태를 갱신(실패 시 기존 목록 유지)
@@ -37,7 +47,20 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
     loadProducts();
   }, [loadProducts]);
 
-  const categories = ['전체', ...new Set(products.map(p => p.category))];
+  const categories = useMemo(() => ['전체', ...new Set(products.map(p => p.category))], [products]);
+  const visibleCategories = useMemo(() => {
+    if (categoryExpanded || categories.length <= 6) {
+      return categories;
+    }
+
+    const collapsed = categories.slice(0, 5);
+    if (collapsed.includes(category)) {
+      return collapsed;
+    }
+
+    return [...collapsed.slice(0, 4), category];
+  }, [categories, category, categoryExpanded]);
+  const canToggleCategories = categories.length > 6;
 
   const filtered = useMemo(() => {
     return products.filter(p => {
@@ -66,6 +89,11 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
     ]);
   };
 
+  const selectCategory = (selectedCategory: string) => {
+    setCategory(selectedCategory);
+    setCategoryExpanded(false);
+  };
+
   return (
     <SafeAreaView style={styles.page}>
       <View style={styles.headerRow}>
@@ -90,16 +118,57 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
         )}
       </View>
 
-      <View style={styles.rowWrap}>
-        {categories.map(c => (
-          <Pressable
-            key={c}
-            style={[styles.chip, c === category && styles.chipActive]}
-            onPress={() => setCategory(c)}>
-            <Text style={[styles.chipText, c === category && styles.chipTextActive]}>{c}</Text>
-          </Pressable>
-        ))}
-      </View>
+      {categoryExpanded ? (
+        <View style={styles.categoryExpandedBox}>
+          <ScrollView
+            nestedScrollEnabled
+            bounces={false}
+            alwaysBounceVertical={false}
+            overScrollMode="never"
+            showsVerticalScrollIndicator
+            style={styles.categoryExpandedList}
+            contentContainerStyle={styles.categoryExpandedContent}
+            scrollEventThrottle={16}>
+            {visibleCategories.map(c => (
+              <Pressable
+                key={c}
+                style={[styles.chip, c === category && styles.chipActive]}
+                onPress={() => selectCategory(c)}>
+                <Text style={[styles.chipText, c === category && styles.chipTextActive]}>{c}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          <View style={styles.categoryExpandedFooter}>
+            {canToggleCategories && (
+              <Pressable style={styles.categoryMoreBtn} onPress={() => setCategoryExpanded(false)}>
+                <Text style={styles.categoryMoreBtnText}>접기</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      ) : (
+        <View style={styles.categoryCollapsedRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryScroll}
+            contentContainerStyle={styles.categoryScrollContent}>
+            {visibleCategories.map(c => (
+              <Pressable
+                key={c}
+                style={[styles.chip, c === category && styles.chipActive]}
+                onPress={() => selectCategory(c)}>
+                <Text style={[styles.chipText, c === category && styles.chipTextActive]}>{c}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          {canToggleCategories && (
+            <Pressable style={styles.categoryMoreBtn} onPress={() => setCategoryExpanded(true)}>
+              <Text style={styles.categoryMoreBtnText}>더보기</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
       <Text style={styles.resultCountText}>검색 결과 {filtered.length}개</Text>
 
       {loading && <Text style={styles.emptyText}>상품 목록을 불러오는 중입니다...</Text>}
@@ -126,7 +195,6 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
                 <Text style={styles.cardMeta}>카테고리: {item.category}</Text>
                 <Text style={styles.statusText}>신청 가능</Text>
               </View>
-              <Text style={styles.cardMeta}>상품 코드: {item.pluCode}</Text>
             </Pressable>
           )}
           ListEmptyComponent={

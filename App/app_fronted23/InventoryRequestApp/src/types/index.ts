@@ -14,6 +14,7 @@ export type RequestItem = {
   productName: string;
   qty: number;
   createdAt: string;
+  salesDate?: string;
 };
 
 export type RootStackParamList = {

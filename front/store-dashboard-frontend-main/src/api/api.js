@@ -95,6 +95,15 @@ export function fetchInventoryCategories() {
   return fetchWithErrorHandling("/api/inventory/categories");
 }
 
+/** 학생 앱 상품 신청 현황 조회 */
+export function fetchStudentRequests({ limit = 15 } = {}) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+  });
+
+  return fetchWithErrorHandling(`/api/student/requests?${params.toString()}`);
+}
+
 /** 판매 파일 업로드 후 daily_sales 적재 */
 export function uploadDailySales({
   salesFiles,

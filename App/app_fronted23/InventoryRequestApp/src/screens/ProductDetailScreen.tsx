@@ -11,7 +11,6 @@ export default function ProductDetailScreen({navigation, route}: ProductDetailSc
       <Text style={styles.title}>{product.name}</Text>
       <View style={styles.card}>
         <Text style={styles.cardMeta}>카테고리: {product.category}</Text>
-        <Text style={styles.cardMeta}>상품 코드: {product.pluCode}</Text>
         <Text style={styles.cardMeta}>
           상품 설명: 상품 신청 가능 여부는 매장 상황에 따라 달라질 수 있습니다.
         </Text>

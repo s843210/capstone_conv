@@ -181,6 +181,27 @@
   font-size: 14px;
 }
 
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-action-button {
+  border: none;
+  border-radius: 10px;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel-action-button:hover {
+  background: #c7d2fe;
+}
+
 .item-list {
   list-style: none;
   padding: 0;
@@ -509,6 +530,81 @@
   margin: 0;
   font-size: 12px;
   color: #64748b;
+}
+
+.student-request-panel {
+  min-width: 0;
+}
+
+.student-request-detail-panel {
+  min-height: 520px;
+}
+
+.student-request-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.page-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.page-section-header h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 24px;
+}
+
+.page-section-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.student-request-empty {
+  margin: 0;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.student-request-table-wrap {
+  overflow-x: auto;
+}
+
+.student-request-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.student-request-table th,
+.student-request-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.student-request-table th {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f8fafc;
+}
+
+.student-request-table td {
+  color: #1e293b;
+}
+
+.student-request-table tr:last-child td {
+  border-bottom: none;
 }
 
 /* 로딩 상태 */

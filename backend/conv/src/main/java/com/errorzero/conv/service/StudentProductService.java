@@ -7,7 +7,6 @@ import com.errorzero.conv.dto.StudentRequestDashboardResponseDto;
 import com.errorzero.conv.dto.StudentRequestResponseDto;
 import com.errorzero.conv.repository.DailySalesRepository;
 import com.errorzero.conv.repository.ProductRepository;
-import com.errorzero.conv.repository.StudentProductCandidateProjection;
 import com.errorzero.conv.repository.StudentProductRequestRepository;
 import com.errorzero.conv.repository.StudentRequestDashboardProjection;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +26,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StudentProductService {
 
-    private static final String DEFAULT_CATEGORY = "주먹밥";
-    private static final String DEFAULT_KEYWORD = "김밥";
     private static final int DEFAULT_DASHBOARD_LIMIT = 100;
     private static final int MAX_DASHBOARD_LIMIT = 500;
 
@@ -38,26 +35,21 @@ public class StudentProductService {
 
     @Transactional(readOnly = true)
     public List<StudentProductResponseDto> getStudentProducts(LocalDate salesDate, String category, String keyword) {
-        LocalDate effectiveSalesDate = resolveSalesDate(salesDate);
         String safeCategory = normalize(category);
         String safeKeyword = normalize(keyword);
 
-        if (safeCategory == null && safeKeyword == null) {
-            safeCategory = DEFAULT_CATEGORY;
-            safeKeyword = DEFAULT_KEYWORD;
-        }
-
-        return dailySalesRepository.findStudentProductCandidates(effectiveSalesDate, safeCategory, safeKeyword)
+        return findStudentProducts(safeCategory, safeKeyword)
                 .stream()
                 .map(this::toStudentProductResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<StudentRequestDashboardResponseDto> getDashboardRequests(int limit) {
+    public List<StudentRequestDashboardResponseDto> getDashboardRequests(int limit, String studentId) {
         int safeLimit = limit > 0 ? Math.min(limit, MAX_DASHBOARD_LIMIT) : DEFAULT_DASHBOARD_LIMIT;
+        String safeStudentId = normalize(studentId);
 
-        return studentProductRequestRepository.findDashboardRequests(safeLimit)
+        return studentProductRequestRepository.findDashboardRequests(safeLimit, safeStudentId)
                 .stream()
                 .map(this::toDashboardResponse)
                 .toList();
@@ -72,7 +64,6 @@ public class StudentProductService {
         Set<String> pluCodes = normalizePluCodes(items);
         validateNoDuplicatePluCodes(items, pluCodes);
         validateActiveProducts(pluCodes);
-        validateDailySalesProducts(salesDate, pluCodes);
 
         int totalQuantity = 0;
         for (StudentRequestCreateDto.ItemDto item : items) {
@@ -91,18 +82,55 @@ public class StudentProductService {
                 .build();
     }
 
-    private StudentProductResponseDto toStudentProductResponse(StudentProductCandidateProjection projection) {
-        return new StudentProductResponseDto(
-                projection.getPluCode(),
-                projection.getName(),
-                projection.getCategory()
+    @Transactional
+    public void deleteRequest(String studentId, LocalDate salesDate, String pluCode) {
+        String safeStudentId = normalize(studentId);
+        String safePluCode = normalize(pluCode);
+
+        if (safeStudentId == null) {
+            throw new IllegalArgumentException("studentId는 필수입니다");
+        }
+        if (safePluCode == null) {
+            throw new IllegalArgumentException("pluCode는 필수입니다");
+        }
+
+        studentProductRequestRepository.deleteRequest(
+                safeStudentId,
+                resolveSalesDate(salesDate),
+                safePluCode
         );
+    }
+
+    private StudentProductResponseDto toStudentProductResponse(Product product) {
+        return new StudentProductResponseDto(
+                product.getPluCode(),
+                product.getName(),
+                product.getCategory()
+        );
+    }
+
+    private List<Product> findStudentProducts(String category, String keyword) {
+        if (category == null && keyword == null) {
+            return productRepository.findAllByIsActiveTrueOrderByCategoryAscNameAsc();
+        }
+
+        if (keyword == null) {
+            return productRepository.findAllByIsActiveTrueAndCategoryOrderByCategoryAscNameAsc(category);
+        }
+
+        if (category == null) {
+            return productRepository.searchStudentProductsByKeyword(keyword);
+        }
+
+        return productRepository.searchStudentProductsByCategoryAndKeyword(category, keyword);
     }
 
     private StudentRequestDashboardResponseDto toDashboardResponse(StudentRequestDashboardProjection projection) {
         int quantity = projection.getQuantity() != null ? projection.getQuantity() : 0;
         return new StudentRequestDashboardResponseDto(
                 projection.getStudentId(),
+                projection.getSalesDate(),
+                projection.getPluCode(),
                 projection.getProductName(),
                 quantity,
                 projection.getRequestedAt()
@@ -131,18 +159,6 @@ public class StudentProductService {
         missingPluCodes.removeAll(productMap.keySet());
         if (!missingPluCodes.isEmpty()) {
             throw new IllegalArgumentException("활성 상품이 아닌 PLU가 포함되어 있습니다: " + missingPluCodes);
-        }
-    }
-
-    private void validateDailySalesProducts(LocalDate salesDate, Set<String> pluCodes) {
-        Set<String> existingPluCodes = new HashSet<>(
-                dailySalesRepository.findExistingPluCodes(salesDate, pluCodes)
-        );
-
-        Set<String> missingPluCodes = new HashSet<>(pluCodes);
-        missingPluCodes.removeAll(existingPluCodes);
-        if (!missingPluCodes.isEmpty()) {
-            throw new IllegalArgumentException("해당 판매일에 신청 가능한 상품이 아닙니다: " + missingPluCodes);
         }
     }
 

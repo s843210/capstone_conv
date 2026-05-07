@@ -6,6 +6,7 @@ import DashboardOverview from "./components/DashboardOverview";
 import InventoryPanel from "./components/InventoryPanel";
 import AcademicContextPanel from "./components/AcademicContextPanel";
 import SalesUploadPanel from "./components/SalesUploadPanel";
+import StudentRequestPage from "./components/StudentRequestPage";
 import { useDashboardData } from "./hooks/useDashboardData";
 
 function DashboardPage({ onLogout }) {
@@ -43,6 +44,7 @@ function DashboardPage({ onLogout }) {
             orderList={orderList}
             insights={insights}
             onNavigateInventory={() => setActivePage("inventory")}
+            onNavigateStudentRequests={() => setActivePage("studentRequests")}
           />
         )}
 
@@ -50,29 +52,7 @@ function DashboardPage({ onLogout }) {
           <InventoryPanel isActive={activePage === "inventory"} />
         )}
 
-        {activePage === "forecast" && (
-          <div className="panel placeholder-panel">
-            <div className="panel-header">
-              <div className="panel-title">
-                <span className="panel-icon">📈</span>
-                <h2>수요 예측</h2>
-              </div>
-            </div>
-            <p className="placeholder-text">수요 예측 기능 준비 중입니다.</p>
-          </div>
-        )}
-
-        {activePage === "order" && (
-          <div className="panel placeholder-panel">
-            <div className="panel-header">
-              <div className="panel-title">
-                <span className="panel-icon">🛒</span>
-                <h2>발주 추천</h2>
-              </div>
-            </div>
-            <p className="placeholder-text">발주 추천 기능 준비 중입니다.</p>
-          </div>
-        )}
+        {activePage === "studentRequests" && <StudentRequestPage />}
 
         {activePage === "settings" && (
           <div className="settings-stack">

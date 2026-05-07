@@ -3,8 +3,7 @@ import "../DashboardPage.css";
 const MENU_ITEMS = [
   { key: "dashboard", label: "대시보드" },
   { key: "inventory", label: "재고 관리" },
-  { key: "forecast", label: "수요 예측" },
-  { key: "order", label: "발주 추천" },
+  { key: "studentRequests", label: "학생 신청현황" },
   { key: "settings", label: "설정" },
 ];
 

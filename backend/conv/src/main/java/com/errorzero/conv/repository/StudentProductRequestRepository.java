@@ -25,16 +25,31 @@ public interface StudentProductRequestRepository extends JpaRepository<StudentPr
                @Param("pluCode") String pluCode,
                @Param("quantity") int quantity);
 
+    @Modifying
+    @Query("""
+            DELETE FROM StudentProductRequest r
+            WHERE r.studentId = :studentId
+              AND r.salesDate = :salesDate
+              AND r.pluCode = :pluCode
+            """)
+    int deleteRequest(@Param("studentId") String studentId,
+                      @Param("salesDate") LocalDate salesDate,
+                      @Param("pluCode") String pluCode);
+
     @Query(value = """
             SELECT
                 r.student_id AS "studentId",
+                r.sales_date AS "salesDate",
+                r.plu_code AS "pluCode",
                 p.name AS "productName",
                 r.quantity AS quantity,
                 r.updated_at AS "requestedAt"
             FROM student_product_request r
             JOIN product p ON p.plu_code = r.plu_code
+            WHERE (:studentId IS NULL OR r.student_id = :studentId)
             ORDER BY r.updated_at DESC, r.id DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<StudentRequestDashboardProjection> findDashboardRequests(@Param("limit") int limit);
+    List<StudentRequestDashboardProjection> findDashboardRequests(@Param("limit") int limit,
+                                                                  @Param("studentId") String studentId);
 }

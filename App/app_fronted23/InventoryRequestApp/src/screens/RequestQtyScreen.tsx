@@ -63,7 +63,7 @@ export default function RequestQtyScreen({navigation, route, addRequest, current
 
           try {
             // 백엔드에 학생 요청을 먼저 저장
-            await submitStudentRequest({
+            const response = await submitStudentRequest({
               studentId: currentUser,
               items: [
                 {
@@ -79,6 +79,7 @@ export default function RequestQtyScreen({navigation, route, addRequest, current
               productName: product.name,
               qty: num,
               createdAt: new Date().toLocaleString('ko-KR'),
+              salesDate: response.salesDate,
             };
 
             const saved = await addRequest(item);

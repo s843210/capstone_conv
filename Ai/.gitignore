@@ -1,6 +1,0 @@
-﻿.DS_Store
-__pycache__/
-*.pyc
-outputs/models/*.pkl
-outputs/reports/*.png
-outputs/reports/*.csv

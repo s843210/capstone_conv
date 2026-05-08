@@ -1,0 +1,36 @@
+{
+  "selected_model": "RandomForestRegressor_fast",
+  "selection_rule": "lowest MAE, tie-breaker lowest RMSE",
+  "metrics": {
+    "MAE": 14.300871760388832,
+    "RMSE": 26.222956839026807,
+    "R2": 0.579228468759434,
+    "train_time_sec": 29.156584199983627
+  },
+  "all_models": [
+    {
+      "model_name": "baseline_rolling_mean_7",
+      "MAE": 16.587471352177232,
+      "RMSE": 30.997899381865437,
+      "R2": 0.4120403040906754,
+      "train_time_sec": 0.0,
+      "source_file": "baseline_result.json"
+    },
+    {
+      "model_name": "RandomForestRegressor_fast",
+      "MAE": 14.300871760388832,
+      "RMSE": 26.222956839026807,
+      "R2": 0.579228468759434,
+      "train_time_sec": 29.156584199983627,
+      "source_file": "random_forest_fast_result.json"
+    },
+    {
+      "model_name": "LightGBMRegressor",
+      "MAE": 24.423606822299963,
+      "RMSE": 33.99678803077996,
+      "R2": 0.2927730479759161,
+      "train_time_sec": 6.635065800044686,
+      "source_file": "lightgbm_result.json"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "model": "baseline_rolling_mean_7",
+  "split": {
+    "train_start": "2024-04-02",
+    "train_end": "2025-12-31",
+    "test_start": "2026-01-01"
+  },
+  "rows": {
+    "total_after_clean": 50370,
+    "train": 49248,
+    "test": 1122
+  },
+  "metrics_test": {
+    "mae": 16.587471352177232,
+    "rmse": 30.997899381865437,
+    "r2": 0.4120403040906754
+  }
+}

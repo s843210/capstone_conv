@@ -1,7 +1,9 @@
 # Model API Spec (RandomForest Fast)
 
 ## 1. Model File
-- Path: `C:/Users/LG/OneDrive/바탕 화면/caps/outputs/models/random_forest_fast_model.pkl`
+- Artifact: `random_forest_fast_model.pkl`
+- Recommended repo path: `models/random_forest_fast_model.pkl`
+- Runtime env option: `MODEL_PATH=./models/random_forest_fast_model.pkl`
 - Type: `RandomForestRegressor` bundle (`model`, `feature_cols`, `categorical_cols`, `label_maps`)
 
 ## 2. Feature Schema

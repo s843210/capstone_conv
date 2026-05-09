@@ -1,0 +1,11 @@
+Merge Sales Files Log
+target_directory: C:/Users/bm961/Desktop/Ai/data/raw/sales
+total_files: 2932
+success: 2931
+failed: 1
+rows: 153774
+output: C:/Users/bm961/Desktop/Ai/data/processed/daily_sales_raw_v2.csv
+
+[Failed Files]
+- data/raw/sales/sales_2024_03/240326/0326.xlsx
+  reason: Could not extract category from: 0326

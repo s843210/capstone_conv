@@ -1,0 +1,21 @@
+{
+  "model": "LightGBMRegressor",
+  "params": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "max_depth": -1,
+    "random_state": 42
+  },
+  "runtime": {
+    "train_seconds": 1.739677200006554
+  },
+  "rows": {
+    "train": 49248,
+    "test": 1122
+  },
+  "metrics_test": {
+    "mae": 24.423606822299963,
+    "rmse": 33.99678803077996,
+    "r2": 0.2927730479759161
+  }
+}

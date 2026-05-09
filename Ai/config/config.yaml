@@ -1,0 +1,65 @@
+# ============================================================
+# 수요예측 파이프라인 설정 파일
+# ============================================================
+
+# --- 데이터 경로 ---
+paths:
+  raw:
+    sales_dir: "data/raw/sales"
+    product_master_dir: "data/raw/product/product_master/csv_상품분류기준표"
+    calendar_csv: "data/raw/calendar/academic_calendar_2026.csv"
+    timetable_2024_2025: "data/raw/timetable/timetable_2024_2025.xlsx"
+    timetable_2026: "data/raw/timetable/timetable_2026.xlsx"
+
+  processed:
+    daily_sales_raw: "data/processed/daily_sales_raw_v2.csv"
+    product_master: "data/processed/product_master.csv"
+    representative_product: "data/processed/representative_product_master.csv"
+    sales_with_product: "data/processed/daily_sales_with_product.csv"
+    sales_with_product_improved: "data/processed/daily_sales_with_product_improved.csv"
+    final_sales: "data/processed/final_sales_dataset.csv"
+    calendar_features: "data/processed/academic_calendar_features.csv"
+    sales_with_calendar: "data/processed/sales_with_calendar.csv"
+    timetable_features: "data/processed/timetable_features.csv"
+    sales_with_calendar_timetable: "data/processed/sales_with_calendar_timetable.csv"
+    model_features: "data/processed/model_features.csv"
+
+  models:
+    rf_fast: "outputs/models/random_forest_fast_model.pkl"
+    lightgbm: "outputs/models/lightgbm_model.pkl"
+
+  reports_dir: "outputs/reports"
+
+# --- 모델 학습 설정 ---
+training:
+  train_start: "2024-04-02"
+  train_end: "2025-12-31"
+  test_start: "2026-01-01"
+  target_col: "target_sales"
+
+  random_forest:
+    n_estimators: 100
+    max_depth: 20
+    min_samples_leaf: 3
+    random_state: 42
+
+  lightgbm:
+    n_estimators: 500
+    learning_rate: 0.05
+    max_depth: -1
+    random_state: 42
+
+# --- 추론/발주 설정 ---
+inference:
+  safety_factor: 1.2
+  guardrail:
+    safety_factor: 1.05
+    blend_alpha: 0.4
+    upper_cap_multiplier: 1.2
+    lower_floor: 0.0
+
+# --- 전처리 설정 ---
+preprocessing:
+  header_keyword: "카테고리/상품"
+  excel_extensions: [".xlsx", ".xls", ".xlsm"]
+  summary_pattern: "(?:합계|총계|계$)"

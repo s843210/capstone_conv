@@ -1,0 +1,4 @@
+Product Master Merge Log
+total_files: 18, success: 18, failed: 0
+rows: 28136
+output: C:/Users/bm961/Desktop/Ai/data/processed/product_master.csv

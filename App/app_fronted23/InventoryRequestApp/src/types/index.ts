@@ -17,6 +17,15 @@ export type RequestItem = {
   salesDate?: string;
 };
 
+export type Suggestion = {
+  id: string;
+  title: string;
+  content: string;
+  writer: string;
+  createdAt: string;
+  updatedAt?: string;
+};
+
 export type RootStackParamList = {
   Start: undefined;
   Login: undefined;
@@ -25,6 +34,10 @@ export type RootStackParamList = {
   RequestQty: {product: Product};
   RequestDone: {item: RequestItem};
   MyRequests: undefined;
+  Suggestions: undefined;
+  SuggestionWrite: undefined;
+  SuggestionEdit: {suggestion: Suggestion};
+  SuggestionDetail: {suggestion: Suggestion};
 };
 
 export type StartScreenProps = NativeStackScreenProps<RootStackParamList, 'Start'>;
@@ -34,3 +47,7 @@ export type ProductDetailScreenProps = NativeStackScreenProps<RootStackParamList
 export type RequestQtyScreenProps = NativeStackScreenProps<RootStackParamList, 'RequestQty'>;
 export type RequestDoneScreenProps = NativeStackScreenProps<RootStackParamList, 'RequestDone'>;
 export type MyRequestsScreenProps = NativeStackScreenProps<RootStackParamList, 'MyRequests'>;
+export type SuggestionsScreenProps = NativeStackScreenProps<RootStackParamList, 'Suggestions'>;
+export type SuggestionWriteScreenProps = NativeStackScreenProps<RootStackParamList, 'SuggestionWrite'>;
+export type SuggestionEditScreenProps = NativeStackScreenProps<RootStackParamList, 'SuggestionEdit'>;
+export type SuggestionDetailScreenProps = NativeStackScreenProps<RootStackParamList, 'SuggestionDetail'>;

@@ -207,6 +207,9 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
         />
       )}
 
+      <Pressable style={styles.secondaryBtn} onPress={() => navigation.navigate('Suggestions')}>
+        <Text style={styles.secondaryBtnText}>건의사항 보기</Text>
+      </Pressable>
       <Pressable style={styles.secondaryBtn} onPress={() => navigation.navigate('MyRequests')}>
         <Text style={styles.secondaryBtnText}>내 요청 목록 보기</Text>
       </Pressable>

@@ -3,7 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
-import {RequestItem, RootStackParamList} from './src/types';
+import {RequestItem, RootStackParamList, Suggestion} from './src/types';
 import StartScreen from './src/screens/StartScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import ProductListScreen from './src/screens/ProductListScreen';
@@ -11,7 +11,12 @@ import ProductDetailScreen from './src/screens/ProductDetailScreen';
 import RequestQtyScreen from './src/screens/RequestQtyScreen';
 import RequestDoneScreen from './src/screens/RequestDoneScreen';
 import MyRequestsScreen from './src/screens/MyRequestsScreen';
+import SuggestionsScreen from './src/screens/SuggestionsScreen';
+import SuggestionWriteScreen from './src/screens/SuggestionWriteScreen';
+import SuggestionDetailScreen from './src/screens/SuggestionDetailScreen';
+import SuggestionEditScreen from './src/screens/SuggestionEditScreen';
 import {STORAGE_KEYS} from './src/data/appConstants';
+import {loadSuggestions, saveSuggestions} from './src/data/suggestionStorage';
 import {deleteStudentRequest, fetchStudentRequests, submitStudentRequest} from './src/api/studentApi';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -21,6 +26,7 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function App() {
   const [requests, setRequests] = useState<RequestItem[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [currentUser, setCurrentUser] = useState('');
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -30,9 +36,10 @@ export default function App() {
       let nextUser = '';
 
       try {
-        const [storedRequests, storedUser] = await Promise.all([
+        const [storedRequests, storedUser, storedSuggestions] = await Promise.all([
           AsyncStorage.getItem(STORAGE_KEYS.requests),
           AsyncStorage.getItem(STORAGE_KEYS.user),
+          loadSuggestions(),
           new Promise(resolve => setTimeout(resolve, SPLASH_TEST_DELAY_MS)),
         ]);
 
@@ -50,6 +57,8 @@ export default function App() {
         if (storedUser && storedUser.trim()) {
           nextUser = storedUser.trim();
         }
+
+        setSuggestions(storedSuggestions);
       } catch {
         nextRequests = [];
         nextUser = '';
@@ -175,6 +184,54 @@ export default function App() {
     }
   };
 
+  const addSuggestion = async (suggestion: Suggestion): Promise<boolean> => {
+    try {
+      const nextSuggestions = [suggestion, ...suggestions];
+      await saveSuggestions(nextSuggestions);
+      setSuggestions(nextSuggestions);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const updateSuggestion = async (
+    nextSuggestion: Suggestion,
+    requestUser: string,
+  ): Promise<boolean> => {
+    try {
+      const targetSuggestion = suggestions.find(item => item.id === nextSuggestion.id);
+      if (!targetSuggestion || targetSuggestion.writer !== requestUser) {
+        return false;
+      }
+
+      const nextSuggestions = suggestions.map(item =>
+        item.id === nextSuggestion.id ? {...nextSuggestion, writer: targetSuggestion.writer} : item,
+      );
+      await saveSuggestions(nextSuggestions);
+      setSuggestions(nextSuggestions);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const removeSuggestion = async (suggestionId: string, requestUser: string): Promise<boolean> => {
+    try {
+      const targetSuggestion = suggestions.find(item => item.id === suggestionId);
+      if (!targetSuggestion || targetSuggestion.writer !== requestUser) {
+        return false;
+      }
+
+      const nextSuggestions = suggestions.filter(item => item.id !== suggestionId);
+      await saveSuggestions(nextSuggestions);
+      setSuggestions(nextSuggestions);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const logoutUser = async (): Promise<boolean> => {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.user);
@@ -213,6 +270,36 @@ export default function App() {
               updateRequestQty={updateRequestQty}
               currentUser={currentUser}
               logoutUser={logoutUser}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="Suggestions" options={{title: '건의사항'}}>
+          {props => <SuggestionsScreen {...props} suggestions={suggestions} />}
+        </Stack.Screen>
+        <Stack.Screen name="SuggestionWrite" options={{title: '건의사항 작성'}}>
+          {props => (
+            <SuggestionWriteScreen
+              {...props}
+              currentUser={currentUser}
+              addSuggestion={addSuggestion}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="SuggestionEdit" options={{title: '건의사항 수정'}}>
+          {props => (
+            <SuggestionEditScreen
+              {...props}
+              currentUser={currentUser}
+              updateSuggestion={updateSuggestion}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="SuggestionDetail" options={{title: '건의사항 상세'}}>
+          {props => (
+            <SuggestionDetailScreen
+              {...props}
+              currentUser={currentUser}
+              removeSuggestion={removeSuggestion}
             />
           )}
         </Stack.Screen>

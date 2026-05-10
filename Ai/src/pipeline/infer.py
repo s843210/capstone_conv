@@ -1,10 +1,11 @@
-"""Infer — tomorrow prediction, order recommendation, guardrails.
+"""Infer — tomorrow prediction, order recommendation, guardrails, API spec.
 
-Consolidates logic from legacy scripts 29, 30, 33.
+Consolidates logic from legacy scripts 29, 30, 33, 40, 41, 42.
 """
 
 from __future__ import annotations
 
+import json
 from math import ceil
 from pathlib import Path
 
@@ -28,7 +29,7 @@ def predict_tomorrow(
     output_csv: Path | None = None,
 ) -> pd.DataFrame:
     """Load the trained model and predict next-day sales for each product."""
-    input_csv = input_csv or Paths.MODEL_FEATURES
+    input_csv = input_csv or Paths.MODEL_FEATURES_WEATHER_BINARY
     model_path = model_path or Paths.MODEL_RF_FAST
     output_csv = output_csv or (Paths.REPORTS_DIR / "tomorrow_sales_prediction.csv")
 
@@ -117,7 +118,7 @@ def apply_guardrails(
 ) -> pd.DataFrame:
     """Apply blending + capping guardrails to predictions."""
     pred_csv = pred_csv or (Paths.REPORTS_DIR / "tomorrow_sales_prediction.csv")
-    feature_csv = feature_csv or Paths.MODEL_FEATURES
+    feature_csv = feature_csv or Paths.MODEL_FEATURES_WEATHER_BINARY
     output_csv = output_csv or (Paths.REPORTS_DIR / "order_recommendation_guardrailed.csv")
 
     sf = Inference.GUARDRAIL_SAFETY_FACTOR
@@ -163,3 +164,96 @@ def apply_guardrails(
 
     print(f"Guardrailed: {len(out)} products → {output_csv.name}")
     return out
+
+
+# ===================================================================
+# API Spec  (legacy 42)
+# ===================================================================
+
+FEATURE_DESCRIPTIONS = {
+    "plu_code": "Product PLU code (string, label-encoded at inference).",
+    "product_category": "Product category (string, label-encoded at inference).",
+    "sales_qty": "Current observed sales quantity.",
+    "purchase_qty": "Current observed purchase quantity.",
+    "is_start_semester": "Start-of-semester flag (0/1).",
+    "is_end_semester": "End-of-semester flag (0/1).",
+    "is_exam": "Exam period flag (0/1).",
+    "is_vacation": "Vacation period flag (0/1).",
+    "is_festival": "Festival/event flag (0/1).",
+    "is_holiday_or_no_class": "Holiday or no-class flag (0/1).",
+    "class_count": "Class count for the date weekday.",
+    "monday_class_count": "Monday class count.",
+    "tuesday_class_count": "Tuesday class count.",
+    "wednesday_class_count": "Wednesday class count.",
+    "thursday_class_count": "Thursday class count.",
+    "friday_class_count": "Friday class count.",
+    "is_rainy": "Binary weather feature: 1 if rainfall > 0 else 0.",
+    "is_hot": "Binary weather feature: 1 if avg_temp >= 27 else 0.",
+    "is_cold": "Binary weather feature: 1 if avg_temp <= 5 else 0.",
+    "year": "Year extracted from date.",
+    "month": "Month extracted from date.",
+    "day": "Day extracted from date.",
+    "weekday": "Weekday index (Mon=0 ... Sun=6).",
+    "is_weekend": "Weekend flag (0/1).",
+    "sales_lag_1": "Previous sales quantity for same plu_code.",
+    "sales_lag_7": "Sales quantity 7 steps before for same plu_code.",
+    "rolling_mean_7": "Rolling mean over previous 7 points (after shift(1)).",
+    "rolling_mean_14": "Rolling mean over previous 14 points (after shift(1)).",
+    "rolling_mean_28": "Rolling mean over previous 28 points (after shift(1)).",
+}
+
+
+def build_api_spec(
+    model_path: Path | None = None,
+    output_md: Path | None = None,
+) -> Path:
+    """Generate a markdown API specification from the trained model bundle."""
+    model_path = model_path or Paths.MODEL_RF_FAST
+    output_md = output_md or (Paths.REPORTS_DIR / "model_api_spec.md")
+
+    if not model_path.exists():
+        raise FileNotFoundError(f"Model not found: {model_path}")
+
+    bundle = joblib.load(model_path)
+    feature_cols = bundle.get("feature_cols", [])
+    cat_cols = bundle.get("categorical_cols", [])
+    label_maps = bundle.get("label_maps", {})
+
+    lines: list[str] = []
+    lines.append("# Model API Spec (RandomForest + Binary Weather)")
+    lines.append("")
+    lines.append("## 1. Model File")
+    lines.append(f"- Path: `{model_path.relative_to(model_path.parents[2])}`")
+    lines.append("- Bundle keys: `model`, `feature_cols`, `categorical_cols`, `label_maps`")
+    lines.append("")
+
+    lines.append("## 2. Input Features")
+    lines.append("| feature | type | description |")
+    lines.append("|---|---|---|")
+    for c in feature_cols:
+        t = "string" if c in cat_cols else "number"
+        desc = FEATURE_DESCRIPTIONS.get(c, "Model input feature")
+        lines.append(f"| `{c}` | `{t}` | {desc} |")
+    lines.append("")
+
+    lines.append("## 3. Categorical Encoding")
+    lines.append("- `plu_code`, `product_category` are LabelEncoded.")
+    lines.append("- Use `label_maps` inside model bundle for consistent encoding.")
+    lines.append("- Unknown category values should map to `-1`.")
+    for c in cat_cols:
+        lines.append(f"- `{c}` classes: {len(label_maps.get(c, {}))}")
+    lines.append("")
+
+    lines.append("## 4. Binary Weather Features")
+    lines.append("- `is_rainy`: 1 if rainfall > 0 else 0")
+    lines.append("- `is_hot`: 1 if avg_temp >= 27 else 0")
+    lines.append("- `is_cold`: 1 if avg_temp <= 5 else 0")
+    lines.append("")
+
+    lines.append("## 5. Order Recommendation Formula")
+    lines.append(f"- `recommended_order_qty = ceil(predicted_sales_qty * {Inference.SAFETY_FACTOR})`")
+
+    ensure_dir(output_md)
+    output_md.write_text("\n".join(lines), encoding="utf-8")
+    print(f"API spec: {output_md.name}")
+    return output_md

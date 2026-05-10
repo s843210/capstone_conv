@@ -250,18 +250,145 @@ def merge_sales_with_timetable(
 
 
 # ===================================================================
-# Model features  (legacy 24)
+# Weather features  (legacy 34, 35)
+# ===================================================================
+
+WEATHER_COLS = ["avg_temp", "min_temp", "max_temp", "rainfall"]
+WEATHER_BINARY_COLS = ["is_rainy", "is_hot", "is_cold"]
+
+WEATHER_COLUMN_ALIASES: dict[str, list[str]] = {
+    "date": ["일시", "date"],
+    "avg_temp": ["평균기온(°C)", "평균기온", "avg_temp"],
+    "min_temp": ["최저기온(°C)", "최저기온", "min_temp"],
+    "max_temp": ["최고기온(°C)", "최고기온", "max_temp"],
+    "rainfall": ["일강수량(mm)", "일강수량", "rainfall"],
+}
+
+
+def _normalize_col_key(text: object) -> str:
+    val = str(text).strip().lower()
+    for ch in [" ", "_", "-", "/", "(", ")", "[", "]", "."]:
+        val = val.replace(ch, "")
+    return val
+
+
+def build_weather_features(
+    output_csv: Path | None = None,
+) -> pd.DataFrame:
+    """Read raw weather CSVs and produce a unified daily weather table."""
+    weather_dir = Paths.WEATHER_DIR
+    output_csv = output_csv or Paths.WEATHER_FEATURES
+
+    if not weather_dir.exists():
+        raise FileNotFoundError(f"Weather directory not found: {weather_dir}")
+
+    csv_files = sorted(
+        p for p in weather_dir.rglob("*")
+        if p.is_file() and p.suffix.lower() == ".csv"
+    )
+    if not csv_files:
+        raise FileNotFoundError("No CSV files found under weather directory")
+
+    standard = ["date", "avg_temp", "min_temp", "max_temp", "rainfall"]
+    frames: list[pd.DataFrame] = []
+
+    for fp in csv_files:
+        raw = safe_read_csv(fp)
+        # Build rename map from aliases
+        normalized = {_normalize_col_key(c): c for c in raw.columns}
+        rename_map: dict[str, str] = {}
+        for std, aliases in WEATHER_COLUMN_ALIASES.items():
+            for alias in aliases:
+                key = _normalize_col_key(alias)
+                if key in normalized:
+                    rename_map[normalized[key]] = std
+                    break
+        df = raw.rename(columns=rename_map)
+        missing = [c for c in standard if c not in df.columns]
+        if missing:
+            raise ValueError(f"Required columns not found in {fp.name}: {missing}")
+        out = df[standard].copy()
+        out["date"] = pd.to_datetime(out["date"], errors="coerce")
+        for col in standard[1:]:
+            out[col] = pd.to_numeric(out[col], errors="coerce")
+        out["rainfall"] = out["rainfall"].fillna(0)
+        out = out.dropna(subset=["date"]).copy()
+        frames.append(out)
+
+    merged = pd.concat(frames, ignore_index=True)
+    weather = (
+        merged.groupby("date", as_index=False)
+        .agg(avg_temp=("avg_temp", "mean"), min_temp=("min_temp", "mean"),
+             max_temp=("max_temp", "mean"), rainfall=("rainfall", "sum"))
+        .sort_values("date").reset_index(drop=True)
+    )
+
+    save = weather.copy()
+    save["date"] = save["date"].dt.strftime("%Y-%m-%d")
+    safe_save_csv(save, output_csv)
+    print(f"Weather features: {len(weather)} days → {output_csv.name}")
+    return weather
+
+
+def merge_sales_with_weather(
+    sales_csv: Path | None = None,
+    weather_csv: Path | None = None,
+    output_csv: Path | None = None,
+) -> pd.DataFrame:
+    """Left-join sales+calendar+timetable with weather features on date."""
+    sales_csv = sales_csv or Paths.SALES_WITH_CALENDAR_TIMETABLE
+    weather_csv = weather_csv or Paths.WEATHER_FEATURES
+    output_csv = output_csv or Paths.SALES_WITH_WEATHER
+
+    sales = safe_read_csv(sales_csv)
+    weather = safe_read_csv(weather_csv)
+
+    sales["date"] = pd.to_datetime(sales["date"], errors="coerce")
+    weather["date"] = pd.to_datetime(weather["date"], errors="coerce")
+    sales = sales[sales["date"].notna()].copy()
+    weather = weather[weather["date"].notna()].copy()
+
+    for col in WEATHER_COLS:
+        weather[col] = pd.to_numeric(weather[col], errors="coerce")
+
+    merged = sales.merge(weather[["date"] + WEATHER_COLS], on="date", how="left")
+
+    # Fill missing temperatures with mean, rainfall with 0
+    temp_cols = ["avg_temp", "min_temp", "max_temp"]
+    for col in temp_cols:
+        merged[col] = pd.to_numeric(merged[col], errors="coerce").fillna(merged[col].mean())
+    merged["rainfall"] = pd.to_numeric(merged["rainfall"], errors="coerce").fillna(0)
+
+    out = merged.copy()
+    out["date"] = out["date"].dt.strftime("%Y-%m-%d")
+    safe_save_csv(out, output_csv)
+    print(f"Sales+Weather: {len(merged)} rows → {output_csv.name}")
+    return merged
+
+
+# ===================================================================
+# Model features  (legacy 24, 38)
 # ===================================================================
 
 def build_model_features(
     input_csv: Path | None = None,
     output_csv: Path | None = None,
+    *,
+    include_weather: bool = True,
 ) -> pd.DataFrame:
-    """Add lag/rolling features and target column to produce
-    ``model_features.csv``.
+    """Add lag/rolling features and target column.
+
+    When *include_weather* is True (default), binary weather features
+    (``is_rainy``, ``is_hot``, ``is_cold``) are derived and continuous
+    weather columns are dropped.  Output goes to
+    ``model_features_weather_binary.csv``.
     """
-    input_csv = input_csv or Paths.SALES_WITH_CALENDAR_TIMETABLE
-    output_csv = output_csv or Paths.MODEL_FEATURES
+    if include_weather:
+        input_csv = input_csv or Paths.SALES_WITH_WEATHER
+        output_csv = output_csv or Paths.MODEL_FEATURES_WEATHER_BINARY
+    else:
+        input_csv = input_csv or Paths.SALES_WITH_CALENDAR_TIMETABLE
+        output_csv = output_csv or Paths.MODEL_FEATURES
     report_path = Paths.REPORTS_DIR / "model_features_report.txt"
 
     df = safe_read_csv(input_csv)
@@ -276,6 +403,15 @@ def build_model_features(
     df = df[df["sales_qty"].notna()].copy()
     df["plu_code"] = df["plu_code"].astype(str).str.strip()
     df = df[(df["plu_code"] != "") & (df["plu_code"].str.lower() != "nan")].copy()
+
+    # Binary weather features (derive then drop continuous)
+    if include_weather:
+        for col in WEATHER_COLS:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df["is_rainy"] = (df["rainfall"] > 0).astype(int)
+        df["is_hot"] = (df["avg_temp"] >= 27).astype(int)
+        df["is_cold"] = (df["avg_temp"] <= 5).astype(int)
+        df = df.drop(columns=[c for c in WEATHER_COLS if c in df.columns])
 
     df = df.sort_values(["plu_code", "date"]).reset_index(drop=True)
 
@@ -300,9 +436,11 @@ def build_model_features(
     df["target_sales"] = grp["sales_qty"].shift(-1)
 
     # Drop NaN rows
-    feat_cols = ["sales_lag_1", "sales_lag_7", "rolling_mean_7", "rolling_mean_14", "rolling_mean_28", "target_sales"]
+    drop_cols = ["sales_lag_1", "sales_lag_7", "rolling_mean_7", "rolling_mean_14", "rolling_mean_28", "target_sales"]
+    if include_weather:
+        drop_cols += WEATHER_BINARY_COLS
     before = len(df)
-    model_df = df.dropna(subset=feat_cols).copy()
+    model_df = df.dropna(subset=drop_cols).copy()
 
     save = model_df.copy()
     save["date"] = save["date"].dt.strftime("%Y-%m-%d")
@@ -315,6 +453,7 @@ def build_model_features(
         f"final_rows: {len(model_df)}",
         f"date: {model_df['date'].min()} ~ {model_df['date'].max()}",
         f"plu_unique: {model_df['plu_code'].nunique()}",
+        f"include_weather: {include_weather}",
     ]
     write_report(report_path, lines)
     print(f"Model features: {len(model_df)} rows → {output_csv.name}")

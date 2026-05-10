@@ -36,33 +36,38 @@ def _step_features() -> None:
         merge_sales_with_calendar,
         build_timetable_features,
         merge_sales_with_timetable,
+        build_weather_features,
+        merge_sales_with_weather,
         build_model_features,
     )
     build_calendar_features()
     merge_sales_with_calendar()
     build_timetable_features()
     merge_sales_with_timetable()
+    build_weather_features()
+    merge_sales_with_weather()
     build_model_features()
 
 
 def _step_train() -> None:
     from src.pipeline.train import (
         train_baseline,
-        train_random_forest,
+        train_random_forest_weather_binary,
         train_lightgbm,
         compare_models,
     )
     train_baseline()
-    train_random_forest()
+    train_random_forest_weather_binary()
     train_lightgbm()
     compare_models()
 
 
 def _step_predict() -> None:
-    from src.pipeline.infer import predict_tomorrow, recommend_orders, apply_guardrails
+    from src.pipeline.infer import predict_tomorrow, recommend_orders, apply_guardrails, build_api_spec
     predict_tomorrow()
     recommend_orders()
     apply_guardrails()
+    build_api_spec()
 
 
 def _step_interactive() -> None:

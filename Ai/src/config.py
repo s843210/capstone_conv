@@ -49,6 +49,7 @@ class Paths:
     CALENDAR_CSV     = _resolve(_CFG.get("paths", {}).get("raw", {}).get("calendar_csv", "data/raw/calendar/academic_calendar_2026.csv"))
     TIMETABLE_2024_2025 = _resolve(_CFG.get("paths", {}).get("raw", {}).get("timetable_2024_2025", "data/raw/timetable/timetable_2024_2025.xlsx"))
     TIMETABLE_2026   = _resolve(_CFG.get("paths", {}).get("raw", {}).get("timetable_2026", "data/raw/timetable/timetable_2026.xlsx"))
+    WEATHER_DIR      = _resolve(_CFG.get("paths", {}).get("raw", {}).get("weather_dir", "data/raw/weather"))
 
     # Processed
     DAILY_SALES_RAW  = _resolve(_CFG.get("paths", {}).get("processed", {}).get("daily_sales_raw", "data/processed/daily_sales_raw_v2.csv"))
@@ -61,7 +62,10 @@ class Paths:
     SALES_WITH_CALENDAR = _resolve(_CFG.get("paths", {}).get("processed", {}).get("sales_with_calendar", "data/processed/sales_with_calendar.csv"))
     TIMETABLE_FEATURES = _resolve(_CFG.get("paths", {}).get("processed", {}).get("timetable_features", "data/processed/timetable_features.csv"))
     SALES_WITH_CALENDAR_TIMETABLE = _resolve(_CFG.get("paths", {}).get("processed", {}).get("sales_with_calendar_timetable", "data/processed/sales_with_calendar_timetable.csv"))
+    WEATHER_FEATURES = _resolve(_CFG.get("paths", {}).get("processed", {}).get("weather_features", "data/processed/weather_features.csv"))
+    SALES_WITH_WEATHER = _resolve(_CFG.get("paths", {}).get("processed", {}).get("sales_with_weather", "data/processed/sales_with_calendar_timetable_weather.csv"))
     MODEL_FEATURES   = _resolve(_CFG.get("paths", {}).get("processed", {}).get("model_features", "data/processed/model_features.csv"))
+    MODEL_FEATURES_WEATHER_BINARY = _resolve(_CFG.get("paths", {}).get("processed", {}).get("model_features_weather_binary", "data/processed/model_features_weather_binary.csv"))
 
     # Models
     MODEL_RF_FAST    = _resolve(os.environ.get("MODEL_PATH", _CFG.get("paths", {}).get("models", {}).get("rf_fast", "outputs/models/random_forest_fast_model.pkl")))

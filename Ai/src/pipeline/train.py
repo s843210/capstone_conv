@@ -96,7 +96,7 @@ def _metrics(y_true: pd.Series, y_pred: np.ndarray) -> dict[str, float]:
 
 def train_baseline(input_csv: Path | None = None) -> dict:
     """Evaluate the rolling_mean_7 baseline."""
-    input_csv = input_csv or Paths.MODEL_FEATURES
+    input_csv = input_csv or Paths.MODEL_FEATURES_WEATHER_BINARY
     out_json = Paths.REPORTS_DIR / "baseline_result.json"
 
     df = safe_read_csv(input_csv)
@@ -125,12 +125,12 @@ def train_baseline(input_csv: Path | None = None) -> dict:
 # RandomForest  (legacy 26_fast)
 # ===================================================================
 
-def train_random_forest(input_csv: Path | None = None) -> dict:
-    """Train a RandomForestRegressor and save the model bundle."""
-    input_csv = input_csv or Paths.MODEL_FEATURES
-    out_model = Paths.MODEL_RF_FAST
-    out_json = Paths.REPORTS_DIR / "random_forest_fast_result.json"
-    out_fi = Paths.REPORTS_DIR / "random_forest_fast_feature_importance.csv"
+def train_random_forest_weather_binary(input_csv: Path | None = None) -> dict:
+    """Train a RandomForestRegressor with weather binary features and save the model bundle."""
+    input_csv = input_csv or Paths.MODEL_FEATURES_WEATHER_BINARY
+    out_model = Paths.MODEL_RF_FAST  # config에서 rf_fast가 weather_binary로 연결됨
+    out_json = Paths.REPORTS_DIR / "random_forest_weather_binary_result.json"
+    out_fi = Paths.REPORTS_DIR / "random_forest_weather_binary_feature_importance.csv"
 
     df = safe_read_csv(input_csv)
     train_df, test_df = _split_data(df)
@@ -169,7 +169,7 @@ def train_random_forest(input_csv: Path | None = None) -> dict:
     joblib.dump(bundle, out_model)
 
     result = {
-        "model": "RandomForestRegressor_fast",
+        "model": "RandomForestRegressor_weather_binary",
         "params": params,
         "runtime": {"train_seconds": elapsed},
         "rows": {"train": len(X_train), "test": len(X_test)},
@@ -178,7 +178,7 @@ def train_random_forest(input_csv: Path | None = None) -> dict:
     ensure_dir(out_json)
     out_json.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    print(f"RF-fast - MAE: {m['mae']:.4f}, RMSE: {m['rmse']:.4f}, R2: {m['r2']:.4f} ({elapsed:.1f}s)")
+    print(f"RF-Weather-Binary - MAE: {m['mae']:.4f}, RMSE: {m['rmse']:.4f}, R2: {m['r2']:.4f} ({elapsed:.1f}s)")
     return result
 
 
@@ -193,7 +193,7 @@ def train_lightgbm(input_csv: Path | None = None) -> dict:
     except ImportError as exc:
         raise ImportError("lightgbm is required: pip install lightgbm") from exc
 
-    input_csv = input_csv or Paths.MODEL_FEATURES
+    input_csv = input_csv or Paths.MODEL_FEATURES_WEATHER_BINARY
     out_model = Paths.MODEL_LIGHTGBM
     out_json = Paths.REPORTS_DIR / "lightgbm_result.json"
     out_fi = Paths.REPORTS_DIR / "lightgbm_feature_importance.csv"

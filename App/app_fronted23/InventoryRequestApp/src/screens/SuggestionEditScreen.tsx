@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+﻿import React, {useState} from 'react';
 import {SafeAreaView, Text, TextInput, Pressable, Alert} from 'react-native';
 import {Suggestion, SuggestionEditScreenProps} from '../types';
 import {styles} from '../styles/commonStyles';
@@ -54,7 +54,8 @@ export default function SuggestionEditScreen({navigation, route, currentUser, up
         return;
       }
 
-      navigation.replace('SuggestionDetail', {suggestion: nextSuggestion});
+      Alert.alert('수정 완료', '건의사항이 수정되었습니다.');
+      navigation.reset({index: 0, routes: [{name: 'ProductList'}]});
     } catch {
       Alert.alert('수정 오류', '건의사항 수정 중 오류가 발생했습니다.');
     } finally {

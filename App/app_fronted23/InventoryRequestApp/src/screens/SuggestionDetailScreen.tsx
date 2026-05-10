@@ -24,7 +24,8 @@ export default function SuggestionDetailScreen({navigation, route, currentUser, 
             Alert.alert('삭제 오류', '건의사항 삭제 중 오류가 발생했습니다.');
             return;
           }
-          navigation.navigate('Suggestions');
+          Alert.alert('삭제 완료', '건의사항이 삭제되었습니다.');
+          navigation.reset({index: 0, routes: [{name: 'ProductList'}]});
         },
       },
     ]);

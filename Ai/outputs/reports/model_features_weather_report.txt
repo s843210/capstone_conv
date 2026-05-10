@@ -1,0 +1,24 @@
+Model Features Weather Report
+input_csv: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/processed/sales_with_calendar_timetable_weather.csv (encoding: utf-8)
+output_csv: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/processed/model_features_weather.csv
+
+initial_rows: 101715
+final_rows: 50370
+rows_dropped_by_nan_filters: 51345
+date_min: 2024-04-02 00:00:00
+date_max: 2026-02-01 00:00:00
+plu_code_unique_count: 1054
+
+[target_sales stats]
+count: 50370
+min: 0.0
+max: 699.0
+mean: 7.0187413142743695
+median: 2.0
+std: 20.748549327505298
+
+[weather feature missing count]
+avg_temp: 0
+min_temp: 0
+max_temp: 0
+rainfall: 0

@@ -1,0 +1,22 @@
+Weather Features Report
+source_directory: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/raw/weather
+source_csv_files: 1
+encodings_used: ['cp949']
+
+row_count: 761
+date_min: 2024-03-01
+date_max: 2026-03-31
+
+missing_by_column:
+- date: 0
+- avg_temp: 0
+- min_temp: 0
+- max_temp: 0
+- rainfall: 0
+
+numeric_statistics:
+          count       mean        std   min   25%   50%   75%    max
+avg_temp  761.0  15.212352   9.731166  -5.5   6.7  15.7  23.9   31.1
+min_temp  761.0  10.975953   9.999851 -10.1   2.1  11.2  20.3   27.3
+max_temp  761.0  20.462943   9.855912  -1.7  12.2  21.7  28.6   37.2
+rainfall  761.0   4.268068  19.908813   0.0   0.0   0.0   0.7  426.4

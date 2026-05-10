@@ -1,0 +1,31 @@
+Order Recommendation Final Summary
+input_csv: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/reports/tomorrow_sales_prediction_final.csv
+output_csv: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/reports/order_recommendation_final.csv
+safety_factor: 1.2
+
+total_products: 1054
+total_recommended_order_qty: 33590
+average_recommended_order_qty: 31.86907020872865
+
+[Top 20 Recommended Order Qty]
+    plu_code         product_name product_category  predicted_sales_qty  recommended_order_qty
+8.803186e+12    옐로우)올데이워터생수펫500ml               음료           258.650166                    311
+8.801056e+12      롯데)펩시콜라제로캔355ml               음료           248.419730                    299
+8.801116e+12     K)릴하이브리드(액상카트리지)               담배           234.180622                    282
+8.801056e+12     롯데)핫식스더킹포스캔355ml               음료           225.617532                    271
+8.801043e+12            농심)육개장사발면             가공식품           212.184093                    255
+4.897037e+12   코카)몬스터에너지울트라캔355ml               음료           203.289970                    244
+8.809963e+12      대정)매콤제육햄말이주먹밥2편               밥류           201.761060                    243
+8.809963e+12      대정)참치마요햄말이주먹밥2편               밥류           194.632816                    234
+1.500000e+12   즉석라면)종이용기(라면조리기전용)             가공식품           180.188589                    217
+8.801047e+12       동원)양반매실차펫500ml               음료           180.331374                    217
+8.801056e+12     롯데)핫식스더킹러쉬캔355ml               음료           178.556351                    215
+8.801056e+12     롯데)핫식스더킹제로캔355ml               음료           178.226747                    214
+8.809651e+12       대정)햄참치마요삼각김밥2편               밥류           172.653470                    208
+8.809963e+12        대정)치킨마요삼각김밥2편               밥류           172.630566                    208
+8.809963e+12   대정)참치마요김치볶음밥계란말이2편               밥류           170.969744                    206
+8.801008e+12      CJ)닭가슴살소시지핫바80g             간편식품           168.491886                    203
+8.801056e+12 롯데)핫식스더킹퍼플그레이프캔355ml               음료           167.299882                    201
+8.801047e+12        동원)보성말차펫500ml               음료           166.314156                    200
+8.808024e+12         옐로우)단커피500ml              유제품           164.891689                    198
+8.808024e+12         옐로우)쓴커피500ml              유제품           164.267270                    198

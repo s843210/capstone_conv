@@ -1,0 +1,54 @@
+Final Model Summary (Semester Binary)
+final_model_name: random_forest_semester_binary_model.pkl
+final_model_path: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/models/random_forest_semester_binary_model.pkl
+
+[Final Performance]
+MAE: 13.024
+RMSE: 24.7452
+R2: 0.6253
+
+[Used Features]
+- plu_code
+- product_category
+- sales_qty
+- purchase_qty
+- class_count
+- monday_class_count
+- tuesday_class_count
+- wednesday_class_count
+- thursday_class_count
+- friday_class_count
+- is_rainy
+- is_hot
+- is_cold
+- is_semester
+- year
+- month
+- day
+- weekday
+- is_weekend
+- sales_lag_1
+- sales_lag_7
+- rolling_mean_7
+- rolling_mean_14
+- rolling_mean_28
+
+[is_semester Rule]
+- if is_vacation == 1: is_semester = 0
+- else: is_semester = 1
+
+[Binary Weather Rules]
+- is_rainy = rainfall > 0
+- is_hot = avg_temp >= 27
+- is_cold = avg_temp <= 5
+
+[Difference vs Previous Final Model (RF + Binary Weather)]
+- Academic features simplified to single `is_semester`
+- Removed dead academic features: is_exam, is_festival, is_start_semester, is_end_semester, is_holiday_or_no_class, is_vacation
+- Metric change: MAE 12.8477 -> 13.024, RMSE 24.1966 -> 24.7452, R2 0.6417 -> 0.6253
+
+[Final Selection Reasons]
+- Performance gap vs previous final model is small
+- Better maintainability and explainability from simplified academic feature design
+- Dead feature removal
+- Easier feature management in production operations

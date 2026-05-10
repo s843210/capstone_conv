@@ -1,0 +1,90 @@
+{
+  "experiment": "random_forest_weather_binary_long_test_validation",
+  "input_csv": "C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/processed/model_features_weather_binary.csv",
+  "params": {
+    "n_estimators": 100,
+    "max_depth": 20,
+    "min_samples_leaf": 3,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "runtime": {
+    "train_seconds": 10.773029600037262,
+    "fitted_n_jobs": -1
+  },
+  "split": {
+    "train_start": "2024-04-02",
+    "train_end": "2025-08-31",
+    "test_start": "2025-09-01",
+    "test_end": "2026-03-31"
+  },
+  "rows": {
+    "train": 46441,
+    "test": 3929
+  },
+  "features": {
+    "count": 29,
+    "categorical_cols": [
+      "plu_code",
+      "product_category"
+    ],
+    "feature_cols": [
+      "plu_code",
+      "product_category",
+      "sales_qty",
+      "purchase_qty",
+      "is_start_semester",
+      "is_end_semester",
+      "is_exam",
+      "is_vacation",
+      "is_festival",
+      "is_holiday_or_no_class",
+      "class_count",
+      "monday_class_count",
+      "tuesday_class_count",
+      "wednesday_class_count",
+      "thursday_class_count",
+      "friday_class_count",
+      "is_rainy",
+      "is_hot",
+      "is_cold",
+      "year",
+      "month",
+      "day",
+      "weekday",
+      "is_weekend",
+      "sales_lag_1",
+      "sales_lag_7",
+      "rolling_mean_7",
+      "rolling_mean_14",
+      "rolling_mean_28"
+    ]
+  },
+  "metrics_test": {
+    "mae": 13.669264524380957,
+    "rmse": 25.064833523348018,
+    "r2": 0.5813523849065371
+  },
+  "comparison_with_final_model": {
+    "final_model_reference": {
+      "mae": 12.8477,
+      "rmse": 24.1966,
+      "r2": 0.6417
+    },
+    "long_test_validation": {
+      "mae": 13.669264524380957,
+      "rmse": 25.064833523348018,
+      "r2": 0.5813523849065371
+    },
+    "delta": {
+      "mae": 0.8215645243809568,
+      "rmse": 0.8682335233480174,
+      "r2": -0.06034761509346298
+    },
+    "improved": {
+      "mae": false,
+      "rmse": false,
+      "r2": false
+    }
+  }
+}

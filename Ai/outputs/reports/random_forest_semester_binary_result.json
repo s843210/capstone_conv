@@ -1,0 +1,50 @@
+{
+  "model": "RandomForestRegressor_semester_binary",
+  "params": {
+    "n_estimators": 100,
+    "max_depth": 20,
+    "min_samples_leaf": 3,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "runtime": {
+    "train_seconds": 4.43096029991284,
+    "fitted_n_jobs": -1
+  },
+  "split": {
+    "train_start": "2024-04-02",
+    "train_end": "2025-12-31",
+    "test_start": "2026-01-01"
+  },
+  "rows": {
+    "train": 49248,
+    "test": 1122
+  },
+  "metrics_test": {
+    "mae": 13.023974516057018,
+    "rmse": 24.74519921562816,
+    "r2": 0.6253161818276032
+  },
+  "comparison_with_final_model": {
+    "final_rf_weather_binary": {
+      "mae": 12.8477,
+      "rmse": 24.1966,
+      "r2": 0.6417
+    },
+    "new_rf_semester_binary": {
+      "mae": 13.023974516057018,
+      "rmse": 24.74519921562816,
+      "r2": 0.6253161818276032
+    },
+    "delta": {
+      "mae": 0.17627451605701872,
+      "rmse": 0.5485992156281583,
+      "r2": -0.01638381817239687
+    },
+    "improved": {
+      "mae": false,
+      "rmse": false,
+      "r2": false
+    }
+  }
+}

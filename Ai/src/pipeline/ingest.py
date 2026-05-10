@@ -6,6 +6,7 @@ Consolidates logic from legacy scripts 04, 08, 10, 13.
 from __future__ import annotations
 
 import re
+from datetime import date as _date
 from pathlib import Path
 from typing import Optional
 
@@ -73,6 +74,55 @@ def _clean_sales_df(df: pd.DataFrame) -> pd.DataFrame:
     return work
 
 
+def _infer_latest_date_from_sheet(raw_df: pd.DataFrame, fallback_date: str) -> str:
+    """Infer latest available day from sheet headers like ``05-09``.
+
+    Monthly raw files are often named like ``2605...xlsx`` and would otherwise
+    map to ``YYYY-MM-01`` by filename parsing. This helper looks at the first
+    data row (just below the header row), detects day headers, and upgrades the
+    date to the latest day that has at least one numeric value in the column.
+    """
+    try:
+        base = pd.to_datetime(fallback_date, errors="coerce")
+    except Exception:
+        base = pd.NaT
+    if pd.isna(base):
+        return fallback_date
+
+    if raw_df.empty:
+        return fallback_date
+
+    first_row = raw_df.iloc[0]
+    latest_day: int | None = None
+
+    for col in raw_df.columns:
+        token = str(first_row.get(col, "")).strip()
+        m = re.fullmatch(r"(\d{1,2})-(\d{1,2})", token)
+        if not m:
+            continue
+
+        month = int(m.group(1))
+        day = int(m.group(2))
+        if month != int(base.month):
+            continue
+
+        # Exclude header-like columns that do not have numeric body values.
+        col_num = pd.to_numeric(raw_df[col], errors="coerce")
+        if len(col_num) <= 1 or not col_num.iloc[1:].notna().any():
+            continue
+
+        latest_day = day if latest_day is None else max(latest_day, day)
+
+    if latest_day is None:
+        return fallback_date
+
+    try:
+        resolved = _date(int(base.year), int(base.month), int(latest_day))
+    except ValueError:
+        return fallback_date
+    return resolved.strftime("%Y-%m-%d")
+
+
 def _process_one_sales_file(file_path: Path) -> pd.DataFrame:
     header_row = _find_real_header_row(file_path)
     if header_row is None:
@@ -82,6 +132,7 @@ def _process_one_sales_file(file_path: Path) -> pd.DataFrame:
     cleaned = _clean_sales_df(_normalize_columns(raw))
 
     date_val = extract_date_from_path(file_path)
+    date_val = _infer_latest_date_from_sheet(raw, date_val)
     cat_val = extract_category_from_filename(file_path.stem)
     src = file_path.relative_to(BASE_DIR).as_posix()
 

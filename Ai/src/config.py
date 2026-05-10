@@ -32,8 +32,17 @@ _CFG = _load_yaml()
 # Helper to resolve a relative path against BASE_DIR
 # ---------------------------------------------------------------------------
 
-def _resolve(relative: str) -> Path:
-    return BASE_DIR / relative
+def _resolve(relative: str | Path) -> Path:
+    """Resolve a configured path safely.
+
+    Normalizes accidental quotes/whitespace from env vars or YAML values and
+    keeps absolute paths untouched.
+    """
+    raw = str(relative).strip().strip('"').strip("'").replace("\x00", "")
+    path = Path(raw)
+    if path.is_absolute():
+        return path
+    return BASE_DIR / path
 
 
 # ---------------------------------------------------------------------------

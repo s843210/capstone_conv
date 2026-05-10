@@ -1,6 +1,6 @@
 Final Sales Dataset Report
-input: C:/Users/bm961/Desktop/Ai/data/processed/daily_sales_with_product.csv
-original_rows: 153774
-final_rows: 101715
-date: 2024-03-01 00:00:00 ~ 2026-03-01 00:00:00
-plu_unique: 4461
+input: C:/Users/bm961/Desktop/important_file/capstone_conv/Ai/data/processed/daily_sales_with_product.csv
+original_rows: 157196
+final_rows: 104540
+date: 2024-03-01 00:00:00 ~ 2026-05-09 00:00:00
+plu_unique: 4596

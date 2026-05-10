@@ -18,8 +18,10 @@ export default function RequestDoneScreen({navigation, route}: RequestDoneScreen
       <Pressable style={styles.secondaryBtn} onPress={() => navigation.navigate('MyRequests')}>
         <Text style={styles.secondaryBtnText}>내 요청 목록 확인</Text>
       </Pressable>
-      <Pressable style={styles.primaryBtn} onPress={() => navigation.navigate('ProductList')}>
-        <Text style={styles.primaryBtnText}>상품 목록으로</Text>
+      <Pressable
+        style={styles.primaryBtn}
+        onPress={() => navigation.reset({index: 0, routes: [{name: 'ProductList'}]})}>
+        <Text style={styles.primaryBtnText}>홈으로 가기</Text>
       </Pressable>
     </SafeAreaView>
   );

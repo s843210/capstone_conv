@@ -55,7 +55,8 @@ export default function SuggestionWriteScreen({navigation, currentUser, addSugge
         return;
       }
 
-      navigation.navigate('Suggestions');
+      Alert.alert('등록 완료', '건의사항이 등록되었습니다.');
+      navigation.reset({index: 0, routes: [{name: 'ProductList'}]});
     } catch {
       Alert.alert('저장 오류', '건의사항 저장 중 오류가 발생했습니다.');
     } finally {

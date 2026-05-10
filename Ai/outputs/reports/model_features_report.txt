@@ -1,6 +1,7 @@
 Model Features Report
-input: C:/Users/bm961/Desktop/Ai/data/processed/sales_with_calendar_timetable.csv
+input: C:/Users/bm961/Desktop/Ai/data/processed/sales_with_calendar_timetable_weather.csv
 initial_rows: 101715
 final_rows: 50370
 date: 2024-04-02 00:00:00 ~ 2026-02-01 00:00:00
 plu_unique: 1054
+include_weather: True

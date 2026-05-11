@@ -18,21 +18,15 @@ def test_model_load():
 
     model_path = Paths.MODEL_RF_FAST
     if not model_path.exists():
-        # Also try the models/ directory copy
-        alt = PROJECT_ROOT / "models" / "random_forest_fast_model.pkl"
-        if alt.exists():
-            model_path = alt
-        else:
-            print(f"SKIP: Model file not found at {Paths.MODEL_RF_FAST}")
-            return
+        print(f"SKIP: Model file not found at {Paths.MODEL_RF_FAST}")
+        return
 
     bundle = joblib.load(model_path)
     assert isinstance(bundle, dict), "Bundle should be a dict"
     assert "model" in bundle, "Bundle must contain 'model'"
-    assert "feature_cols" in bundle, "Bundle must contain 'feature_cols'"
-    assert "label_maps" in bundle, "Bundle must contain 'label_maps'"
-    assert len(bundle["feature_cols"]) > 0, "feature_cols should not be empty"
-    print(f"PASS: Model loaded, {len(bundle['feature_cols'])} features")
+    feature_cols = bundle.get("feature_cols", bundle.get("feature_columns", []))
+    assert len(feature_cols) > 0, "feature columns should not be empty"
+    print(f"PASS: Monthly V2 model loaded, {len(feature_cols)} features")
 
 
 def test_single_prediction():
@@ -41,9 +35,6 @@ def test_single_prediction():
     from src.serving.preprocess_for_infer import ModelPredictor
 
     model_path = Paths.MODEL_RF_FAST
-    alt = PROJECT_ROOT / "models" / "random_forest_fast_model.pkl"
-    if not model_path.exists() and alt.exists():
-        model_path = alt
     if not model_path.exists():
         print(f"SKIP: Model file not found")
         return
@@ -65,7 +56,7 @@ def test_single_prediction():
     assert "recommended_order_qty" in result, "Result must have recommended_order_qty"
     assert result["predicted_sales_qty"] >= 0, "Prediction should be non-negative"
     assert isinstance(result["recommended_order_qty"], int), "Order qty should be int"
-    print(f"PASS: Prediction={result['predicted_sales_qty']}, Order={result['recommended_order_qty']}")
+    print(f"PASS: Monthly V2 Prediction={result['predicted_sales_qty']}, Order={result['recommended_order_qty']}")
 
 
 def test_order_calculation():

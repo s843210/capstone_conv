@@ -1,0 +1,26 @@
+{
+  "input_csv": "C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/processed/model_features_monthly_v2.csv",
+  "train_period": [
+    "2024-03-29",
+    "2025-09-30"
+  ],
+  "test_period": [
+    "2025-10-01",
+    "2026-04-29"
+  ],
+  "train_rows": 656119,
+  "test_rows": 284356,
+  "feature_count": 23,
+  "metrics": {
+    "mae": 0.7728685329953058,
+    "rmse": 3.396173079091971,
+    "r2": 0.01631106367124202
+  },
+  "train_time_seconds": 148.00212287902832,
+  "outputs": {
+    "result_json": "C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/reports/random_forest_monthly_v2_result.json",
+    "feature_importance_csv": "C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/reports/random_forest_monthly_v2_feature_importance.csv",
+    "predictions_sample_csv": "C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/reports/random_forest_monthly_v2_predictions_sample.csv",
+    "model_path": "C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/models/random_forest_monthly_v2_model.pkl"
+  }
+}

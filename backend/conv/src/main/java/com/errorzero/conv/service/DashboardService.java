@@ -1,5 +1,6 @@
 package com.errorzero.conv.service;
 
+import com.errorzero.conv.domain.AiPrediction;
 import com.errorzero.conv.domain.Product;
 import com.errorzero.conv.dto.DashboardResponseDto.*;
 import com.errorzero.conv.repository.AiPredictionRepository;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,9 +39,6 @@ public class DashboardService {
         return new MainDashboard(totalItems, normalItems, lowStockItems, inventoryStats, recommendations, insights);
     }
 
-    /**
-     * 재고 현황: 재고가 적은 상위 5개 품목 통계
-     */
     private List<InventoryStat> buildInventoryStats() {
         Pageable pageable = PageRequest.of(0, LOW_STOCK_DISPLAY_LIMIT);
         List<Product> products = productRepository
@@ -54,27 +53,31 @@ public class DashboardService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * AI 발주 추천 (Mock Data)
-     * TODO: FastAPI 구현 후 aiPredictionRepository.findAllByTargetDate(LocalDate.now())로 교체
-     */
     private List<OrderRecommendation> buildOrderRecommendations() {
-        return List.of(
-                new OrderRecommendation("15000001", "참치마요 삼각김밥", 2, 15, "오후 3시 IT 학생들 전공 수업 직후 간식 수요 급증 예상"),
-                new OrderRecommendation("15000002", "제육볶음 도시락", 4, 10, "오늘 야간 IT 학생들 야작 수요 20% 증가 패턴")
+        LocalDate targetDate = aiPredictionRepository.findLatestRecommendedTargetDate().orElse(null);
+        if (targetDate == null) {
+            return List.of();
+        }
+
+        return aiPredictionRepository
+                .findTop20ByTargetDateAndRecommendedOrderGreaterThanOrderByRecommendedOrderDesc(targetDate, 0)
+                .stream()
+                .map(this::toOrderRecommendation)
+                .collect(Collectors.toList());
+    }
+
+    private OrderRecommendation toOrderRecommendation(AiPrediction prediction) {
+        Product product = prediction.getProduct();
+        return new OrderRecommendation(
+                product.getPluCode(),
+                product.getName(),
+                product.getCurrentStock(),
+                prediction.getRecommendedOrder(),
+                "AI target_date=" + prediction.getTargetDate()
         );
     }
 
-    /**
-     * 오늘의 인사이트 (Mock Data)
-     * TODO: FastAPI 구현 후 AI 분석 기반으로 동적 생성으로 교체
-     */
     private List<Insight> buildInsights() {
-        return List.of(
-                new Insight("수요 급증", "오늘 저녁 도시락 수요 40% 증가 예상", ""),
-                new Insight("품절주의", "생수 500ml 2시간 내 품절 위험", ""),
-                new Insight("발주조정", "내일 비 예보, 우산 발주량 +20개 추천", ""),
-                new Insight("수요증가", "주말 대학기 축제로 주류 수요 증가 진단", "")
-        );
+        return List.of();
     }
 }

@@ -1,7 +1,7 @@
 Tomorrow Sales Prediction Monthly V2 Final Report
-input_csv: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/processed/model_features_monthly_v2.csv
-model_path: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/models/random_forest_monthly_v2_model.pkl
-output_csv: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/reports/tomorrow_sales_prediction_monthly_v2_final.csv
+input_csv: C:/Users/bm961/Desktop/Capsss/capstone_conv/Ai/data/processed/model_features_monthly_v2.csv
+model_path: C:/Users/bm961/Desktop/Capsss/capstone_conv/Ai/outputs/models/random_forest_monthly_v2_model.pkl
+output_csv: C:/Users/bm961/Desktop/Capsss/capstone_conv/Ai/outputs/reports/tomorrow_sales_prediction_monthly_v2_final.csv
 latest_sku_rows_total: 4569
 latest_rows_used_for_prediction: 4569
 excluded_rows_due_to_missing_features: 0

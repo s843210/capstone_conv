@@ -10,9 +10,7 @@ function SalesUploadPanel() {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
-  const canSubmit = useMemo(() => {
-    return salesFiles.length > 0 && masterFiles.length > 0 && !loading;
-  }, [salesFiles.length, masterFiles.length, loading]);
+  const canSubmit = useMemo(() => salesFiles.length > 0 && !loading, [salesFiles.length, loading]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -30,7 +28,7 @@ function SalesUploadPanel() {
       });
       setResult(payload);
     } catch (err) {
-      setError(err.message || "업로드 중 오류가 발생했습니다.");
+      setError(err.message || "판매 데이터 업로드 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -40,14 +38,15 @@ function SalesUploadPanel() {
     <div className="panel">
       <div className="panel-header">
         <div className="panel-title">
-          <span className="panel-icon">📥</span>
+          <span className="panel-icon">SALES</span>
           <h2>판매 데이터 업로드</h2>
         </div>
       </div>
 
       <p className="panel-desc">
-        판매현황 파일과 분류 마스터 CSV를 업로드하면 <code>daily_sales</code>에
-        <code>sales_date</code>, <code>plu_code</code>, <code>sales_qty</code>만 적재합니다.
+        일별 판매 파일을 업로드하면 <code>product_master</code> DB 기준으로 PLU를 매칭해서
+        <code>daily_sales</code>에 <code>sales_date</code>, <code>plu_code</code>, <code>sales_qty</code>를
+        upsert합니다.
       </p>
 
       <form className="sales-upload-form" onSubmit={handleSubmit}>
@@ -59,18 +58,18 @@ function SalesUploadPanel() {
             multiple
             onChange={(event) => setSalesFiles(Array.from(event.target.files || []))}
           />
-          <small>{salesFiles.length}개 선택됨</small>
+          <small>{salesFiles.length > 0 ? `${salesFiles.length}개 선택됨` : "파일을 선택하세요"}</small>
         </label>
 
         <label className="sales-upload-field">
-          <span>분류 마스터 파일 (csv, 여러 개 선택)</span>
+          <span>상품 마스터 파일 (선택, DB 마스터 보강용)</span>
           <input
             type="file"
             accept=".csv"
             multiple
             onChange={(event) => setMasterFiles(Array.from(event.target.files || []))}
           />
-          <small>{masterFiles.length}개 선택됨</small>
+          <small>{masterFiles.length > 0 ? `${masterFiles.length}개 선택됨` : "DB product_master 사용"}</small>
         </label>
 
         <label className="sales-upload-field">
@@ -88,7 +87,7 @@ function SalesUploadPanel() {
             checked={dryRun}
             onChange={(event) => setDryRun(event.target.checked)}
           />
-          <span>DRY RUN (DB 저장 없이 변환/매칭 결과만 확인)</span>
+          <span>DRY RUN (DB 저장 없이 매칭 결과만 확인)</span>
         </label>
 
         <div className="sales-upload-actions">
@@ -98,7 +97,7 @@ function SalesUploadPanel() {
         </div>
       </form>
 
-      {error && <p className="panel-error">⚠️ {error}</p>}
+      {error && <p className="panel-error">{error}</p>}
 
       {result && (
         <div className="sales-upload-result">
@@ -113,11 +112,11 @@ function SalesUploadPanel() {
               <span>{result.matchedRowCount}</span>
             </div>
             <div>
-              <strong>미매칭 행</strong>
+              <strong>미매칭</strong>
               <span>{result.unmatchedRowCount}</span>
             </div>
             <div>
-              <strong>유니크 적재키</strong>
+              <strong>적재 대상</strong>
               <span>{result.uniqueDailySalesCount}</span>
             </div>
             <div>

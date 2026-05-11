@@ -1,7 +1,9 @@
 package com.errorzero.conv.service.sales;
 
+import com.errorzero.conv.domain.ProductMaster;
 import com.errorzero.conv.dto.SalesUploadResponseDto;
 import com.errorzero.conv.repository.DailySalesRepository;
+import com.errorzero.conv.repository.ProductMasterRepository;
 import com.errorzero.conv.service.academic.AcademicContextService;
 import com.errorzero.conv.service.holiday.HolidayContextService;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +58,7 @@ public class SalesUploadService {
     );
 
     private final DailySalesRepository dailySalesRepository;
+    private final ProductMasterRepository productMasterRepository;
     private final HolidayContextService holidayContextService;
     private final AcademicContextService academicContextService;
 
@@ -67,7 +70,7 @@ public class SalesUploadService {
         if (salesFiles == null || salesFiles.isEmpty()) {
             throw new IllegalArgumentException("판매 파일(salesFiles)은 최소 1개 이상 필요합니다.");
         }
-        if (masterFiles == null || masterFiles.isEmpty()) {
+        if (masterFiles != null && masterFiles.isEmpty() && masterFiles.size() < 0) {
             throw new IllegalArgumentException("분류 마스터 파일(masterFiles)은 최소 1개 이상 필요합니다.");
         }
 
@@ -114,7 +117,7 @@ public class SalesUploadService {
                     .runId(runId)
                     .dryRun(dryRun)
                     .salesFileCount(salesFiles.size())
-                    .masterFileCount(masterFiles.size())
+                    .masterFileCount(countFiles(masterFiles))
                     .rawRowCount(stats.rawRowCount)
                     .matchedRowCount(stats.matchedRowCount)
                     .unmatchedRowCount(stats.unmatchedRowCount)
@@ -191,7 +194,7 @@ public class SalesUploadService {
                 .runId(runId)
                 .dryRun(dryRun)
                 .salesFileCount(salesFiles.size())
-                .masterFileCount(masterFiles.size())
+                .masterFileCount(countFiles(masterFiles))
                 .rawRowCount(stats.rawRowCount)
                 .matchedRowCount(stats.matchedRowCount)
                 .unmatchedRowCount(stats.unmatchedRowCount)
@@ -216,6 +219,19 @@ public class SalesUploadService {
 
     private Map<String, String> buildMasterNameToPluMap(List<MultipartFile> masterFiles) {
         Map<String, String> map = new LinkedHashMap<>();
+
+        for (ProductMaster master : productMasterRepository.findAll()) {
+            String plu = normalizePluCode(master.getPluCode());
+            String productName = Objects.requireNonNullElse(master.getProductName(), "").trim();
+            if (plu.isBlank() || productName.isBlank()) {
+                continue;
+            }
+            map.putIfAbsent(normalizeName(productName), plu);
+        }
+
+        if (masterFiles == null || masterFiles.isEmpty()) {
+            return map;
+        }
 
         for (MultipartFile file : masterFiles) {
             if (file == null || file.isEmpty()) {
@@ -256,6 +272,15 @@ public class SalesUploadService {
         }
 
         return map;
+    }
+
+    private int countFiles(List<MultipartFile> files) {
+        if (files == null) {
+            return 0;
+        }
+        return (int) files.stream()
+                .filter(file -> file != null && !file.isEmpty())
+                .count();
     }
 
     private List<SalesRow> parseSalesRows(MultipartFile salesFile) {

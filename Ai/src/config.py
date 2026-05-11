@@ -64,11 +64,11 @@ class Paths:
     SALES_WITH_CALENDAR_TIMETABLE = _resolve(_CFG.get("paths", {}).get("processed", {}).get("sales_with_calendar_timetable", "data/processed/sales_with_calendar_timetable.csv"))
     WEATHER_FEATURES = _resolve(_CFG.get("paths", {}).get("processed", {}).get("weather_features", "data/processed/weather_features.csv"))
     SALES_WITH_WEATHER = _resolve(_CFG.get("paths", {}).get("processed", {}).get("sales_with_weather", "data/processed/sales_with_calendar_timetable_weather.csv"))
-    MODEL_FEATURES   = _resolve(_CFG.get("paths", {}).get("processed", {}).get("model_features", "data/processed/model_features.csv"))
+    MODEL_FEATURES   = _resolve(_CFG.get("paths", {}).get("processed", {}).get("model_features", "data/processed/model_features_monthly_v2.csv"))
     MODEL_FEATURES_WEATHER_BINARY = _resolve(_CFG.get("paths", {}).get("processed", {}).get("model_features_weather_binary", "data/processed/model_features_weather_binary.csv"))
 
     # Models
-    MODEL_RF_FAST    = _resolve(os.environ.get("MODEL_PATH", _CFG.get("paths", {}).get("models", {}).get("rf_fast", "outputs/models/random_forest_fast_model.pkl")))
+    MODEL_RF_FAST    = _resolve(os.environ.get("MODEL_PATH", _CFG.get("paths", {}).get("models", {}).get("rf_fast", "outputs/models/random_forest_monthly_v2_model.pkl")))
     MODEL_LIGHTGBM   = _resolve(_CFG.get("paths", {}).get("models", {}).get("lightgbm", "outputs/models/lightgbm_model.pkl"))
 
     # Reports

@@ -5,11 +5,13 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class AiPredictionRequestDto {
 
@@ -21,6 +23,7 @@ public class AiPredictionRequestDto {
     private List<CategoryPrediction> categories;
 
     @Getter
+    @Setter
     @NoArgsConstructor
     public static class CategoryPrediction {
         @NotNull(message = "카테고리명은 필수입니다")
@@ -35,6 +38,7 @@ public class AiPredictionRequestDto {
     }
 
     @Getter
+    @Setter
     @NoArgsConstructor
     public static class ProductPrediction {
         @NotNull(message = "PLU 코드는 필수입니다")

@@ -32,7 +32,7 @@ public class SalesUploadAdminController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SalesUploadResponseDto> uploadSales(
             @RequestPart("salesFiles") List<MultipartFile> salesFiles,
-            @RequestPart("masterFiles") List<MultipartFile> masterFiles,
+            @RequestPart(value = "masterFiles", required = false) List<MultipartFile> masterFiles,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate salesDate,
             @RequestParam(defaultValue = "false") boolean dryRun
     ) {

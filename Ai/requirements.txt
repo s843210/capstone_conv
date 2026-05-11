@@ -6,3 +6,6 @@ matplotlib
 joblib
 openpyxl
 pyyaml
+fastapi
+uvicorn
+psycopg2-binary

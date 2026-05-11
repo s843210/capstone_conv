@@ -51,6 +51,54 @@ public class DailyContext {
     @Column(name = "building_headcount", nullable = false)
     private Integer buildingHeadcount = 0;
 
+    @Builder.Default
+    @Column(name = "is_start_semester", nullable = false)
+    private Short isStartSemester = 0;
+
+    @Builder.Default
+    @Column(name = "is_end_semester", nullable = false)
+    private Short isEndSemester = 0;
+
+    @Builder.Default
+    @Column(name = "is_exam", nullable = false)
+    private Short isExam = 0;
+
+    @Builder.Default
+    @Column(name = "is_vacation", nullable = false)
+    private Short isVacation = 0;
+
+    @Builder.Default
+    @Column(name = "is_festival", nullable = false)
+    private Short isFestival = 0;
+
+    @Builder.Default
+    @Column(name = "is_holiday_or_no_class", nullable = false)
+    private Short isHolidayOrNoClass = 0;
+
+    @Builder.Default
+    @Column(name = "class_count", nullable = false)
+    private Integer classCount = 0;
+
+    @Builder.Default
+    @Column(name = "monday_class_count", nullable = false)
+    private Integer mondayClassCount = 0;
+
+    @Builder.Default
+    @Column(name = "tuesday_class_count", nullable = false)
+    private Integer tuesdayClassCount = 0;
+
+    @Builder.Default
+    @Column(name = "wednesday_class_count", nullable = false)
+    private Integer wednesdayClassCount = 0;
+
+    @Builder.Default
+    @Column(name = "thursday_class_count", nullable = false)
+    private Integer thursdayClassCount = 0;
+
+    @Builder.Default
+    @Column(name = "friday_class_count", nullable = false)
+    private Integer fridayClassCount = 0;
+
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 

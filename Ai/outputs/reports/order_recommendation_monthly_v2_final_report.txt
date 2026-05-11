@@ -1,6 +1,6 @@
 Order Recommendation Monthly V2 Final Report
-input_csv: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/reports/tomorrow_sales_prediction_monthly_v2_final.csv
-output_csv: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/outputs/reports/order_recommendation_monthly_v2_final.csv
+input_csv: C:/Users/bm961/Desktop/Capsss/capstone_conv/Ai/outputs/reports/tomorrow_sales_prediction_monthly_v2_final.csv
+output_csv: C:/Users/bm961/Desktop/Capsss/capstone_conv/Ai/outputs/reports/order_recommendation_monthly_v2_final.csv
 row_count: 4569
 predict_date_min: 2024-03-31
 predict_date_max: 2026-04-30

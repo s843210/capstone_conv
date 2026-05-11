@@ -56,3 +56,6 @@ __pycache__/
 ### Local raw/bulk AI source files ###
 Ai/data/raw/sales_monthly/
 Ai/data/raw/weather/OBS_*.csv
+
+### Local deployment notes ###
+DEPLOYMENT_SETUP_GUIDE.md

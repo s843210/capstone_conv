@@ -45,3 +45,17 @@ out/
 .env.*.local
 application-secret.yml
 application-local.yml
+
+### Runtime artifacts ###
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.pid
+
+### Local raw/bulk AI source files ###
+Ai/data/raw/sales_monthly/
+Ai/data/raw/weather/OBS_*.csv
+
+### Local deployment notes ###
+DEPLOYMENT_SETUP_GUIDE.md

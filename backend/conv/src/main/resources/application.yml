@@ -18,6 +18,10 @@ spring:
         default_batch_fetch_size: 100
 
 app:
+  ai:
+    base-url: ${AI_BASE_URL:http://127.0.0.1:8000}
+  sales:
+    monthly-v2-processed-path: ${MONTHLY_V2_PROCESSED_PATH:../../Ai/data/processed/monthly_sales_with_calendar_timetable_weather_v2.csv}
   weather:
     enabled: ${WEATHER_ENABLED:false}
     base-url: ${WEATHER_BASE_URL:https://api.openweathermap.org}

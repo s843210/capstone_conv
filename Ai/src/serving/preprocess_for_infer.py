@@ -34,9 +34,17 @@ class ModelPredictor:
 
         bundle = joblib.load(model_path)
         self.model = bundle["model"]
-        self.feature_cols: list[str] = bundle["feature_cols"]
-        self.categorical_cols: list[str] = bundle.get("categorical_cols", [])
+        self.feature_cols: list[str] = bundle.get("feature_cols", bundle.get("feature_columns", []))
+        self.categorical_cols: list[str] = bundle.get("categorical_cols", bundle.get("categorical_columns", []))
         self.label_maps: dict[str, dict[str, int]] = bundle.get("label_maps", {})
+
+        label_encoders = bundle.get("label_encoders", {})
+        for col, encoder in label_encoders.items():
+            if col not in self.label_maps:
+                self.label_maps[col] = {str(cls): idx for idx, cls in enumerate(encoder.classes_)}
+
+        if not self.feature_cols:
+            raise KeyError("Model bundle does not contain feature_cols/feature_columns.")
 
     def predict_one(
         self,

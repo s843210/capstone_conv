@@ -25,11 +25,11 @@ paths:
     sales_with_calendar_timetable: "data/processed/sales_with_calendar_timetable.csv"
     weather_features: "data/processed/weather_features.csv"
     sales_with_weather: "data/processed/sales_with_calendar_timetable_weather.csv"
-    model_features: "data/processed/model_features.csv"
+    model_features: "data/processed/model_features_monthly_v2.csv"
     model_features_weather_binary: "data/processed/model_features_weather_binary.csv"
 
   models:
-    rf_fast: "outputs/models/random_forest_weather_binary_model.pkl"
+    rf_fast: "outputs/models/random_forest_monthly_v2_model.pkl"
     lightgbm: "outputs/models/lightgbm_model.pkl"
 
   reports_dir: "outputs/reports"

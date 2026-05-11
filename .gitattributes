@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+Ai/data/processed/model_features_monthly_v2.csv filter=lfs diff=lfs merge=lfs -text
+Ai/data/processed/monthly_sales_with_calendar_timetable_weather_v2.csv filter=lfs diff=lfs merge=lfs -text
+Ai/data/processed/monthly_sales_daily_filled_v2_clean.csv filter=lfs diff=lfs merge=lfs -text
+Ai/outputs/models/random_forest_monthly_v2_model.pkl filter=lfs diff=lfs merge=lfs -text

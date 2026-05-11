@@ -107,7 +107,7 @@ export function fetchStudentRequests({ limit = 15 } = {}) {
 /** 판매 파일 업로드 후 daily_sales 적재 */
 export function uploadDailySales({
   salesFiles,
-  masterFiles,
+  masterFiles = [],
   salesDate = "",
   dryRun = false,
 }) {
@@ -126,6 +126,65 @@ export function uploadDailySales({
   return fetchWithErrorHandling("/api/admin/sales/upload", {
     method: "POST",
     body: formData,
+  });
+}
+
+/** 현재고 엑셀/CSV 업로드 후 product.current_stock 반영 */
+export function uploadInventoryStock({ file, dryRun = false }) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("dryRun", String(dryRun));
+
+  return fetchWithErrorHandling("/api/admin/inventory/upload", {
+    method: "POST",
+    body: formData,
+  });
+}
+
+/** Product master CSV upload for PLU/category mapping */
+export function uploadProductMaster({ files, dryRun = false }) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  formData.append("dryRun", String(dryRun));
+
+  return fetchWithErrorHandling("/api/admin/products/master/upload", {
+    method: "POST",
+    body: formData,
+  });
+}
+
+/** Run monthly_v2 AI prediction through Spring -> FastAPI */
+export function runAiPrediction({
+  targetDate = "",
+  onlyPositiveRecommendations = true,
+} = {}) {
+  const params = new URLSearchParams({
+    onlyPositiveRecommendations: String(onlyPositiveRecommendations),
+  });
+
+  const trimmedTargetDate = targetDate.trim();
+  if (trimmedTargetDate) {
+    params.set("targetDate", trimmedTargetDate);
+  }
+
+  return fetchWithErrorHandling(`/api/admin/ai/predict?${params.toString()}`, {
+    method: "POST",
+  });
+}
+
+/** Sync weather/context for a target date */
+export function syncWeatherContext({ targetDate = "", dryRun = false } = {}) {
+  const params = new URLSearchParams({
+    dryRun: String(dryRun),
+  });
+
+  const trimmedTargetDate = targetDate.trim();
+  if (trimmedTargetDate) {
+    params.set("targetDate", trimmedTargetDate);
+  }
+
+  return fetchWithErrorHandling(`/api/admin/context/weather?${params.toString()}`, {
+    method: "POST",
   });
 }
 

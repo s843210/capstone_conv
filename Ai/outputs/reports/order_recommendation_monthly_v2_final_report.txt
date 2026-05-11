@@ -1,0 +1,35 @@
+Order Recommendation Monthly V2 Final Report
+input_csv: C:/Users/bm961/Desktop/Capsss/capstone_conv/Ai/outputs/reports/tomorrow_sales_prediction_monthly_v2_final.csv
+output_csv: C:/Users/bm961/Desktop/Capsss/capstone_conv/Ai/outputs/reports/order_recommendation_monthly_v2_final.csv
+row_count: 4569
+predict_date_min: 2024-03-31
+predict_date_max: 2026-04-30
+recommended_order_qty_positive_count: 429
+recommended_order_qty_zero_count: 4140
+recommended_order_qty_sum: 1381
+recommended_order_qty_min_positive: 2.0
+recommended_order_qty_max_positive: 33.0
+recommended_order_qty_mean_positive: 3.219114219114219
+recommended_order_qty_median_positive: 2.0
+
+[Top 20 recommended order products]
+- plu_code=8801043015653, product_name=농심)육개장사발면, product_category=가공식품, recommended_order_qty=33
+- plu_code=8803186000022, product_name=옐로우)올데이워터생수펫500ml, product_category=음료, recommended_order_qty=20
+- plu_code=4897036691120, product_name=코카)몬스터에너지울트라캔355ml, product_category=음료, recommended_order_qty=15
+- plu_code=8809962583772, product_name=대정)참치마요햄말이주먹밥2편, product_category=밥류, recommended_order_qty=13
+- plu_code=8809962584830, product_name=대정)참치마요김치볶음밥계란말이2편, product_category=밥류, recommended_order_qty=12
+- plu_code=8809962586353, product_name=대정)참치마요삼각김밥2편, product_category=밥류, recommended_order_qty=12
+- plu_code=8801056002725, product_name=롯데)2%복숭아제로펫500ml, product_category=음료, recommended_order_qty=12
+- plu_code=8801056251253, product_name=롯데)핫식스더킹아이스피치제로캔355ml, product_category=음료, recommended_order_qty=11
+- plu_code=8803186000992, product_name=청정)몽베스트펫500ml(QR), product_category=음료, recommended_order_qty=11
+- plu_code=1500000184810, product_name=대정)반반고기정찬(쿱스켓특판용), product_category=밥류, recommended_order_qty=10
+- plu_code=8801117478407, product_name=오리온)핫브레이크쫀득쿠키바38g, product_category=캔디/초콜릿, recommended_order_qty=9
+- plu_code=8809962586339, product_name=대정)스팸참치마요삼각김밥2편, product_category=밥류, recommended_order_qty=9
+- plu_code=8801056171032, product_name=롯데)핫식스더킹포스캔355ml, product_category=음료, recommended_order_qty=9
+- plu_code=8801073211469, product_name=삼양)까르보불닭볶음면큰컵, product_category=가공식품, recommended_order_qty=9
+- plu_code=8808024031459, product_name=옐로우)쓴커피500ml, product_category=유제품, recommended_order_qty=8
+- plu_code=1500000205331, product_name=대정)불고기한판도시락(쿱스켓특판용), product_category=밥류, recommended_order_qty=8
+- plu_code=8809962587800, product_name=대정)NEW올바른스팸마요&김치반반김밥2편, product_category=밥류, recommended_order_qty=8
+- plu_code=8809962586377, product_name=대정)전주비빔참치마요삼각김밥2편, product_category=밥류, recommended_order_qty=8
+- plu_code=80176732, product_name=매일)킨더해피히포21g, product_category=과자, recommended_order_qty=8
+- plu_code=4897036693339, product_name=코카)몬스터에너지망고로코캔355ml, product_category=음료, recommended_order_qty=8

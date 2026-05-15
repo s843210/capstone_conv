@@ -38,9 +38,11 @@ out/
 
 
 **/.env
+**/.env.development
 **/application-secret.yml
 
 .env
+.env.development
 .env.local
 .env.*.local
 application-secret.yml
@@ -52,10 +54,21 @@ __pycache__/
 *.pyo
 *.log
 *.pid
+.DS_Store
+**/.DS_Store
+node_modules/
+dist/
 
 ### Local raw/bulk AI source files ###
+Ai/data/raw/sales/
 Ai/data/raw/sales_monthly/
 Ai/data/raw/weather/OBS_*.csv
+
+### Local generated presentation / analysis files ###
+CampusStore_App_Backend_AI_MVP_*.pptx
+actual_vs_recommendation_*.csv
+ppt_candidate_actual_vs_recommendation_*.csv
+artifact-build-manifest.json
 
 ### Local deployment notes ###
 DEPLOYMENT_SETUP_GUIDE.md

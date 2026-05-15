@@ -64,6 +64,14 @@ Ai/data/raw/sales/
 Ai/data/raw/sales_monthly/
 Ai/data/raw/weather/OBS_*.csv
 
+### Legacy processed AI artifacts ###
+Ai/data/processed/daily_sales_raw_v2.csv
+Ai/data/processed/daily_sales_with_product.csv
+Ai/data/processed/final_sales_dataset.csv
+Ai/data/processed/model_features.csv
+Ai/data/processed/product_master.csv
+Ai/data/processed/sales_with_calendar.csv
+
 ### Local generated presentation / analysis files ###
 CampusStore_App_Backend_AI_MVP_*.pptx
 actual_vs_recommendation_*.csv

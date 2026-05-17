@@ -6,6 +6,85 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F4F7FB',
     padding: 16,
   },
+  loginPage: {
+    flex: 1,
+    backgroundColor: '#0060AF',
+    paddingHorizontal: 20,
+  },
+  loginKeyboardWrap: {
+    flex: 1,
+  },
+  loginContent: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    zIndex: 1,
+    paddingTop: 28,
+  },
+  loginHeader: {
+    marginTop: 8,
+    marginBottom: 18,
+    paddingHorizontal: 4,
+  },
+  loginAppTitle: {
+    fontSize: 36,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 10,
+    letterSpacing: 0.2,
+  },
+  loginDescription: {
+    fontSize: 16,
+    lineHeight: 23,
+    color: 'rgba(255,255,255,0.85)',
+  },
+  loginIntroText: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: 'rgba(255,255,255,0.87)',
+    marginBottom: 8,
+  },
+  loginLogoWrap: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  loginLogo: {
+    width: 136,
+    height: 136,
+    opacity: 0.95,
+    alignSelf: 'center',
+  },
+  loginCard: {
+    backgroundColor: '#1A5FAF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
+    padding: 16,
+    marginTop: 66,
+  },
+  loginInput: {
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.26)',
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    marginBottom: 14,
+    fontSize: 16,
+    color: '#F8FAFC',
+  },
+  loginPrimaryBtn: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  loginPrimaryBtnText: {
+    color: '#0060AF',
+    fontWeight: '700',
+    fontSize: 15,
+  },
   heroCard: {
     marginTop: 36,
     borderRadius: 24,
@@ -301,3 +380,6 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
   },
 });
+
+
+

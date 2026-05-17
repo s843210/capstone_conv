@@ -1,5 +1,5 @@
-﻿import React, {useState} from 'react';
-import {SafeAreaView, Text, FlatList, View, Pressable, Alert, TextInput} from 'react-native';
+﻿import React, {useMemo, useState} from 'react';
+import {SafeAreaView, Text, FlatList, View, Pressable, Alert, TextInput, StyleSheet} from 'react-native';
 import {RequestItem, MyRequestsScreenProps} from '../types';
 import {styles} from '../styles/commonStyles';
 import {MAX_REQUEST_QTY} from '../data/appConstants';
@@ -13,33 +13,25 @@ type Props = MyRequestsScreenProps & {
 };
 
 export default function MyRequestsScreen({
-  navigation,
   requests,
   removeRequest,
   updateRequestQty,
   currentUser,
-  logoutUser,
 }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQty, setEditQty] = useState('');
+  const [keyword, setKeyword] = useState('');
 
-  const handleLogout = () => {
-    Alert.alert('로그아웃', '로그아웃하시겠습니까?', [
-      {text: '취소', style: 'cancel'},
-      {
-        text: '로그아웃',
-        style: 'destructive',
-        onPress: async () => {
-          const loggedOut = await logoutUser();
-          if (!loggedOut) {
-            Alert.alert('로그아웃 오류', '로그아웃 중 오류가 발생했습니다.');
-            return;
-          }
-          navigation.reset({index: 0, routes: [{name: 'Login'}]});
-        },
-      },
-    ]);
-  };
+  const normalizedKeyword = keyword.trim().toLocaleLowerCase();
+  const hasKeyword = normalizedKeyword.length > 0;
+
+  const filteredRequests = useMemo(() => {
+    if (!hasKeyword) {
+      return requests;
+    }
+
+    return requests.filter(item => item.productName.toLocaleLowerCase().includes(normalizedKeyword));
+  }, [hasKeyword, normalizedKeyword, requests]);
 
   const handleRemove = (requestId: string) => {
     Alert.alert('요청 삭제', '이 요청을 삭제하시겠습니까?', [
@@ -107,16 +99,20 @@ export default function MyRequestsScreen({
 
   return (
     <SafeAreaView style={styles.page}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>내 요청 목록</Text>
-        <Pressable style={styles.logoutBtn} onPress={handleLogout}>
-          <Text style={styles.logoutBtnText}>로그아웃</Text>
-        </Pressable>
-      </View>
       <Text style={styles.subtitle}>{currentUser}님의 요청 목록</Text>
 
+      <View style={localStyles.searchRow}>
+        <TextInput
+          placeholder="요청 상품 검색"
+          placeholderTextColor="#94A3B8"
+          value={keyword}
+          onChangeText={setKeyword}
+          style={localStyles.searchInput}
+        />
+      </View>
+
       <FlatList
-        data={requests}
+        data={filteredRequests}
         keyExtractor={item => item.id}
         renderItem={({item}) => {
           const isEditing = editingId === item.id;
@@ -162,10 +158,52 @@ export default function MyRequestsScreen({
           );
         }}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>아직 접수된 요청이 없습니다. 상품을 선택해 요청해보세요.</Text>
+          <View style={localStyles.emptyWrap}>
+            {requests.length === 0 ? (
+              <>
+                <Text style={styles.emptyText}>아직 요청한 상품이 없어요</Text>
+                <Text style={localStyles.emptySub}>상품 목록에서 필요한 상품을 요청해보세요.</Text>
+              </>
+            ) : hasKeyword ? (
+              <>
+                <Text style={styles.emptyText}>검색 결과가 없어요</Text>
+                <Text style={localStyles.emptySub}>다른 상품명으로 검색해보세요.</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.emptyText}>아직 요청한 상품이 없어요</Text>
+                <Text style={localStyles.emptySub}>상품 목록에서 필요한 상품을 요청해보세요.</Text>
+              </>
+            )}
+          </View>
         }
       />
     </SafeAreaView>
   );
 }
 
+const localStyles = StyleSheet.create({
+  searchRow: {
+    marginBottom: 12,
+  },
+  searchInput: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: '#111827',
+    fontSize: 15,
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+  },
+  emptySub: {
+    color: '#64748B',
+    fontSize: 14,
+    marginTop: 4,
+  },
+});

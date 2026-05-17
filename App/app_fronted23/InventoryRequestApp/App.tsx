@@ -30,6 +30,11 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState('');
   const [isInitializing, setIsInitializing] = useState(true);
 
+  const syncSuggestionsState = (nextSuggestions: Suggestion[]) => {
+    suggestionsRef.current = nextSuggestions;
+    setSuggestions(nextSuggestions);
+  };
+
   useEffect(() => {
     const initializeApp = async () => {
       let nextRequests: RequestItem[] = [];
@@ -58,7 +63,7 @@ export default function App() {
           nextUser = storedUser.trim();
         }
 
-        setSuggestions(storedSuggestions);
+        syncSuggestionsState(storedSuggestions);
       } catch {
         nextRequests = [];
         nextUser = '';
@@ -72,10 +77,6 @@ export default function App() {
 
     initializeApp();
   }, []);
-
-  useEffect(() => {
-    suggestionsRef.current = suggestions;
-  }, [suggestions]);
 
   useEffect(() => {
     if (isInitializing || !currentUser) {
@@ -192,7 +193,7 @@ export default function App() {
     try {
       const nextSuggestions = [suggestion, ...suggestionsRef.current];
       await saveSuggestions(nextSuggestions);
-      setSuggestions(nextSuggestions);
+      syncSuggestionsState(nextSuggestions);
       return true;
     } catch {
       return false;
@@ -214,7 +215,7 @@ export default function App() {
         item.id === nextSuggestion.id ? {...nextSuggestion, writer: targetSuggestion.writer} : item,
       );
       await saveSuggestions(nextSuggestions);
-      setSuggestions(nextSuggestions);
+      syncSuggestionsState(nextSuggestions);
       return true;
     } catch {
       return false;
@@ -231,7 +232,7 @@ export default function App() {
 
       const nextSuggestions = currentSuggestions.filter(item => item.id !== suggestionId);
       await saveSuggestions(nextSuggestions);
-      setSuggestions(nextSuggestions);
+      syncSuggestionsState(nextSuggestions);
       return true;
     } catch {
       return false;
@@ -260,7 +261,7 @@ export default function App() {
       failedCount = suggestionIds.length - removedCount;
 
       await saveSuggestions(nextSuggestions);
-      setSuggestions(nextSuggestions);
+      syncSuggestionsState(nextSuggestions);
       return {removedCount, failedCount};
     } catch {
       return {removedCount: 0, failedCount: suggestionIds.length};

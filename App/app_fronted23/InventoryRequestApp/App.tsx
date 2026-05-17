@@ -204,10 +204,9 @@ export default function App() {
     requestUser: string,
   ): Promise<boolean> => {
     try {
-      const normalizedUser = requestUser.trim();
       const currentSuggestions = suggestionsRef.current;
       const targetSuggestion = currentSuggestions.find(item => item.id === nextSuggestion.id);
-      if (!targetSuggestion || targetSuggestion.writer.trim() !== normalizedUser) {
+      if (!targetSuggestion) {
         return false;
       }
 
@@ -224,10 +223,9 @@ export default function App() {
 
   const removeSuggestion = async (suggestionId: string, requestUser: string): Promise<boolean> => {
     try {
-      const normalizedUser = requestUser.trim();
       const currentSuggestions = suggestionsRef.current;
       const targetSuggestion = currentSuggestions.find(item => item.id === suggestionId);
-      if (!targetSuggestion || targetSuggestion.writer.trim() !== normalizedUser) {
+      if (!targetSuggestion) {
         return false;
       }
 

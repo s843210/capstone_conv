@@ -1,7 +1,6 @@
 ﻿import React, {useState} from 'react';
-import {SafeAreaView, Text, TextInput, Pressable, Alert} from 'react-native';
+import {SafeAreaView, Text, TextInput, Pressable, Alert, View, StyleSheet} from 'react-native';
 import {Suggestion, SuggestionWriteScreenProps} from '../types';
-import {styles} from '../styles/commonStyles';
 
 const MAX_TITLE_LENGTH = 50;
 const MIN_CONTENT_LENGTH = 10;
@@ -56,7 +55,7 @@ export default function SuggestionWriteScreen({navigation, currentUser, addSugge
       }
 
       Alert.alert('등록 완료', '건의사항이 등록되었습니다.');
-      navigation.reset({index: 0, routes: [{name: 'ProductList'}]});
+      navigation.reset({index: 1, routes: [{name: 'ProductList'}, {name: 'Suggestions'}]});
     } catch {
       Alert.alert('저장 오류', '건의사항 저장 중 오류가 발생했습니다.');
     } finally {
@@ -65,32 +64,107 @@ export default function SuggestionWriteScreen({navigation, currentUser, addSugge
   };
 
   return (
-    <SafeAreaView style={styles.page}>
-      <Text style={styles.title}>건의사항 작성</Text>
-      <Text style={styles.subtitle}>원하는 상품, 이용 불편, 개선 의견을 자유롭게 적어주세요.</Text>
+    <SafeAreaView style={localStyles.page}>
+      <Text style={localStyles.subtitle}>원하는 상품, 이용 불편, 개선 의견을 자유롭게 적어주세요.</Text>
 
-      <TextInput
-        placeholder="제목을 입력하세요"
-        value={title}
-        onChangeText={setTitle}
-        style={styles.input}
-        editable={!isSubmitting}
-      />
-      <TextInput
-        placeholder="내용을 입력하세요"
-        value={content}
-        onChangeText={setContent}
-        style={[styles.input, {height: 140, textAlignVertical: 'top'}]}
-        multiline
-        editable={!isSubmitting}
-      />
+      <View style={localStyles.formCard}>
+        <TextInput
+          placeholder="제목을 입력하세요"
+          placeholderTextColor="#94A3B8"
+          value={title}
+          onChangeText={setTitle}
+          style={localStyles.input}
+          editable={!isSubmitting}
+        />
+        <TextInput
+          placeholder="건의사항 내용을 입력하세요"
+          placeholderTextColor="#94A3B8"
+          value={content}
+          onChangeText={setContent}
+          style={localStyles.contentInput}
+          multiline
+          editable={!isSubmitting}
+        />
+      </View>
 
       <Pressable
-        style={[styles.primaryBtn, isSubmitting && styles.primaryBtnDisabled]}
+        style={[localStyles.submitBtn, isSubmitting && localStyles.submitBtnDisabled]}
         onPress={submitSuggestion}
         disabled={isSubmitting}>
-        <Text style={styles.primaryBtnText}>{isSubmitting ? '등록 중...' : '등록'}</Text>
+        <Text style={localStyles.submitBtnText}>{isSubmitting ? '등록 중...' : '등록'}</Text>
       </Pressable>
     </SafeAreaView>
   );
 }
+
+const localStyles = StyleSheet.create({
+  page: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  title: {
+    color: '#111827',
+    fontSize: 24,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: '#64748B',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  formCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    padding: 14,
+    marginBottom: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    marginBottom: 10,
+    fontSize: 15,
+    color: '#111827',
+  },
+  contentInput: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    minHeight: 140,
+    fontSize: 15,
+    color: '#111827',
+    textAlignVertical: 'top',
+  },
+  submitBtn: {
+    backgroundColor: '#0060AF',
+    borderWidth: 1,
+    borderColor: '#0060AF',
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  submitBtnDisabled: {
+    backgroundColor: '#94A3B8',
+    borderColor: '#94A3B8',
+  },
+  submitBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+});
+
+
+

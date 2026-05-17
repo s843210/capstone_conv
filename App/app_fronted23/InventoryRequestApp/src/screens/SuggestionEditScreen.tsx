@@ -1,5 +1,5 @@
 ﻿import React, {useState} from 'react';
-import {SafeAreaView, Text, TextInput, Pressable, Alert} from 'react-native';
+import {SafeAreaView, Text, TextInput, Pressable, Alert, StyleSheet} from 'react-native';
 import {Suggestion, SuggestionEditScreenProps} from '../types';
 import {styles} from '../styles/commonStyles';
 
@@ -55,7 +55,7 @@ export default function SuggestionEditScreen({navigation, route, currentUser, up
       }
 
       Alert.alert('수정 완료', '건의사항이 수정되었습니다.');
-      navigation.reset({index: 0, routes: [{name: 'ProductList'}]});
+      navigation.reset({index: 1, routes: [{name: 'ProductList'}, {name: 'Suggestions'}]});
     } catch {
       Alert.alert('수정 오류', '건의사항 수정 중 오류가 발생했습니다.');
     } finally {
@@ -65,7 +65,6 @@ export default function SuggestionEditScreen({navigation, route, currentUser, up
 
   return (
     <SafeAreaView style={styles.page}>
-      <Text style={styles.title}>건의사항 수정</Text>
       <Text style={styles.subtitle}>작성한 건의사항의 제목과 내용을 수정할 수 있습니다.</Text>
 
       <TextInput
@@ -85,11 +84,33 @@ export default function SuggestionEditScreen({navigation, route, currentUser, up
       />
 
       <Pressable
-        style={[styles.primaryBtn, isSubmitting && styles.primaryBtnDisabled]}
+        style={[localStyles.saveBtn, isSubmitting && localStyles.saveBtnDisabled]}
         onPress={submitEdit}
         disabled={isSubmitting}>
-        <Text style={styles.primaryBtnText}>{isSubmitting ? '저장 중...' : '수정 저장'}</Text>
+        <Text style={localStyles.saveBtnText}>{isSubmitting ? '저장 중...' : '수정 저장'}</Text>
       </Pressable>
     </SafeAreaView>
   );
 }
+
+const localStyles = StyleSheet.create({
+  saveBtn: {
+    backgroundColor: '#0060AF',
+    borderWidth: 1,
+    borderColor: '#0060AF',
+    paddingVertical: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  saveBtnDisabled: {
+    backgroundColor: '#94A3B8',
+    borderColor: '#94A3B8',
+  },
+  saveBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+});
+
+

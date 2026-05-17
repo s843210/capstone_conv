@@ -27,7 +27,6 @@ export type Suggestion = {
 };
 
 export type RootStackParamList = {
-  Start: undefined;
   Login: undefined;
   ProductList: undefined;
   ProductDetail: {product: Product};
@@ -40,7 +39,6 @@ export type RootStackParamList = {
   SuggestionDetail: {suggestion: Suggestion};
 };
 
-export type StartScreenProps = NativeStackScreenProps<RootStackParamList, 'Start'>;
 export type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export type ProductListScreenProps = NativeStackScreenProps<RootStackParamList, 'ProductList'>;
 export type ProductDetailScreenProps = NativeStackScreenProps<RootStackParamList, 'ProductDetail'>;

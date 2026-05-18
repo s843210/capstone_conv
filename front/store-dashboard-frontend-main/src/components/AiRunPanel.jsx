@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { runAiPrediction } from "../api/api";
 
-function AiRunPanel() {
+function AiRunPanel({ onPredictionComplete }) {
   const [targetDate, setTargetDate] = useState("");
   const [onlyPositiveRecommendations, setOnlyPositiveRecommendations] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -20,6 +20,7 @@ function AiRunPanel() {
         onlyPositiveRecommendations,
       });
       setResult(response);
+      onPredictionComplete?.(response);
     } catch (err) {
       setError(err.message || "AI 예측 실행 중 오류가 발생했습니다.");
     } finally {

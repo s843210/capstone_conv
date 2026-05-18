@@ -15,7 +15,7 @@ import { useDashboardData } from "./hooks/useDashboardData";
 
 function DashboardPage({ onLogout }) {
   const [activePage, setActivePage] = useState("dashboard");
-  const { loading, error, inventoryList, orderList, insights, totalItems, normalItems, lowStockItems } =
+  const { loading, error, inventoryList, orderList, insights, totalItems, normalItems, lowStockItems, refreshDashboard } =
     useDashboardData();
 
   return (
@@ -63,7 +63,7 @@ function DashboardPage({ onLogout }) {
             <SalesUploadPanel />
             <InventoryUploadPanel />
             <WeatherContextPanel />
-            <AiRunPanel />
+            <AiRunPanel onPredictionComplete={() => refreshDashboard().catch(() => {})} />
             <ProductMasterUploadPanel />
             <AcademicContextPanel />
           </div>

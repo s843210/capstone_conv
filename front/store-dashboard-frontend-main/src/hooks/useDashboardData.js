@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { fetchDashboard } from "../api/api";
 
 const INSIGHT_STYLE_MAP = {
@@ -24,30 +24,27 @@ export function useDashboardData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const refreshDashboard = useCallback(async ({ showLoading = false } = {}) => {
+    if (showLoading) {
+      setLoading(true);
+    }
+    setError(null);
 
-    fetchDashboard()
-      .then((data) => {
-        if (!cancelled) {
-          setRaw(data);
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err.message);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
+    try {
+      const data = await fetchDashboard();
+      setRaw(data);
+      return data;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    refreshDashboard({ showLoading: true }).catch(() => {});
+  }, [refreshDashboard]);
 
   /** 재고 현황 목록 (차트용) */
   const inventoryList = useMemo(
@@ -101,5 +98,6 @@ export function useDashboardData() {
     totalItems,
     normalItems,
     lowStockItems,
+    refreshDashboard,
   };
 }

@@ -104,6 +104,15 @@ export function fetchStudentRequests({ limit = 15 } = {}) {
   return fetchWithErrorHandling(`/api/student/requests?${params.toString()}`);
 }
 
+/** 학생 앱 건의사항 조회 */
+export function fetchStudentSuggestions({ limit = 100 } = {}) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+  });
+
+  return fetchWithErrorHandling(`/api/student/suggestions?${params.toString()}`);
+}
+
 /** 판매 파일 업로드 후 daily_sales 적재 */
 export function uploadDailySales({
   salesFiles,

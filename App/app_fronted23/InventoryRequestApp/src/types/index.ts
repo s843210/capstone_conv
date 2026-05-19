@@ -22,6 +22,7 @@ export type Suggestion = {
   title: string;
   content: string;
   writer: string;
+  status?: string;
   createdAt: string;
   updatedAt?: string;
 };

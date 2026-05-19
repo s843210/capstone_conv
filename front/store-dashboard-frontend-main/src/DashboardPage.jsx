@@ -10,7 +10,7 @@ import ProductMasterUploadPanel from "./components/ProductMasterUploadPanel";
 import SalesUploadPanel from "./components/SalesUploadPanel";
 import StudentRequestPage from "./components/StudentRequestPage";
 import WeatherContextPanel from "./components/WeatherContextPanel";
-import { fetchStudentRequests } from "./api/api";
+import { fetchStudentRequests, fetchStudentSuggestions } from "./api/api";
 import { useDashboardData } from "./hooks/useDashboardData";
 
 const POLL_INTERVAL_MS = 5000;
@@ -37,6 +37,13 @@ function formatRequestedAt(value) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function normalizeSuggestionStatus(value) {
+  const status = String(value || "UNREAD").trim().toUpperCase();
+  if (status === "DONE") return { label: "반영완료", code: "done" };
+  if (status === "REVIEWING") return { label: "검토중", code: "reviewing" };
+  return { label: "미확인", code: "unread" };
 }
 
 function formatDisplayDate(value) {
@@ -77,7 +84,9 @@ function extractPredictionDate(orderList) {
 function DashboardPage({ onLogout }) {
   const [activePage, setActivePage] = useState("dashboard");
   const [studentRequests, setStudentRequests] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
   const [requestError, setRequestError] = useState("");
+  const [suggestionError, setSuggestionError] = useState("");
   const [productNameQuery, setProductNameQuery] = useState("");
   const [productPluQuery, setProductPluQuery] = useState("");
   const [productCategory, setProductCategory] = useState("전체");
@@ -95,7 +104,6 @@ function DashboardPage({ onLogout }) {
     error,
     inventoryList,
     orderList,
-    insights,
     totalItems,
     normalItems,
     lowStockItems,
@@ -119,12 +127,29 @@ function DashboardPage({ onLogout }) {
       }
     };
 
+    const loadSuggestions = async () => {
+      try {
+        const data = await fetchStudentSuggestions({ limit: 500 });
+        if (!cancelled) {
+          setSuggestions(data);
+          setSuggestionError("");
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setSuggestionError(err.message || "건의사항을 불러오지 못했습니다.");
+        }
+      }
+    };
+
     loadRequests();
+    loadSuggestions();
     const intervalId = window.setInterval(loadRequests, POLL_INTERVAL_MS);
+    const suggestionIntervalId = window.setInterval(loadSuggestions, POLL_INTERVAL_MS);
 
     return () => {
       cancelled = true;
       window.clearInterval(intervalId);
+      window.clearInterval(suggestionIntervalId);
     };
   }, []);
 
@@ -168,12 +193,15 @@ function DashboardPage({ onLogout }) {
   }, [inventoryRows]);
 
   const suggestionRows = useMemo(
-    () => insights.slice(0, 10).map((item, idx) => ({
+    () => suggestions.map((item) => ({
+      id: item.id,
       title: item.title,
-      preview: item.desc,
-      time: idx === 0 ? "방금" : `${idx + 1}분 전`,
+      preview: item.content,
+      writer: item.writer,
+      status: item.status,
+      time: formatRequestedAt(item.updatedAt || item.createdAt),
     })),
-    [insights],
+    [suggestions],
   );
 
   const nowLabel = useMemo(
@@ -332,9 +360,10 @@ function DashboardPage({ onLogout }) {
 
   const suggestionRowsDetailed = useMemo(
     () =>
-      suggestionRows.map((row, idx) => {
-        const statusCode = idx % 3 === 0 ? "unread" : idx % 3 === 1 ? "reviewing" : "done";
-        const statusLabel = statusCode === "unread" ? "미확인" : statusCode === "reviewing" ? "검토중" : "반영완료";
+      suggestionRows.map((row) => {
+        const status = normalizeSuggestionStatus(row.status);
+        const statusCode = status.code;
+        const statusLabel = status.label;
         return { ...row, statusCode, statusLabel };
       }),
     [suggestionRows],
@@ -584,8 +613,9 @@ function DashboardPage({ onLogout }) {
                     <span>내용</span>
                     <span>작성 시간</span>
                   </div>
-                  {suggestionRows.map((item, idx) => (
-                    <div className="row suggestion-row" key={`${item.title}-${idx}`}>
+                  {suggestionError && <p className="panel-error">{suggestionError}</p>}
+                  {suggestionRows.slice(0, 10).map((item, idx) => (
+                    <div className="row suggestion-row" key={`${item.id || item.title}-${idx}`}>
                       <span className="prod">{item.title}</span>
                       <span className="preview">{item.preview}</span>
                       <span>{item.time}</span>
@@ -967,6 +997,8 @@ function DashboardPage({ onLogout }) {
                 <button className="mini-action primary" type="button">건의사항 등록</button>
               </div>
 
+              {suggestionError && <p className="panel-error">{suggestionError}</p>}
+
               {filteredSuggestionRows.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-icon">💡</div>
@@ -976,10 +1008,11 @@ function DashboardPage({ onLogout }) {
               ) : (
                 <div className="request-card-list">
                   {filteredSuggestionRows.map((item, idx) => (
-                    <div className="request-card" key={`${item.title}-${idx}`}>
+                    <div className="request-card" key={`${item.id || item.title}-${idx}`}>
                       <div>
                         <strong>{item.title}</strong>
                         <p>{item.preview}</p>
+                        <p>작성자: {item.writer || "-"}</p>
                       </div>
                       <div className="request-card-meta">
                         <span className={`request-status status-${item.statusCode}`}>{item.statusLabel}</span>

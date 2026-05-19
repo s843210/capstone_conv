@@ -1,0 +1,43 @@
+﻿[Order Prediction Date Display Fix Report]
+Date: 2026-05-19 (Asia/Seoul)
+Target: 발주 관리 페이지 기준 예측 날짜 표시
+
+1) 원인 분석
+- 파일: front/store-dashboard-frontend-main/src/DashboardPage.jsx
+- 기존 로직:
+  forecastDate: nowLabel.split(" ")[0]
+- 문제 원인:
+  - nowLabel은 ko-KR 포맷(예: "2026. 05. 19. 18:49")
+  - 공백 split 시 첫 토큰이 "2026."만 남아 연도 일부만 표시됨
+
+2) API 응답 날짜 값 확인
+- GET /api/dashboard 응답에서 recommendations[].aiReason 확인
+- 예시: "AI target_date=2026-04-30"
+- 즉, 화면에서 사용할 수 있는 실제 예측 기준 날짜 값(target_date)이 응답에 포함됨
+
+3) slice/문자열 절단 여부 확인
+- 직접 slice는 없지만 split(" ") 기반 잘못된 절단 로직 존재
+- 이를 제거하고 날짜 파싱 기반 포맷으로 변경
+
+4) CSS 절단 여부 확인
+- 본 이슈는 CSS보다 문자열 생성 로직 문제
+- 카드/strong 스타일 자체가 연도만 남게 자르지는 않음
+
+5) 수정 내용
+- 파일: front/store-dashboard-frontend-main/src/DashboardPage.jsx
+- 추가:
+  - formatDisplayDate(value): YYYY.MM.DD 포맷 함수
+  - extractPredictionDate(orderList): aiReason에서 YYYY-MM-DD 추출
+- 변경:
+  - orderSummary.forecastDate를
+    - 우선: orderList의 aiReason(target_date)에서 추출한 날짜
+    - 없으면: 현재 날짜
+  - 최종 표시 형식: YYYY.MM.DD
+
+6) 빌드 검증
+- 명령: npm run build
+- 결과: 성공 (오류 없음)
+
+7) 영향 범위
+- 발주 관리 페이지의 "기준 예측 날짜" 표시 로직만 수정
+- API 호출/라우팅/다른 페이지 로직은 변경 없음

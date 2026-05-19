@@ -1,0 +1,66 @@
+﻿[Context Update and AI Prediction Report]
+Date: 2026-05-19 (Asia/Seoul)
+Scope: 실행/검증만 수행 (코드/DB 스키마 변경 없음)
+
+1) 날씨/Context 갱신 API 및 실행 방법 확인
+- Weather Context: POST /api/admin/context/weather?targetDate=YYYY-MM-DD&dryRun={true|false}
+- Holiday Context: POST /api/admin/context/holiday?targetDate=YYYY-MM-DD
+- Academic Context: POST /api/admin/context/academic?targetDate=YYYY-MM-DD
+- AI Predict: POST /api/admin/ai/predict?targetDate=YYYY-MM-DD&onlyPositiveRecommendations=true
+
+2) 예측 대상 날짜 기준 Context 갱신 실행
+A. targetDate=2026-05-19 (오늘)
+- weather dryRun=true: HTTP 400
+  message: 날씨 API 조회 재시도 실패: targetDate=2026-05-19
+- holiday upsert: HTTP 200 SUCCESS
+- academic upsert: HTTP 200 SUCCESS
+
+B. targetDate=2026-04-30 (예측 성공 검증용)
+- holiday upsert: HTTP 200 SUCCESS
+- academic upsert: HTTP 200 SUCCESS
+
+DB 확인 (daily_context):
+- 2026-04-30: avg_temp_c=15.6, is_holiday=0, academic_event=0, building_headcount=20, updated_at 갱신 확인
+- 2026-05-19: avg_temp_c=null, is_holiday=0, academic_event=0, building_headcount=0
+
+3) AI 서버(FastAPI) 상태 및 실행
+- 초기 상태: 127.0.0.1:8000 미기동
+- 조치: Ai/requirements.txt 설치 후 uvicorn 기동
+  command: py -m uvicorn src.api_server:app --host 127.0.0.1 --port 8000
+- health: GET http://127.0.0.1:8000/health -> 200 OK
+
+4) AI 예측 실행 결과
+A. targetDate=2026-05-19
+- POST /api/admin/ai/predict -> HTTP 200 (Spring 응답)
+- run status: FAILED
+- errorMessage: No feature rows available for base_date=2026-05-18
+- 해석: 전일(2026-05-18) 기준 피처 생성 가능한 판매데이터가 없어 실패
+
+B. targetDate=2026-04-30
+- POST /api/admin/ai/predict -> HTTP 200
+- runId: 20260519-184852-random_forest_monthly_v2-predict-a0dbe705
+- status: SUCCESS
+- rowCount: 227
+- savedCount: 227
+- predictionCsv: Ai/outputs/reports/tomorrow_sales_prediction_monthly_v2_final.csv
+- recommendationCsv: Ai/outputs/reports/order_recommendation_monthly_v2_final.csv
+
+5) 예측 결과 DB 저장 확인
+- ai_prediction count: 227
+- max(target_date): 2026-04-30
+- target_date=2026-04-30 positive recommendation count: 227
+- ai_run count: 2 (FAILED 1건 + SUCCESS 1건)
+
+6) 추천 발주 조회 확인
+- GET /api/dashboard -> HTTP 200
+- recommendations 배열: 비어있지 않음(Top 20 반환 확인)
+- aiReason에 target_date=2026-04-30 표시
+
+7) 대시보드/발주 관리 API 응답 확인
+- GET /api/dashboard -> 200 OK (추천 발주 데이터 포함)
+- GET /api/inventory?page=0&size=5 -> 200 OK
+
+8) 결론
+- FastAPI 미기동 상태를 해소하고 AI 예측 파이프라인 실행 확인 완료.
+- 오늘(2026-05-19) 기준 예측은 전일 피처 부재로 실패.
+- 데이터 범위 내 날짜(2026-04-30) 기준으로는 예측 성공, DB 저장 성공, 대시보드 추천 발주 조회 성공.

@@ -1,0 +1,36 @@
+﻿[Order Table Spacing Polish Report]
+Date: 2026-05-19 (Asia/Seoul)
+Target: 발주 관리 페이지 테이블(상품명 컬럼 간격/정렬)
+
+1) 조정 파일
+- front/store-dashboard-frontend-main/src/DashboardPage.css
+
+2) 적용 내용 (발주 관리 테이블 전용)
+- .order-table-head, .order-table-row를 grid로 고정
+  - grid-template-columns: 64px minmax(260px, 1.9fr) 120px 120px 130px 86px
+  - 컬럼 간격(column-gap) 10px
+- 행 높이 균일화
+  - .order-table-row min-height: 52px
+- 텍스트 정렬/간격 정리
+  - line-height: 1.25
+  - 상하 padding 소폭 통일
+  - vertical-align: middle
+- 상품명 컬럼 overflow 처리
+  - .order-table-row .item-name
+  - white-space: nowrap
+  - overflow: hidden
+  - text-overflow: ellipsis
+
+3) 결과
+- 긴 상품명으로 인한 줄바꿈 제거
+- 행 높이 들쭉날쭉 현상 완화
+- 테이블 컬럼 간격/정렬 균일화
+- dist 톤(심플 카드형/정돈된 표) 유지
+
+4) 영향 범위
+- order-table 관련 셀렉터만 수정
+- 다른 페이지 테이블 스타일은 변경 없음
+
+5) 빌드 검증
+- 명령: npm run build
+- 결과: 성공 (오류 없음)

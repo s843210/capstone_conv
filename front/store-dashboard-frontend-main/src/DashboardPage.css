@@ -960,3 +960,36 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Order page table spacing polish */
+.order-table-head,
+.order-table-row {
+  display: grid;
+  grid-template-columns: 64px minmax(260px, 1.9fr) 120px 120px 130px 86px;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.order-table-head > span,
+.order-table-row > span {
+  min-width: 0;
+}
+
+.order-table-row {
+  min-height: 52px;
+}
+
+.order-table-row > span {
+  line-height: 1.25;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  vertical-align: middle;
+}
+
+.order-table-row .item-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

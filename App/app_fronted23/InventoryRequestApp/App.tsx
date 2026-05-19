@@ -17,6 +17,13 @@ import SuggestionEditScreen from './src/screens/SuggestionEditScreen';
 import {STORAGE_KEYS} from './src/data/appConstants';
 import {loadSuggestions, saveSuggestions} from './src/data/suggestionStorage';
 import {deleteStudentRequest, fetchStudentRequests, submitStudentRequest} from './src/api/studentApi';
+import {
+  createSuggestion,
+  deleteSuggestion as deleteSuggestionFromServer,
+  deleteSuggestionsBulk as deleteSuggestionsBulkFromServer,
+  fetchSuggestions,
+  updateSuggestion as updateSuggestionOnServer,
+} from './src/api/suggestionApi';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const SPLASH_TEST_DELAY_MS = 2000;
@@ -117,6 +124,36 @@ export default function App() {
     };
   }, [currentUser, isInitializing]);
 
+  useEffect(() => {
+    if (isInitializing || !currentUser) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const syncSuggestions = async () => {
+      try {
+        const serverSuggestions = await fetchSuggestions();
+        if (cancelled) {
+          return;
+        }
+
+        await saveSuggestions(serverSuggestions);
+        if (!cancelled) {
+          syncSuggestionsState(serverSuggestions);
+        }
+      } catch {
+        // 서버 동기화 실패 시에는 마지막 로컬 건의사항 목록을 유지
+      }
+    };
+
+    syncSuggestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser, isInitializing]);
+
   const addRequest = async (item: RequestItem): Promise<boolean> => {
     try {
       const nextRequests = [item, ...requests];
@@ -191,7 +228,12 @@ export default function App() {
 
   const addSuggestion = async (suggestion: Suggestion): Promise<boolean> => {
     try {
-      const nextSuggestions = [suggestion, ...suggestionsRef.current];
+      const savedSuggestion = await createSuggestion({
+        writer: currentUser || suggestion.writer,
+        title: suggestion.title,
+        content: suggestion.content,
+      });
+      const nextSuggestions = [savedSuggestion, ...suggestionsRef.current];
       await saveSuggestions(nextSuggestions);
       syncSuggestionsState(nextSuggestions);
       return true;
@@ -211,9 +253,13 @@ export default function App() {
         return false;
       }
 
-      const nextSuggestions = currentSuggestions.map(item =>
-        item.id === nextSuggestion.id ? {...nextSuggestion, writer: targetSuggestion.writer} : item,
-      );
+      const savedSuggestion = await updateSuggestionOnServer({
+        id: targetSuggestion.id,
+        writer: requestUser,
+        title: nextSuggestion.title,
+        content: nextSuggestion.content,
+      });
+      const nextSuggestions = currentSuggestions.map(item => (item.id === savedSuggestion.id ? savedSuggestion : item));
       await saveSuggestions(nextSuggestions);
       syncSuggestionsState(nextSuggestions);
       return true;
@@ -229,6 +275,11 @@ export default function App() {
       if (!targetSuggestion) {
         return false;
       }
+
+      await deleteSuggestionFromServer({
+        id: targetSuggestion.id,
+        writer: requestUser,
+      });
 
       const nextSuggestions = currentSuggestions.filter(item => item.id !== suggestionId);
       await saveSuggestions(nextSuggestions);
@@ -255,11 +306,14 @@ export default function App() {
         return {removedCount: 0, failedCount: suggestionIds.length};
       }
 
-      const targetIdSet = new Set(targetIds);
-      const nextSuggestions = currentSuggestions.filter(item => !targetIdSet.has(item.id));
-      removedCount = targetIds.length;
+      const response = await deleteSuggestionsBulkFromServer({
+        ids: targetIds,
+        writer: requestUser,
+      });
+      removedCount = response.removedCount;
       failedCount = suggestionIds.length - removedCount;
 
+      const nextSuggestions = await fetchSuggestions();
       await saveSuggestions(nextSuggestions);
       syncSuggestionsState(nextSuggestions);
       return {removedCount, failedCount};
@@ -352,8 +406,6 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-
 
 
 

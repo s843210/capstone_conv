@@ -3,4 +3,4 @@
 // - iOS Simulator: http://localhost:8080
 // - 실제 휴대폰: http://백엔드컴퓨터IP:8080
 // - ngrok: https://xxxx.ngrok-free.app
-export const BASE_URL = 'http://172.27.20.188:8080';
+export const BASE_URL = 'http://10.181.253.230:8080';

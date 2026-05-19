@@ -1,0 +1,48 @@
+﻿[Product Master Final Import Report]
+Date: 2026-05-19 (Asia/Seoul)
+Target: backend/conv
+
+1) 실행 조건
+- 요청에 따라 monthly_v2 bulk import는 재실행하지 않음.
+- 상품 마스터 파일만 실제 import(dryRun=false) 수행.
+
+2) 실제 import 수행
+- Endpoint: POST /api/admin/products/master/upload?dryRun=false
+- File: Ai/data/processed/product_master_representative_for_upload.csv
+- HTTP: 200 OK
+
+3) API 응답 결과
+- runId: 22a60b0b-55b6-4cb1-a208-16dcc2323107
+- dryRun: false
+- fileCount: 1
+- rawRowCount: 27956
+- parsedRowCount: 27947
+- duplicatePluCount: 9
+- upsertedCount: 27947
+- message: Product master upload complete.
+
+4) 적재 후 row 수 확인
+- product row count: 4896
+- product_master row count: 27947
+
+5) 카테고리/상품명 매칭 확인
+(검증 쿼리: product.plu_code 기준으로 product_master 조인)
+- product와 product_master PLU 매칭 건수: 4896
+- 이름 일치 건수 (product.name = product_master.product_name): 4662
+- 카테고리 일치 건수 (product.category = product_master.category): 0
+
+추가 품질 확인(product_master 자체 결측)
+- 빈 상품명 건수: 0
+- 빈 카테고리 건수: 0
+
+해석:
+- 상품명/카테고리 값 자체는 product_master에 정상 적재됨(결측 없음).
+- 다만 product 테이블의 category 체계와 product_master category 값은 전량 불일치(0건)로, 카테고리 분류 체계가 서로 다름.
+
+6) 에러/invalid row 여부
+- HTTP/서버 에러: 없음
+- invalid row 전용 필드는 응답 스키마에 없음.
+- 다만 raw(27956)와 parsed(27947)의 차이 9건은 duplicatePluCount(9)와 일치.
+
+7) 참고
+- 서버 로그 파일: outputs/reports/master_upload_size_fix_bootrun.log

@@ -1,0 +1,54 @@
+﻿[Initial Bulk Load Sequence Report]
+Date: 2026-05-19
+Workspace: C:\Users\LG\OneDrive\바탕 화면\capss\capstone_conv
+
+Requested sequence
+1) Product master upload
+2) monthly_v2 CSV bulk import
+3) Current stock upload
+
+Input files used
+- Product master source: Ai/data/processed/product_master_representative.csv
+- Product master upload file (converted): Ai/data/processed/product_master_representative_for_upload.csv
+- Monthly v2 source: Ai/data/processed/monthly_sales_with_calendar_timetable_weather_v2.csv
+- Current stock source: C:\Users\LG\OneDrive\바탕 화면\capss\로컬DB띄우고 연동하기\로컬DB띄우고 연동하기\현재고현황.xlsx
+
+Step 1) Product master upload
+- DryRun: POST /api/admin/products/master/upload?dryRun=true
+  Result: HTTP 500
+- Real: POST /api/admin/products/master/upload?dryRun=false
+  Result: HTTP 500
+- Response body: {"status":500,"message":"서버 내부 오류가 발생했습니다."...}
+
+Step 2) monthly_v2 bulk import
+- DryRun: POST /api/admin/sales/monthly-v2/import-processed?dryRun=true
+  Result: HTTP 500
+- Real: POST /api/admin/sales/monthly-v2/import-processed?dryRun=false
+  Result: HTTP 500
+- Response body: {"status":500,"message":"서버 내부 오류가 발생했습니다."...}
+
+Step 3) Current stock upload
+- DryRun: POST /api/admin/inventory/upload?dryRun=true
+  Result: SUCCESS
+  parsedRowCount=1810
+  masterMatchedCount=0
+  masterUnmatchedCount=1810
+  snapshotUpsertedCount=0
+- Real: POST /api/admin/inventory/upload?dryRun=false
+  Result: SUCCESS
+  parsedRowCount=1810
+  createdOrUpdatedProductCount=1810
+  snapshotUpsertedCount=1810
+  updatedCount=1810
+
+DB row counts (after run)
+- product: 4896
+- daily_sales: 1073592
+- daily_context: 791
+- inventory_snapshot: 1810
+- product.current_stock IS NOT NULL: 4896
+
+Conclusion
+- Inventory upload completed successfully (dryRun + real).
+- Product master and monthly_v2 import admin endpoints are currently failing with HTTP 500 and need backend error-log diagnosis.
+- Inventory step executed but masterMatchedCount remained 0 because product master upload failed.

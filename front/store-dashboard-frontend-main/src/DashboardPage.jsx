@@ -39,6 +39,41 @@ function formatRequestedAt(value) {
   });
 }
 
+function formatDisplayDate(value) {
+  if (!value) return "-";
+
+  if (value instanceof Date) {
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, "0");
+    const d = String(value.getDate()).padStart(2, "0");
+    return `${y}.${m}.${d}`;
+  }
+
+  const isoMatch = String(value).match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    return `${isoMatch[1]}.${isoMatch[2]}.${isoMatch[3]}`;
+  }
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, "0");
+    const d = String(parsed.getDate()).padStart(2, "0");
+    return `${y}.${m}.${d}`;
+  }
+
+  return String(value);
+}
+
+function extractPredictionDate(orderList) {
+  for (const item of orderList) {
+    const reason = String(item?.reason || "");
+    const match = reason.match(/(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 function DashboardPage({ onLogout }) {
   const [activePage, setActivePage] = useState("dashboard");
   const [studentRequests, setStudentRequests] = useState([]);
@@ -274,13 +309,14 @@ function DashboardPage({ onLogout }) {
     const targetCount = filteredOrderRows.length;
     const totalQty = filteredOrderRows.reduce((sum, row) => sum + row.recommended, 0);
     const priority = filteredOrderRows.filter((row) => row.stock < row.forecast * 0.5).length;
+    const predictionDate = extractPredictionDate(orderList);
     return {
       targetCount,
       totalQty,
       priority,
-      forecastDate: nowLabel.split(" ")[0],
+      forecastDate: formatDisplayDate(predictionDate || new Date()),
     };
-  }, [filteredOrderRows, nowLabel]);
+  }, [filteredOrderRows, orderList]);
 
   const analysisSummary = useMemo(() => {
     const soldProducts = inventoryList.length;

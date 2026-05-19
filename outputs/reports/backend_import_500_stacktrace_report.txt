@@ -1,0 +1,47 @@
+﻿[Backend Import 500 Stacktrace Report]
+Date: 2026-05-19 (Asia/Seoul)
+Target: backend/conv
+Mode: Dry-run only (no dryRun=false execution)
+
+1) Execution Setup
+- Existing server on 8080 was stopped.
+- Spring Boot was started via: .\gradlew.bat bootRun --console=plain
+- Boot log file: outputs/reports/backend_bootrun_foreground_capture.log
+- Server started successfully on port 8080.
+
+2) API Reproduction - Product Master Upload (dryRun=true)
+- Endpoint: POST /api/admin/products/master/upload?dryRun=true
+- Request: multipart file upload (field name: files)
+- Input file used: Ai/data/processed/product_master_representative_for_upload.csv
+- File size: 1,573,873 bytes (~1.50 MB)
+- HTTP result: 500
+
+[Captured stacktrace key lines]
+org.springframework.web.multipart.MaxUploadSizeExceededException: Maximum upload size exceeded
+Caused by: org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException:
+The field files exceeds its maximum permitted size of 1048576 bytes.
+
+3) API Reproduction - monthly_v2 import (dryRun=true)
+- Endpoint: POST /api/admin/sales/monthly-v2/import-processed?dryRun=true
+- HTTP result: 200
+- Response summary:
+  parsedRows=1073592
+  invalidRows=0
+  uniquePluCount=4591
+  minDate=2024-03-01
+  maxDate=2026-04-30
+  message=DRY RUN 완료
+
+4) Root Cause Classification
+- Product master upload 500: Request file-size limit issue (multipart max size exceeded).
+  -> Category: File/request constraint issue (NOT duplicate-data issue, NOT DB constraint issue).
+- monthly_v2 dryRun=true: 500 not reproduced in current run.
+  -> Current observed state is 정상 응답(200), so DB unique constraint/중복데이터/포맷 오류에 의한 500은 이번 dryRun 재현에서 확인되지 않음.
+
+5) Notes
+- Product master CSV itself reached endpoint parsing stage and failed before business logic due to multipart limit.
+- To proceed with product master dryRun in current backend settings, either file size must be reduced/split, or multipart size config must be increased (code/config change required; not performed per request).
+
+6) Evidence Files
+- Stacktrace/source log: outputs/reports/backend_bootrun_foreground_capture.log
+- This report: outputs/reports/backend_import_500_stacktrace_report.txt

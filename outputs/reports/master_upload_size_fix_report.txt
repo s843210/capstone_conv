@@ -1,0 +1,45 @@
+﻿[Master Upload Size Fix Report]
+Date: 2026-05-19 (Asia/Seoul)
+Target: backend/conv
+
+1) Multipart 업로드 제한 설정 위치
+- File: backend/conv/src/main/resources/application.yml
+- Path: spring.servlet.multipart
+
+2) 적용한 설정
+- max-file-size: 20MB
+- max-request-size: 20MB
+
+적용 내용:
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+3) 서버 재실행
+- Command: .\gradlew.bat bootRun --console=plain
+- Result: 정상 기동 (Tomcat 8080)
+
+4) 상품 마스터 dryRun=true 재시도
+- Endpoint: POST /api/admin/products/master/upload?dryRun=true
+- Input file: Ai/data/processed/product_master_representative_for_upload.csv
+- File size: 1,573,873 bytes (~1.50MB)
+- HTTP result: 200 OK
+
+5) dryRun 결과
+- runId: 35e734d9-71cc-49ad-85a8-9e24bd865f0c
+- fileCount: 1
+- rawRowCount: 27956
+- parsedRowCount: 27947
+- duplicatePluCount: 9
+- upsertedCount: 0 (dryRun이므로 저장 안 함)
+- message: DRY RUN complete. Product master rows were parsed but not saved.
+
+6) 결론
+- 기존 500 원인(MaxUploadSizeExceededException)은 multipart 크기 제한 설정으로 해소됨.
+- 현재 단계에서 dryRun 검증은 정상 성공.
+- 요청사항에 따라 dryRun=false 실제 import는 수행하지 않음.
+
+7) 참고 로그
+- outputs/reports/master_upload_size_fix_bootrun.log

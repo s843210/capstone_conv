@@ -1,0 +1,54 @@
+﻿[Frontend Dashboard Apply Report]
+작성일시: 2026-05-19
+대상 프로젝트: front/store-dashboard-frontend-main
+참고 디자인: C:/Users/LG/OneDrive/바탕 화면/store-dashboard-main/store-dashboard-main/dist.zip
+
+1) dist.zip 처리
+- dist.zip 압축 해제 완료
+- 참고 경로:
+  - front/store-dashboard-frontend-main/.design_ref_dist/dist
+  - front/store-dashboard-frontend-main/.design_ref_dist/dist/assets/index-Bj62FC1g.css
+- 대시보드 관련 스타일/레이아웃만 참조
+
+2) 수정 범위 제약 준수
+- 기존 라우팅/설정/사이드바 동작 유지
+- 설정 페이지 컴포넌트 미수정
+- API 호출 로직 미수정 (/api/dashboard 유지)
+- 전체 dist 덮어쓰기 미수행
+
+3) 수정한 파일 목록
+- src/components/DashboardHeader.jsx
+- src/components/DashboardOverview.jsx
+- src/DashboardPage.css
+
+4) 변경 내용 요약
+- DashboardHeader.jsx
+  - 헤더를 dist 레이아웃 톤에 맞춘 top-header 구조로 개선
+  - 우측 상태칩(날짜/Admin) UI 추가
+  - 데이터 로직/API 호출 변경 없음
+
+- DashboardOverview.jsx
+  - 루트 class를 `content-grid dashboard-grid`로 확장
+  - 기존 하위 컴포넌트/데이터 전달 로직은 그대로 유지
+
+- DashboardPage.css
+  - 파일 하단에 대시보드 전용 오버라이드 스타일 추가
+  - 주요 반영:
+    - 상단 헤더(top-header) 비주얼
+    - 대시보드 그리드 영역 배치(inventory/order/insight/student)
+    - 카드/패널/타이포 개선
+    - 반응형 레이아웃 보정
+  - settings 관련 JSX/로직 변경 없음
+
+5) API 연동 영향
+- /api/dashboard 호출 로직 파일(src/api/api.js) 미수정
+- useDashboardData 훅 미수정
+- 기존 데이터 표시 흐름 유지
+
+6) 오류/빌드 확인
+- 실행 명령: npm run build
+- 결과: 성공 (오류 없음)
+
+7) 결론
+- 대시보드 화면만 1단계로 점진 반영 완료
+- 기존 라우팅/설정/API 연결 유지 상태에서 디자인/레이아웃만 개선됨

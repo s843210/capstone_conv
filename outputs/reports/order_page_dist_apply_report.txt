@@ -1,0 +1,58 @@
+﻿[Order Page Dist Apply Report]
+Date: 2026-05-19
+Target: front/store-dashboard-frontend-main
+Scope: 발주 관리 페이지 dist UI 구조 적용
+
+1) dist 발주 화면 구조 반영
+- dist 기준 order 화면 구조를 아래 className/DOM으로 반영
+  - requests-page
+  - summary-card-grid / summary-soft-card
+  - panel inventory-filter-panel
+  - inventory-tools (검색/카테고리/발주량 정렬/재고 상태)
+  - panel inventory-table-panel
+  - inventory-table-head order-table-head
+  - inventory-table-row order-table-row
+
+2) React 페이지 적용 내용
+- 파일: src/DashboardPage.jsx
+- activePage='order' 페이지 섹션 추가
+- 기존 API 호출 로직 유지
+  - useDashboardData() 변경 없음
+  - orderList(기존 발주 추천 데이터) 그대로 사용
+- 발주 데이터 표시 로직 유지/확장
+  - orderList -> 화면 행 데이터 매핑
+  - 추천 발주량(recommended) 그대로 표시
+  - 현재 재고(current), 예측 판매량(forecast) 컬럼 구성
+  - 상태(우선/일반) 표시
+- 필터/정렬 UI 추가
+  - 상품 검색
+  - 카테고리
+  - 발주량 정렬(높은 순/낮은 순)
+  - 재고 상태(전체/부족/여유)
+
+3) 메뉴/라우팅 유지
+- 파일: src/components/Sidebar.jsx
+- 메뉴에 발주 관리(order) 항목만 추가
+- 기존 activePage 기반 라우팅 구조 유지
+
+4) CSS 반영
+- 파일: src/dashboardDist.css
+- dist 발주 스타일 보강
+  - .soft-status
+  - .soft-status.is-check
+  - .soft-status.is-watch
+
+5) 수정 제외 확인
+- 운영 관리/설정 페이지 미수정
+- 로그인 화면 미수정
+- 대시보드/상품 관리/재고 관리 로직은 불필요 변경 없음
+  - 필요한 범위(메뉴 추가 및 order 페이지 추가) 외 변경 없음
+
+6) 수정 파일 목록
+- src/components/Sidebar.jsx
+- src/DashboardPage.jsx
+- src/dashboardDist.css
+
+7) 빌드 검증
+- Command: npm run build
+- Result: SUCCESS (vite build 완료, 오류 없음)

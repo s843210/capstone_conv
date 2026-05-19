@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 
 function InventoryChart({
   inventoryList,
@@ -7,92 +7,126 @@ function InventoryChart({
   lowStockItems,
   onNavigateInventory,
 }) {
-  const isNavigable = typeof onNavigateInventory === "function";
+  const sortedItems = useMemo(
+    () =>
+      [...inventoryList]
+        .sort((a, b) => {
+          const ratioA = a.target > 0 ? a.stock / a.target : 1;
+          const ratioB = b.target > 0 ? b.stock / b.target : 1;
+          return ratioA - ratioB;
+        })
+        .slice(0, 6),
+    [inventoryList],
+  );
 
-  const handleKeyDown = (event) => {
-    if (!isNavigable) return;
+  const categoryRows = useMemo(() => {
+    const groups = new Map();
 
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onNavigateInventory();
-    }
-  };
+    sortedItems.forEach((item) => {
+      const key = item.name?.includes("음료")
+        ? "음료"
+        : item.name?.includes("디저트") || item.name?.includes("빵")
+          ? "디저트"
+          : item.name?.includes("즉석") || item.name?.includes("간편")
+            ? "간편식"
+            : "기타";
 
-  /** 재고 부족 → 정상 순으로 정렬, 최대 8개만 표시 */
-  const displayItems = useMemo(() => {
-    return [...inventoryList]
-      .sort((a, b) => {
-        const ratioA = a.target > 0 ? a.stock / a.target : 1;
-        const ratioB = b.target > 0 ? b.stock / b.target : 1;
-        return ratioA - ratioB;
+      const prev = groups.get(key) || { stock: 0, target: 0 };
+      groups.set(key, {
+        stock: prev.stock + Number(item.stock || 0),
+        target: prev.target + Number(item.target || 0),
+      });
+    });
+
+    return Array.from(groups.entries())
+      .map(([label, value]) => {
+        const ratio = value.target > 0 ? Math.min((value.stock / value.target) * 100, 100) : 100;
+        return { label, ratio: Math.max(0, ratio) };
       })
-      .slice(0, 8);
-  }, [inventoryList]);
+      .slice(0, 4);
+  }, [sortedItems]);
 
   return (
-    <div
-      className={`panel ${isNavigable ? "panel-clickable" : ""}`}
-      onClick={isNavigable ? onNavigateInventory : undefined}
-      onKeyDown={handleKeyDown}
-      role={isNavigable ? "button" : undefined}
-      tabIndex={isNavigable ? 0 : undefined}
-      aria-label={isNavigable ? "재고 관리 페이지로 이동" : undefined}
-    >
-      <div className="panel-header">
-        <div className="panel-title">
-          <span className="panel-icon">📦</span>
-          <h2>재고 현황</h2>
-        </div>
-        {lowStockItems > 0 && (
-          <span className="badge danger">⚠️ 부족 {lowStockItems}건</span>
-        )}
+    <section className="panel inventory-panel">
+      <div className="panel-header with-icon">
+        <h2>
+          <span className="head-icon" aria-hidden="true">📦</span>
+          재고 현황
+        </h2>
       </div>
 
-      {isNavigable && (
-        <p className="panel-link-hint">차트(그레이 바 포함) 클릭 시 재고 관리로 이동</p>
-      )}
-
-      {/* 요약 카드 */}
-      <div className="inventory-summary">
-        <div className="summary-stat">
-          <span className="summary-stat-value">{totalItems}</span>
-          <span className="summary-stat-label">전체 품목</span>
-        </div>
-        <div className="summary-stat">
-          <span className="summary-stat-value text-green">{normalItems}</span>
-          <span className="summary-stat-label">정상</span>
-        </div>
-        <div className="summary-stat">
-          <span className="summary-stat-value text-red">{lowStockItems}</span>
-          <span className="summary-stat-label">부족</span>
-        </div>
+      <div className="stat-grid">
+        <article className="stat-card">
+          <span className="stat-label">전체 품목</span>
+          <span className="stat-value">{totalItems}</span>
+          <em>개</em>
+        </article>
+        <article className="stat-card">
+          <span className="stat-label">정상 품목</span>
+          <span className="stat-value">{normalItems}</span>
+          <em>개</em>
+        </article>
+        <article className="stat-card">
+          <span className="stat-label">부족 품목</span>
+          <span className="stat-value">{lowStockItems}</span>
+          <em>개</em>
+        </article>
+        <article className="stat-card">
+          <span className="stat-label">안정 비율</span>
+          <span className="stat-value">
+            {totalItems > 0 ? Math.round((normalItems / totalItems) * 100) : 0}
+          </span>
+          <em>%</em>
+        </article>
       </div>
 
-      {/* 상품별 재고 리스트 */}
-      <div className="inventory-bars">
-        {displayItems.map((item) => {
-          const ratio = item.target > 0 ? Math.min((item.stock / item.target) * 100, 100) : 100;
-          const isLow = item.stock < item.target;
+      <div className="inventory-bottom">
+        <div className="low-stock-box">
+          <span>재고 부족 경고</span>
+          <strong>{lowStockItems}</strong>
+          <em>건</em>
+        </div>
 
-          return (
-            <div key={item.name} className="inventory-bar-row">
-              <div className="inventory-bar-info">
-                <span className="inventory-bar-name">{item.name}</span>
-                <span className={`inventory-bar-count ${isLow ? "text-red" : "text-muted"}`}>
-                  {item.stock} / {item.target}
-                </span>
+        <div className="category-ratio">
+          <p className="category-ratio-title">카테고리 충족률</p>
+          {categoryRows.map((row, index) => {
+            const fillClass = ["blue", "purple", "green", "orange"][index % 4];
+            return (
+              <div key={row.label} className="ratio-row">
+                <div className="ratio-top">
+                  <span>{row.label}</span>
+                  <strong>{Math.round(row.ratio)}%</strong>
+                </div>
+                <div className="ratio-bar">
+                  <div className={`ratio-fill ${fillClass}`} style={{ width: `${row.ratio}%` }} />
+                </div>
               </div>
-              <div className="inventory-bar-track">
-                <div
-                  className={`inventory-bar-fill ${isLow ? "bar-red" : "bar-blue"}`}
-                  style={{ width: `${Math.max(ratio, 0)}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
+
+      <div className="table-wrap" style={{ marginTop: "10px" }}>
+        <div className="row thead">
+          <span>순위</span>
+          <span>상품명</span>
+          <span>재고/기준</span>
+        </div>
+        {sortedItems.map((item, idx) => (
+          <div className="row" key={`${item.name}-${idx}`}>
+            <span className="rank">#{idx + 1}</span>
+            <span className="prod">{item.name}</span>
+            <span className="qty-badge">{item.stock}/{item.target}</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: "10px" }}>
+        <button className="mini-action primary" type="button" onClick={onNavigateInventory}>
+          재고 관리로 이동
+        </button>
+      </div>
+    </section>
   );
 }
 

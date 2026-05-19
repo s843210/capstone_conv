@@ -1,0 +1,231 @@
+﻿[pulled project structure report]
+작성일: 2026-05-19
+대상 루트: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv
+분석 방식: 파일 구조/설정 파일 정적 분석 (실행 없음, 코드 수정 없음)
+
+==================================================
+1. 현재 루트 폴더 구조
+==================================================
+루트 주요 디렉터리:
+- Ai/
+- App/
+- backend/
+- front/
+
+루트 주요 파일:
+- README.md
+- MVP_DAILY_OPERATION_GUIDE.md
+- .gitignore / .gitattributes
+
+판정:
+- 단일 모놀리식이 아닌 멀티 모듈 저장소
+  - 웹 프론트(관리자): front/store-dashboard-frontend-main
+  - 백엔드(Spring): backend/conv
+  - AI/FastAPI: Ai
+  - 모바일 앱(학생용): App/app_fronted23/InventoryRequestApp
+
+==================================================
+2. 프론트엔드 프로젝트 위치 확인
+==================================================
+[관리자 웹 프론트]
+위치:
+- front/store-dashboard-frontend-main
+
+증거 파일:
+- package.json 존재
+- src 디렉터리 존재
+- vite.config.js 존재
+- src/main.jsx, src/App.jsx 존재
+
+기술 판정:
+- React + Vite 프로젝트
+  - package.json dependencies: react, react-dom
+  - devDependencies: vite, @vitejs/plugin-react
+
+API 호출 파일:
+- front/store-dashboard-frontend-main/src/api/api.js
+  - BASE_URL: VITE_API_BASE_URL 또는 기본 http://localhost:8080
+
+[추가 프론트(모바일)]
+위치:
+- App/app_fronted23/InventoryRequestApp
+- React Native(Expo) 형태의 별도 앱으로 보임
+- API 파일: src/api/client.ts, src/api/studentApi.ts
+
+==================================================
+3. 백엔드 프로젝트 위치 확인
+==================================================
+위치:
+- backend/conv
+
+증거 파일:
+- build.gradle 존재
+- gradlew / gradlew.bat 존재
+- settings.gradle 존재
+- src/main 디렉터리 존재
+- src/main/resources/application.yml 존재
+
+기술 판정:
+- Spring Boot 3.5.x + Java 17 + Gradle
+- PostgreSQL(JPA) + Flyway + Swagger(springdoc) + QueryDSL
+
+DB 설정:
+- application.yml 에 datasource URL/username/password (환경변수 기반)
+- docker-compose.yml 존재(DB 컨테이너 구성용)
+- .env.example 존재
+
+==================================================
+4. FastAPI 또는 AI 서버 코드 존재 여부
+==================================================
+존재함.
+
+위치:
+- Ai/src/api_server.py (FastAPI 앱)
+
+확인 엔드포인트:
+- GET /health
+- POST /ai/predict
+- POST /ai/monthly-v2/predict
+- POST /ai/train
+- POST /ai/monthly-v2/train
+
+기타:
+- Ai/requirements.txt 존재
+- Spring과 연동하도록 app.ai.base-url 기본값이 127.0.0.1:8000 로 설정
+
+==================================================
+5. API 관련 파일 확인
+==================================================
+[백엔드 Controller]
+경로:
+- backend/conv/src/main/java/com/errorzero/conv/controller
+
+주요 엔드포인트(요약):
+- GET  /api/dashboard
+- GET  /api/inventory
+- GET  /api/inventory/categories
+- POST /api/admin/sales/upload
+- POST /api/admin/sales/monthly-v2/import-processed
+- POST /api/admin/inventory/upload
+- POST /api/admin/products/master/upload
+- POST /api/admin/ai/predict
+- POST /api/admin/context/weather
+- POST /api/admin/context/weather/backfill
+- POST /api/admin/context/holiday
+- POST /api/admin/context/holiday/backfill
+- POST /api/admin/context/academic/upload
+- POST /api/admin/context/academic
+- POST /api/admin/context/academic/backfill
+- GET  /api/student/products
+- GET  /api/student/requests
+- POST /api/student/requests
+- DELETE /api/student/requests
+- POST /api/ai/predictions
+
+[백엔드 Service]
+경로:
+- backend/conv/src/main/java/com/errorzero/conv/service
+- 하위: academic/, holiday/, weather/, sales/, inventory/
+
+[FastAPI Router 역할 파일]
+- Ai/src/api_server.py
+  - FastAPI 라우트 선언 포함
+
+[프론트 API/axios 파일]
+- 웹 프론트:
+  - front/store-dashboard-frontend-main/src/api/api.js
+  - axios는 사용하지 않고 fetch 래퍼 사용
+- 모바일 프론트:
+  - App/app_fronted23/InventoryRequestApp/src/api/client.ts
+  - App/app_fronted23/InventoryRequestApp/src/api/studentApi.ts
+  - axios는 사용하지 않고 fetch 사용
+
+==================================================
+6. JWT 관련 코드 위치 확인
+==================================================
+검색 결과:
+- 명시적 JWT 인증 코드 미확인
+  - jwt, bearer, token provider, spring security 관련 핵심 코드/의존성 없음
+  - build.gradle에 spring-boot-starter-security 없음
+
+판정:
+- 현재 저장소 기준 JWT 인증/인가 체계는 미구현 또는 미포함 상태로 보임
+
+==================================================
+7. 로컬 실행 순서 정리
+==================================================
+주의: 아래는 '실행 방법 정리'이며 실제 실행은 본 분석에서 수행하지 않음.
+
+권장 실행 순서:
+1) DB(PostgreSQL) 기동
+2) 백엔드(Spring) 실행
+3) AI(FastAPI) 실행
+4) 프론트(웹) 실행
+
+[DB]
+- backend/conv/docker-compose.yml 기반 실행 필요
+- 백엔드는 DB 의존(Flyway/JPA)
+
+[백엔드 실행 명령]
+- 작업 폴더: backend/conv
+- 명령: .\gradlew.bat bootRun  (Windows)
+
+[AI 서버 실행 명령]
+- 작업 폴더: Ai
+- 명령 개요:
+  - pip install -r requirements.txt
+  - python -m uvicorn src.api_server:app --host 127.0.0.1 --port 8000 --reload
+
+[프론트 실행 명령]
+- 작업 폴더: front/store-dashboard-frontend-main
+- 명령:
+  - npm install
+  - npm run dev
+
+[DB 필요 여부]
+- 필요함.
+  - Spring application.yml이 PostgreSQL datasource를 기본 사용
+  - AI도 DB 모드 예측 경로를 사용함(환경/요청 모드에 따라)
+
+==================================================
+8. 프론트 연동을 위해 확인해야 할 API 목록
+==================================================
+우선 확인 대상(관리자 웹 기준):
+1) GET /api/dashboard
+2) GET /api/inventory?page=&size=&q=&category=&sort=
+3) GET /api/inventory/categories
+4) GET /api/student/requests?limit=
+5) POST /api/admin/sales/upload (multipart)
+6) POST /api/admin/inventory/upload (multipart)
+7) POST /api/admin/products/master/upload (multipart)
+8) POST /api/admin/ai/predict?targetDate=&onlyPositiveRecommendations=
+9) POST /api/admin/context/weather?targetDate=&dryRun=
+10) POST /api/admin/context/academic/upload (multipart)
+11) POST /api/admin/context/academic/backfill?from=&to=&maxDays=
+
+추가 확인 대상:
+- POST /api/admin/sales/monthly-v2/import-processed (운영/초기적재용)
+- POST /api/ai/predictions (Spring 내부/연동 경로 성격 확인 필요)
+
+모바일 앱 연동 API:
+- GET /api/student/products
+- GET /api/student/requests
+- POST /api/student/requests
+- DELETE /api/student/requests
+
+==================================================
+9. 실행 전 체크리스트
+==================================================
+- backend/conv/.env 준비 (.env.example 참고)
+- DB 컨테이너 상태 확인
+- Spring 기동 후 Swagger 확인: /swagger-ui/index.html
+- FastAPI health 확인: /health
+- 프론트 환경변수(VITE_API_BASE_URL) 점검
+
+==================================================
+10. 결론
+==================================================
+- Pull 이후 구조는 프론트/백엔드/AI/모바일이 모두 갖춰진 통합 레포 상태.
+- 웹 프론트는 React+Vite, 백엔드는 Spring Boot(Gradle), AI는 FastAPI로 분리되어 연동됨.
+- JWT 관련 구현은 현재 코드베이스에서 확인되지 않음.
+- 프론트 연동 전에는 Swagger 기준으로 요청/응답 스키마를 최종 확정하는 것이 필요.

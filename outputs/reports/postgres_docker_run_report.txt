@@ -1,0 +1,42 @@
+﻿[PostgreSQL Docker Run Report - Updated]
+작성일시: 2026-05-19 12:41 (Asia/Seoul)
+대상: backend/conv/docker-compose.yml
+
+1) docker-compose.yml 확인
+- postgres:15, container_name: campus-store-db
+- 포트: ${DB_PORT}:5432
+- DB env: POSTGRES_USER/POSTGRES_PASSWORD/POSTGRES_DB
+
+2) PostgreSQL 컨테이너 실행 시도
+실행 명령:
+- docker compose up -d db
+
+결과:
+- 이미지 pull/네트워크/볼륨/컨테이너 생성까지 성공
+- 최종 시작 실패
+
+에러:
+- Bind for 0.0.0.0:5432 failed: port is already allocated
+
+3) localhost:5432 오픈 여부
+- True (포트 열림)
+
+4) 포트 점유 원인
+- 기존 컨테이너가 이미 5432 사용 중
+  - capstone-postgres (postgres:16)
+  - ports: 0.0.0.0:5432->5432/tcp
+
+5) DB 이름(campus_store) 존재 여부
+- 현재 떠 있는 컨테이너(capstone-postgres) DB 목록 확인 결과:
+  - capstone_db, postgres, template0, template1
+- campus_store는 없음
+- 요청한 docker-compose 컨테이너(campus-store-db)는 시작 실패 상태(Created)라 내부 DB 확인 불가
+
+6) 실행 로그 요약
+- docker compose 경고: version 필드 obsolete
+- 핵심 실패 로그: 5432 포트 충돌
+
+최종 결론
+- Docker는 정상 기동됨.
+- 다만 5432를 기존 컨테이너가 사용 중이라 backend/conv의 postgres 컨테이너를 시작할 수 없음.
+- campus_store DB 확인은 campus-store-db가 정상 시작된 뒤 가능.

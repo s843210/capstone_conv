@@ -1,0 +1,55 @@
+﻿[Analytics Page Dist Apply Report]
+Date: 2026-05-19
+Target: front/store-dashboard-frontend-main
+Scope: 데이터 분석 페이지 dist UI 구조 적용
+
+1) dist 데이터 분석 화면 구조 확인 및 반영
+- dist 기준 analysis 화면 구조를 아래 DOM/class로 반영
+  - requests-page
+  - summary-card-grid / summary-soft-card
+  - content-grid analysis-grid
+  - panel
+  - ratio-row analysis-ratio-row / ratio-top / ratio-bar / ratio-fill
+  - simple-list
+
+2) React 데이터 분석 페이지 적용
+- 파일: src/DashboardPage.jsx
+- activePage='analysis' 섹션 추가
+- 메뉴 연결을 위해 Sidebar에 데이터 분석 항목 추가
+- 기존 API 호출 로직 유지
+  - useDashboardData() 변경 없음
+  - 기존 inventoryList / orderList / insights 기반 파생 데이터 사용
+
+3) 데이터 연결 유지 내용
+- 통계 카드 데이터:
+  - 오늘 판매 상품 수: inventoryList 길이
+  - 총 판매량: orderList 추천량 합계
+  - 예측 대상 상품 수: 추천량 > 0 개수
+  - 최근 예측 실행 시간: nowLabel
+- 분석 패널 데이터:
+  - 카테고리별 판매 비율: inventoryList 기반 비율 계산
+  - 인기 상품 TOP5: orderList 추천량 상위
+  - 최근 판매 증가 상품: inventoryList 재고 상위
+  - 최근 판매 감소 상품: inventoryList 재고 하위
+
+4) CSS 반영
+- 파일: src/dashboardDist.css
+- 데이터 분석 전용 스타일 추가
+  - .analysis-grid
+  - .analysis-ratio-row
+  - .simple-list
+
+5) 수정 제외 준수
+- 운영 관리/설정 페이지 미수정
+- 로그인 화면 미수정
+- 이미 적용된 대시보드/상품 관리/재고 관리/발주 관리는 불필요 변경 없음
+  - 단, 메뉴에 analysis 진입 항목 추가는 본 작업 범위 내 반영
+
+6) 수정 파일 목록
+- src/components/Sidebar.jsx
+- src/DashboardPage.jsx
+- src/dashboardDist.css
+
+7) 빌드 검증
+- Command: npm run build
+- Result: SUCCESS (vite build 완료, 오류 없음)

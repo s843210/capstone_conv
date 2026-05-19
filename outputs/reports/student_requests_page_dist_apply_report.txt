@@ -1,0 +1,51 @@
+﻿[Student Requests Page Dist Apply Report]
+Date: 2026-05-19
+Target: front/store-dashboard-frontend-main
+Scope: 학생 신청 관리 페이지 dist UI 구조 적용
+
+1) dist 학생 신청 관리 화면 구조 반영
+- dist requests 화면 기준 DOM/class 구조를 반영
+  - requests-page
+  - summary-card-grid / request-summary-grid / summary-soft-card
+  - panel requests-list-panel
+  - request-toolbar
+  - request-card-list / request-card / request-card-meta
+  - empty-state / empty-icon
+  - request-status status-pending/status-reviewing/status-done
+
+2) React 학생 신청 페이지 적용
+- 파일: src/components/StudentRequestPage.jsx
+  - 페이지 래퍼를 requests-page 구조로 변경
+- 파일: src/components/StudentRequestPanel.jsx
+  - 기존 API 호출(fetchStudentRequests) 로직 유지
+  - 기존 자동 갱신 polling 유지
+  - 학생 신청 목록 표시 로직 유지
+  - 상태값 정규화 및 상태 필터(select) 추가
+  - dist 구조의 요약 카드 + 요청 카드 목록 UI로 전환
+
+3) API/라우팅 유지 확인
+- 기존 라우팅(activePage='studentRequests') 유지
+- API 호출 함수/경로 유지
+  - src/api/api.js 변경 없음
+
+4) CSS 반영
+- 파일: src/dashboardDist.css
+- 학생 신청 관리 dist 스타일 클래스 추가
+  - requests-list-panel, request-toolbar
+  - request-card-list, request-card, request-card-meta
+  - empty-state, empty-icon
+  - request-status 변형 클래스
+
+5) 수정 제외 준수
+- 운영 관리/설정 페이지 미수정
+- 로그인 화면 미수정
+- 기존 적용 완료된 대시보드/상품 관리/재고 관리/발주 관리/데이터 분석 페이지 로직은 불필요 변경 없음
+
+6) 수정 파일 목록
+- src/components/StudentRequestPage.jsx
+- src/components/StudentRequestPanel.jsx
+- src/dashboardDist.css
+
+7) 빌드 검증
+- Command: npm run build
+- Result: SUCCESS (vite build 완료, 오류 없음)

@@ -1,0 +1,51 @@
+﻿[Suggestions Page Dist Apply Report]
+Date: 2026-05-19
+Target: front/store-dashboard-frontend-main
+Scope: 건의사항 페이지 dist UI 구조 적용
+
+1) dist 건의사항 화면 구조 확인 및 반영
+- dist suggestions 화면 구조를 기준으로 DOM/class 반영
+  - requests-page
+  - summary-card-grid / request-summary-grid / summary-soft-card
+  - panel inventory-filter-panel + suggestion-tools
+  - panel requests-list-panel
+  - request-toolbar / request-card-list / request-card / request-card-meta
+  - request-status(status-unread/status-reviewing/status-done)
+  - empty-state
+
+2) React 건의사항 페이지 적용
+- 파일: src/DashboardPage.jsx
+- activePage='suggestions' 페이지 섹션 추가
+- 기존 라우팅 구조 유지 (activePage 기반)
+- 기존 데이터 로직 유지
+  - 기존 insights -> suggestionRows 데이터 재사용
+  - 제목/내용/시간 표시 로직 유지
+- UI 기능 추가 (dist 구조 기반)
+  - 요약 카드(전체/미확인/검토중/반영완료)
+  - 검색(제목/내용), 상태 필터, 정렬(최신/오래된순)
+  - 카드형 건의사항 목록 + 상태 뱃지
+
+3) 메뉴 연결
+- 파일: src/components/Sidebar.jsx
+- 메뉴에 건의사항 항목 추가
+  - key: suggestions, label: 건의사항
+
+4) CSS 반영
+- 파일: src/dashboardDist.css
+- 건의사항 페이지용 dist 클래스 보강
+  - .request-status.status-unread
+  - .suggestion-tools
+
+5) 수정 제외 준수
+- 운영 관리/설정 페이지 미수정
+- 로그인 화면 미수정
+- 이미 적용된 대시보드/상품 관리/재고 관리/발주 관리/데이터 분석/학생 신청 관리 페이지 로직은 불필요 변경 없음
+
+6) 수정 파일 목록
+- src/components/Sidebar.jsx
+- src/DashboardPage.jsx
+- src/dashboardDist.css
+
+7) 빌드 검증
+- Command: npm run build
+- Result: SUCCESS (vite build 완료, 오류 없음)

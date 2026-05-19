@@ -1,0 +1,28 @@
+﻿[Favicon and Title Update Report]
+Date: 2026-05-19 (Asia/Seoul)
+Target: front/store-dashboard-frontend-main
+
+1) 브라우저 탭 제목 변경
+- File: index.html
+- Title 변경:
+  - 기존: 깨진 문자열/기존 Smart Shelf 계열 제목
+  - 변경: COOPSKET 관리자 시스템
+
+2) 보라색 번개 favicon 제거
+- File: public/favicon.svg
+- 기존 번개형 SVG(보라 계열) 제거
+
+3) COOPSKET 기준 favicon 적용
+- File: public/favicon.svg
+- 적용 내용:
+  - 블루 그라디언트 배경
+  - 흰색 C 형태 심볼(브랜드 이니셜형)
+- index.html의 favicon 링크(/favicon.svg)는 유지
+
+4) 빌드 검증
+- 명령: npm run build
+- 결과: 성공 (오류 없음)
+
+5) 수정 파일
+- front/store-dashboard-frontend-main/index.html
+- front/store-dashboard-frontend-main/public/favicon.svg

@@ -1,0 +1,55 @@
+﻿[Inventory Page Dist Apply Report]
+Date: 2026-05-19
+Target: front/store-dashboard-frontend-main
+Scope: 재고 관리 페이지 dist UI 구조 적용
+
+1) dist 기준 구조 반영
+- dist inventory 화면 구조를 기준으로 재고 페이지를 다음 DOM 구조로 맞춤
+  - inventory-page
+  - panel inventory-filter-panel
+  - inventory-tools (검색/카테고리/정렬)
+  - summary-card-grid / summary-soft-card
+  - panel inventory-table-panel
+  - inventory-table-head / inventory-table-row
+
+2) React 재고 페이지 적용 내용
+- 파일: src/components/InventoryPanel.jsx
+- 기존 API/데이터 로직 유지
+  - useInfiniteScroll(...) 유지
+  - fetchInventoryCategories() 유지
+- 변경 사항
+  - 기존 list(<ul><li>) 형태를 dist 표형 레이아웃으로 변경
+  - 필터 UI를 dist 구조 className으로 정렬
+  - 요약 카드(전체 상품 수/재고 확인 대상/발주 필요 상품) 추가
+  - 테이블 컬럼을 dist 구조에 맞춤
+    - 상품명 / PLU 코드 / 현재 재고 / 적정 재고 / 차이 / 관리 상태
+  - 무한 스크롤 observer 행을 표 하단 구조로 유지
+
+3) CSS 반영
+- 파일: src/dashboardDist.css
+- 재고 페이지에 필요한 dist 스타일 클래스 보강
+  - .inventory-page
+  - .inventory-page .inventory-tools (재고 페이지 전용 컬럼 구성)
+  - .item-name / .item-plu
+  - .diff-positive / .diff-negative
+  - .observer-row
+- 주의 반영
+  - 전역 inventory-tools를 바꾸지 않고, 재고 페이지 범위로 한정 적용
+  - 상품 관리/대시보드 불필요 영향 최소화
+
+4) 유지/제외 확인
+- 유지
+  - 기존 라우팅 구조(activePage) 유지
+  - 기존 API 호출 로직 유지
+- 수정 제외
+  - 운영 관리/설정 페이지 미수정
+  - 로그인 페이지 미수정
+  - 대시보드/상품 관리 페이지 로직 미수정
+
+5) 수정 파일 목록
+- src/components/InventoryPanel.jsx
+- src/dashboardDist.css
+
+6) 빌드 검증
+- Command: npm run build
+- Result: SUCCESS (vite build 완료, 오류 없음)

@@ -1,0 +1,78 @@
+﻿[monthly_v2 bulk import check report]
+작성일시: 2026-05-19 13:16 (Asia/Seoul)
+대상 CSV: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/processed/monthly_sales_with_calendar_timetable_weather_v2.csv
+범위: dryRun 검증까지만 수행 (실제 적재 미수행)
+
+==================================================
+1) bulk import 관련 API/명령어 위치 확인
+==================================================
+코드 위치:
+- Controller: backend/conv/src/main/java/com/errorzero/conv/controller/MonthlyV2ProcessedImportAdminController.java
+- Service: backend/conv/src/main/java/com/errorzero/conv/service/sales/MonthlyV2ProcessedImportService.java
+
+엔드포인트:
+- POST /api/admin/sales/monthly-v2/import-processed
+- 파라미터:
+  - path (optional): CSV 경로
+  - dryRun (default=true)
+
+실행 명령 예시(Windows):
+- curl.exe -X POST --data-urlencode "path=<CSV_PATH>" --data-urlencode "dryRun=true" http://127.0.0.1:8080/api/admin/sales/monthly-v2/import-processed
+
+==================================================
+2) dryRun=true 기준 검증 실행
+==================================================
+실행 결과(JSON):
+- runId: 3c782bbb-eda6-4610-95d1-bd9194c3f43a
+- dryRun: true
+- parsedRows: 1,073,592
+- invalidRows: 0
+- uniquePluCount: 4,591
+- minDate: 2024-03-01
+- maxDate: 2026-04-30
+- message: DRY RUN 완료: DB 저장 없이 monthly_v2 processed CSV를 검증했습니다.
+
+==================================================
+3) 오류 여부 확인
+==================================================
+- invalidRows: 0
+- invalidSamples: []
+- 검증 기준으로 파싱/스키마 불일치 오류 없음
+
+==================================================
+4) row 수 변화 확인 (dryRun 전/후)
+==================================================
+테이블 row count 비교:
+- daily_sales: before=0, after=0
+- daily_context: before=0, after=0
+- product: before=0, after=0
+
+판정:
+- dryRun 수행으로 DB row 변화 없음(정상)
+
+==================================================
+5) 실제 import(dryRun=false) 방식 정리
+==================================================
+실행 명령:
+- curl.exe -X POST --data-urlencode "path=C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/processed/monthly_sales_with_calendar_timetable_weather_v2.csv" --data-urlencode "dryRun=false" http://127.0.0.1:8080/api/admin/sales/monthly-v2/import-processed
+
+예상 동작:
+- daily_sales upsert
+- product upsert
+- daily_context upsert
+- 응답에 upserted row 수 반환
+
+==================================================
+6) 현재 단계에서 실제 적재 가능 여부 확인
+==================================================
+결론: 가능
+
+근거:
+- 백엔드/DB 모두 정상 실행 상태
+- 대상 CSV 파일 존재
+- dryRun 검증 결과 invalidRows=0
+- row 변화 없이 dryRun 정상 종료
+
+주의:
+- 실제 적재는 대량 처리(약 107만 row)로 시간 소요 가능
+- 진행 전 사용자 최종 승인 필요

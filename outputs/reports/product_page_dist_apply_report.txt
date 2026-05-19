@@ -1,0 +1,66 @@
+﻿[Product Page Dist Apply Report]
+Date: 2026-05-19
+Target: front/store-dashboard-frontend-main
+Scope: 상품 관리 페이지만 dist UI 구조 기준으로 순차 적용
+
+1) 적용 범위
+- 수정 대상: 상품 관리(Product) 화면 관련 코드만 반영
+- 유지 사항:
+  - 기존 라우팅/상태 구조 유지 (activePage 기반)
+  - 기존 API 호출 로직 유지 (useDashboardData/fetchDashboard 변경 없음)
+  - 운영 관리(설정) 페이지 로직 미수정
+  - 로그인 페이지 미수정
+
+2) dist 기준 반영 내용
+- Sidebar 메뉴에 상품 관리 추가
+  - key: product, label: 상품 관리
+- DashboardPage에 product 페이지 섹션 추가
+  - dist 구조 반영 클래스:
+    - requests-page
+    - summary-card-grid / summary-soft-card
+    - inventory-filter-panel / inventory-tools / product-tools
+    - inventory-table-panel / inventory-table-head / inventory-table-row / product-table-row
+  - 필터 UI 반영:
+    - 상품명 검색
+    - PLU 코드 검색
+    - 카테고리 선택
+    - 판매 상태 선택
+  - 테이블 컬럼 반영:
+    - 상품명 / PLU 코드 / 카테고리 / 판매 상태 / 최근 판매량 / 최근 수정일
+
+3) 데이터 연결 방식 (API 로직 유지)
+- 데이터 소스: 기존 inventoryList (useDashboardData 결과) 재사용
+- 파생 매핑:
+  - plu: PLU-0001 형식 생성
+  - category: 상품명 키워드 기반(음료/디저트/간편식/기타)
+  - salesStatus: stock/target 비율 기반(판매중/판매 대기)
+  - salesVolume: current stock 값 사용
+  - updatedAt: 현재 시각 라벨 재사용
+- 요약 카드:
+  - 전체 상품 수, 판매 중 상품, 관리 대상 상품, 최근 등록 상품(표시용)
+
+4) CSS 반영
+- 파일: src/dashboardDist.css
+- dist UI 호환 스타일 추가:
+  - summary 카드 그리드
+  - 필터 툴바 인풋/셀렉트
+  - 상품 테이블 헤더/행 레이아웃
+  - 판매 상태 배지(status-done/status-pending)
+
+5) 수정 파일 목록
+- src/components/Sidebar.jsx
+- src/DashboardPage.jsx
+- src/dashboardDist.css
+
+6) 제외/비수정 확인
+- 미수정 페이지:
+  - 로그인
+  - 설정(운영 관리)
+  - 기타 페이지 컴포넌트 로직
+- API 파일 미수정:
+  - src/api/api.js
+  - src/hooks/useDashboardData.js
+
+7) 검증 결과
+- 실행 검증: npm run build
+- 결과: SUCCESS (vite build 완료, 에러 없음)

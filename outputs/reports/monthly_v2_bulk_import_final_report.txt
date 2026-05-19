@@ -1,0 +1,71 @@
+﻿[monthly_v2 bulk import final report]
+작성일시: 2026-05-19 13:28 (Asia/Seoul)
+대상 API: POST /api/admin/sales/monthly-v2/import-processed
+대상 CSV: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/Ai/data/processed/monthly_sales_with_calendar_timetable_weather_v2.csv
+
+==================================================
+1) dryRun=false 기준 실제 bulk import 수행
+==================================================
+실행 요청:
+- dryRun=false
+
+응답(runId=b7ba121e-12e1-4354-b149-694bd58417c4):
+- dryRun: false
+- parsedRows: 1,073,592
+- dailySalesUpsertedRows: 1,073,592
+- productUpsertedRows: 4,591
+- contextUpsertedRows: 791
+- invalidRows: 0
+- uniquePluCount: 4,591
+- minDate: 2024-03-01
+- maxDate: 2026-04-30
+- message: monthly_v2 processed CSV DB bulk import 완료
+
+==================================================
+2) import 소요 시간 측정
+==================================================
+- 실측 소요 시간: 80.5초
+
+==================================================
+3) 적재 완료 후 row 수 확인
+==================================================
+DB(campus_store) 확인 SQL 결과:
+- daily_sales: 1,073,592 rows
+- daily_context: 791 rows
+- product: 4,591 rows
+
+추가 검증:
+- daily_sales 기간: 2024-03-01 ~ 2026-04-30
+- daily_context 기간: 2024-03-01 ~ 2026-04-30
+
+==================================================
+4) import 성공 여부 확인
+==================================================
+- 성공
+
+근거:
+- API 응답 성공 메시지
+- invalidRows=0
+- backend 로그에 dryRun=false 완료 로그 기록
+
+로그 확인:
+- monthly_v2 processed import 완료: runId=b7ba121e-12e1-4354-b149-694bd58417c4, dryRun=false, parsedRows=1073592, invalidRows=0, products=4591, contexts=791
+
+==================================================
+5) 실패 row 여부 확인
+==================================================
+- invalidRows: 0
+- invalidSamples: []
+
+==================================================
+6) 서버 에러 여부 확인
+==================================================
+- import 수행 중 치명적 서버 에러 확인되지 않음
+- backend stderr tail:
+(stderr 에러 로그 없음)
+
+==================================================
+최종 결론
+==================================================
+- monthly_v2 원천 CSV의 실제 bulk import가 정상 완료되었습니다.
+- 요청하신 3개 핵심 테이블(daily_sales/daily_context/product)의 row 수가 모두 반영되었습니다.

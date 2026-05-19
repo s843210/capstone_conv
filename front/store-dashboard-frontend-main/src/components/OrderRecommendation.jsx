@@ -1,35 +1,32 @@
-function OrderRecommendation({ orderList }) {
+﻿function OrderRecommendation({ orderList }) {
+  const rows = orderList.slice(0, 10);
+
   return (
-    <div className="panel">
-      <div className="panel-header">
-        <div className="panel-title">
-          <span className="panel-icon">🛒</span>
-          <h2>AI 발주 추천</h2>
-        </div>
+    <article className="panel order-panel">
+      <div className="panel-header with-icon">
+        <h2>
+          <span className="head-icon purple" aria-hidden="true">📊</span>
+          우선 발주 추천 상품 TOP10
+        </h2>
+        <button className="mini-action" type="button">전체보기</button>
       </div>
-      <p className="panel-desc">곧 발주하면 품절을 막을 수 있어요</p>
-      <div className="order-list">
-        {orderList.map((item) => (
-          <div key={item.name} className="order-item">
-            <div className="order-top">
-              <strong>{item.name}</strong>
-              <span className="order-qty">
-                현재 {item.current} / {item.recommended}개 권장
-              </span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${Math.min((item.current / item.recommended) * 100, 100)}%`,
-                }}
-              />
-            </div>
-            <p className="order-reason">⚡ {item.reason}</p>
+
+      <div className="table-wrap">
+        <div className="thead row">
+          <span>순위</span>
+          <span>상품명</span>
+          <span>추천 발주량</span>
+        </div>
+
+        {rows.map((item, idx) => (
+          <div className="row" key={`${item.name}-${idx}`}>
+            <span className="rank">{idx + 1}</span>
+            <span className="prod">{item.name}</span>
+            <span className="qty-badge">{item.recommended}개</span>
           </div>
         ))}
       </div>
-    </div>
+    </article>
   );
 }
 

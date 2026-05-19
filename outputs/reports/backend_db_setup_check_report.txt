@@ -1,0 +1,133 @@
+﻿[Backend DB Setup Check Report]
+작성일: 2026-05-19
+대상 경로: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/backend/conv
+범위: DB 설정 확인 + 로컬 PostgreSQL 실행 방법 정리 (코드 수정 없음)
+
+==================================================
+1) application.yml / application.properties DB 설정 확인
+==================================================
+- application.yml: 존재
+  경로: backend/conv/src/main/resources/application.yml
+- application.properties: 없음
+
+application.yml DB 관련 설정:
+- driver-class-name: org.postgresql.Driver
+- url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:campus_store}
+- username: ${DB_USER:postgres}
+- password: ${DB_PASSWORD:postgres}
+
+해석:
+- 환경변수(.env) 없으면 기본값(localhost:5432, campus_store, postgres/postgres) 사용
+
+==================================================
+2) DB 이름/username/password/port 확인
+==================================================
+기본값(application.yml):
+- DB_HOST: localhost
+- DB_PORT: 5432
+- DB_NAME: campus_store
+- DB_USER: postgres
+- DB_PASSWORD: postgres
+
+샘플 환경파일(.env.example):
+- backend/conv/.env.example 에 동일 값 정의됨
+
+주의:
+- 실제 실행 시에는 backend/conv/.env 파일을 생성해 사용하는 것을 권장
+- build.gradle에서 bootRun 시 .env를 읽어 환경변수로 주입하도록 설정됨
+
+==================================================
+3) Flyway 설정 확인
+==================================================
+application.yml:
+- spring.flyway.enabled: true
+- spring.flyway.baseline-on-migrate: true
+- spring.flyway.locations: classpath:db/migration
+
+마이그레이션 파일 위치:
+- backend/conv/src/main/resources/db/migration
+- V1__init.sql ~ V10__extend_daily_context_for_monthly_v2.sql 존재
+
+의미:
+- DB가 연결되면 백엔드 기동 시 Flyway가 자동으로 스키마를 맞춤
+
+==================================================
+4) docker-compose.yml / DB 실행 스크립트 확인
+==================================================
+- docker-compose.yml: 존재
+  경로: backend/conv/docker-compose.yml
+
+구성 요약:
+- image: postgres:15
+- container_name: campus-store-db
+- ports: ${DB_PORT}:5432
+- env: POSTGRES_USER=${DB_USER}, POSTGRES_PASSWORD=${DB_PASSWORD}, POSTGRES_DB=${DB_NAME}
+- volume: pgdata (데이터 영속화)
+
+추가 실행 스크립트:
+- 별도 .sh/.bat DB 전용 스크립트는 backend/conv 내부에서 확인되지 않음
+- 표준 docker compose 명령으로 실행하는 구조
+
+==================================================
+5) PostgreSQL 로컬 실행 방법 정리
+==================================================
+방법 A: Docker Compose 사용 (권장)
+1. backend/conv 경로 이동
+2. .env 파일 준비
+   예시:
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=campus_store
+   DB_USER=postgres
+   DB_PASSWORD=postgres
+3. DB 실행
+   - docker compose up -d db
+4. 상태 확인
+   - docker ps
+5. 필요 시 중지
+   - docker compose stop db
+
+방법 B: 로컬 PostgreSQL 서비스 사용
+1. PostgreSQL 서버를 로컬에 설치/기동
+2. DB/계정 생성
+   - DB: campus_store
+   - USER: postgres (또는 application.yml에 맞춘 계정)
+3. backend/conv/.env 값과 로컬 서버 설정 일치시킴
+4. 포트 5432 수신 확인 후 백엔드 실행
+
+==================================================
+6) psql 접속 명령어 정리
+==================================================
+도커 DB 접속:
+- docker exec -it campus-store-db psql -U postgres -d campus_store
+
+도커에서 단발 조회:
+- docker exec campus-store-db psql -U postgres -d campus_store -c "\dt"
+- docker exec campus-store-db psql -U postgres -d campus_store -c "SELECT now();"
+
+로컬 PostgreSQL 직접 접속:
+- psql -h localhost -p 5432 -U postgres -d campus_store
+
+Windows에서 비밀번호 프롬프트가 뜨면 입력하거나,
+PGPASSWORD 환경변수 사용 예시:
+- $env:PGPASSWORD='postgres'; psql -h localhost -p 5432 -U postgres -d campus_store
+
+==================================================
+7) DB 기동 후 백엔드 재실행 명령어
+==================================================
+경로:
+- C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/backend/conv
+
+명령:
+- .\gradlew.bat bootRun
+
+확인 포인트:
+- 로그에 Flyway migrate 성공
+- Tomcat started on port(s): 8080
+- Swagger 접속: http://localhost:8080/swagger-ui/index.html
+
+==================================================
+8) 요약
+==================================================
+- 현재 백엔드는 PostgreSQL 선행 기동이 필수인 구조(JPA + Flyway 자동 마이그레이션).
+- backend/conv/.env를 준비하고 docker compose로 DB를 올린 뒤 bootRun 하면 정상 기동 가능성이 높음.

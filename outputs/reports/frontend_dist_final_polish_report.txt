@@ -1,0 +1,56 @@
+﻿[Frontend Dist Final Polish Report]
+Date: 2026-05-19
+Target: front/store-dashboard-frontend-main
+Scope: 공통 UI 최종 점검/보완 (설정/로그인 제외)
+
+1) dist 기준 로고/브랜드 영역 보완
+- 파일: src/components/Sidebar.jsx
+- 변경:
+  - 로고 텍스트: COOPSKET
+  - 브랜드 서브텍스트: IT Convenience Store
+  - brand-area class 적용
+- 파일: src/dashboardDist.css
+  - brand-area 하위 subtitle 강조 스타일 보완
+
+2) 메뉴 클릭 시 상단 페이지 제목/설명 동적 변경
+- 파일: src/DashboardPage.jsx
+- 변경:
+  - PAGE_META 매핑 추가
+    - 대시보드
+    - 상품 관리
+    - 재고 관리
+    - 발주 관리
+    - 데이터 분석
+    - 학생 신청 관리
+    - 건의사항
+    - 운영 관리(설정)
+  - 기존 고정 DashboardHeader 대신 top-header를 activePage 기반 동적 렌더링
+  - 날짜 chip/관리자/알림 버튼 유지
+
+3) 각 페이지 제목/설명 문구 점검
+- DashboardPage 내 currentPageMeta.title/description으로 메뉴별 문구 반영
+- 설정 페이지 로직/구조는 변경하지 않고 헤더 텍스트만 메뉴 상태에 맞춰 표시
+
+4) 공통 dist 스타일 누락 보완
+- 파일: src/dashboardDist.css
+- 보완:
+  - 브랜드 영역 typography 정리
+  - 반응형 그리드 보강
+    - summary-card-grid / request-summary-grid
+    - inventory-tools / product-tools / suggestion-tools
+    - analysis-grid
+- 버튼/카드/표/필터/빈 상태 UI는 기존 적용 상태 유지 + 공통 반응형 누락 보완
+
+5) 제외 범위 준수
+- 운영 관리/설정 페이지 로직 미수정
+- 로그인 화면 미수정
+- 기존 API 호출/라우팅/상태 로직 유지
+
+6) 수정 파일 목록
+- src/components/Sidebar.jsx
+- src/DashboardPage.jsx
+- src/dashboardDist.css
+
+7) 빌드 검증
+- Command: npm run build
+- Result: SUCCESS (vite build 완료, 오류 없음)

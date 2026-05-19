@@ -1,0 +1,56 @@
+﻿[Dashboard Dist Match Report]
+작성일시: 2026-05-19
+대상: front/store-dashboard-frontend-main
+
+1) dist 실제 대시보드 구조 분석
+- 소스: .design_ref_dist/dist/assets/index-B-vlIPvA.js, index-Bj62FC1g.css
+- 확인된 핵심 DOM/CSS 구조:
+  - 상단: top-header + header-right + header-chip/admin-chip/icon-btn
+  - 본문: content-grid dashboard-grid (inventory/order/requests/suggestions)
+  - 카드: panel, panel-header, with-icon, head-icon
+  - 표: table-wrap, thead row, row, request-head/request-row, suggestion-head/suggestion-row
+  - 하단: status-bar + status-cell 5칸
+
+2) 이식 방식 적용 내용
+- DashboardPage.jsx를 dist DOM 패턴으로 재구성 (대시보드 구간)
+- dist 스타일을 별도 파일로 분리 추가:
+  - src/dashboardDist.css
+- class -> className 변환 적용
+- 기존 API 로직 유지:
+  - useDashboardData(/api/dashboard)
+  - fetchStudentRequests(/api/student/requests)
+
+3) 수정 파일
+- src/DashboardPage.jsx
+- src/dashboardDist.css
+
+4) 수정 전후 차이 (핵심)
+- 레이아웃:
+  - 전: 컴포넌트별 커스텀 배치
+  - 후: dist와 동일한 2x2 카드 + status-bar 구조
+- 카드 배치:
+  - 전: 순서/헤더 액션이 dist와 불일치
+  - 후: inventory/order/requests/suggestions 순서 + 헤더 버튼 구조 반영
+- 스타일:
+  - 전: 기존 DashboardPage.css 기반 혼합 스타일
+  - 후: dist 클래스명 기준 색상/여백/보더/표/배지 스타일 이식
+- 테이블:
+  - 전: 카드별 제각각 마크업
+  - 후: dist row/thead 패턴으로 통일
+
+5) 남은 차이점
+- dist 원본은 일부 데이터가 정적 샘플(건의사항 시간/요청 상태 등)
+  - 현재는 API 데이터 기반으로 표시하여 값 자체는 달라질 수 있음
+- 기존 프로젝트의 Sidebar/Header 하위 컴포넌트 파일 수정 이력이 남아 있음
+  - 이번 이식은 DashboardPage + dashboardDist.css 중심으로 적용
+  - 시각적으로는 dist 구조 우선으로 렌더링됨
+
+6) 검증
+- npm run build: 성공
+- npm run dev: 성공
+  - 포트 점유로 5176 자동 할당됨 (5173/5174/5175 사용 중)
+
+7) 주의
+- 백엔드 CORS가 localhost:5173만 허용된 경우 5176에서 API 호출 차단 가능
+- 동일 환경 재현 권장:
+  - 기존 프론트 프로세스 정리 후 5173 고정 실행

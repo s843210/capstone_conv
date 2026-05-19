@@ -1,0 +1,96 @@
+﻿[Backend Full Run Success Check Report]
+작성일시: 2026-05-19 12:49 (Asia/Seoul)
+대상: C:/Users/LG/OneDrive/바탕 화면/capss/capstone_conv/backend/conv
+요청 범위: 컨테이너 중지/재기동 + DB 확인 + backend bootRun 재실행
+
+==================================================
+1) 기존 capstone-postgres 컨테이너 중지
+==================================================
+실행:
+- docker stop capstone-postgres
+
+결과:
+- 성공 (컨테이너 삭제 없이 Exited 상태)
+
+==================================================
+2) docker compose up -d db 재실행
+==================================================
+실행:
+- backend/conv에서 docker compose up -d db
+
+초기 결과:
+- campus-store-db가 Created/Up 상태를 오갔으나 host 포트 반영 이슈가 있어,
+  db 서비스 재생성(docker compose rm -sf db 후 up -d db) 수행
+
+최종 결과:
+- campus-store-db 정상 실행(Up)
+- 포트 매핑 정상: 0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+
+==================================================
+3) campus-store-db 정상 실행 확인
+==================================================
+확인:
+- docker ps -a
+- docker inspect/logs
+
+결과:
+- 상태: Up
+- PostgreSQL 15 부팅 로그 정상
+- "database system is ready to accept connections" 확인
+
+==================================================
+4) localhost:5432 연결 확인
+==================================================
+확인:
+- Test-NetConnection 127.0.0.1 -Port 5432 -InformationLevel Quiet
+
+결과:
+- True (연결 가능)
+
+==================================================
+5) campus_store DB 존재 확인
+==================================================
+확인:
+- docker exec campus-store-db psql -U postgres -d postgres -tAc "SELECT datname FROM pg_database WHERE datname='campus_store';"
+
+결과:
+- campus_store 반환됨 (DB 존재 확인)
+
+==================================================
+6) backend/conv에서 .\gradlew.bat bootRun 재실행
+==================================================
+실행:
+- .\gradlew.bat bootRun --console=plain
+
+결과:
+- DB 연결 성공
+- Flyway 10개 마이그레이션 성공 적용 확인
+  - v1 ~ v10 migrated
+- 그러나 최종 기동 실패
+
+==================================================
+7) Spring Boot 서버 정상 기동 여부
+==================================================
+결과: 실패
+
+실패 원인:
+- "Web server failed to start. Port 8080 was already in use."
+
+추가 확인:
+- 8080 점유 프로세스 PID 5352 확인
+- Stop-Process 시도했으나 "Access is denied"
+- 점유 프로세스는 시스템 리스너(TNSLSNR)로 식별됨
+
+==================================================
+8) API 포트(8080) 확인
+==================================================
+- 앱 설정 및 로그 기준 기본 포트는 8080
+- 현재 8080은 외부 프로세스가 선점 중
+- 따라서 Spring이 8080 바인딩을 획득하지 못해 종료됨
+
+==================================================
+최종 결론
+==================================================
+- DB 측 요구사항(컨테이너 실행/5432 연결/campus_store 존재)은 모두 충족됨.
+- backend bootRun은 DB 문제는 해결되었지만, 8080 포트 충돌로 최종 실패.
+- 8080 점유 프로세스를 사용자 권한으로 종료하지 못해 정상 기동까지는 완료되지 않음.

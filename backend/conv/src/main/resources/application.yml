@@ -44,3 +44,6 @@ app:
     timeout-sec: ${HOLIDAY_TIMEOUT_SEC:8}
     retry-count: ${HOLIDAY_RETRY:2}
     retry-backoff-millis: ${HOLIDAY_RETRY_BACKOFF_MS:300}
+
+server:
+  port: 8080

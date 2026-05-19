@@ -794,6 +794,155 @@
   gap: 18px;
 }
 
+/* Dashboard-only visual refresh (based on dist reference) */
+.dashboard-layout {
+  background: linear-gradient(#f8fbff 0%, #f3f8ff 100%);
+}
+
+.dashboard-main {
+  padding: 16px 20px 14px;
+}
+
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.top-header h1 {
+  margin: 0;
+  color: #1e3152;
+  letter-spacing: -0.6px;
+  font-size: 32px;
+}
+
+.top-header p {
+  margin: 5px 0 0;
+  color: #6d7f9d;
+  font-size: 14px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-chip,
+.admin-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid #dfe8f8;
+  border-radius: 10px;
+  background: #fff;
+  color: #3f5275;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.content-grid.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "inventory order"
+    "student suggestion";
+  gap: 12px;
+}
+
+.content-grid.dashboard-grid > .panel:nth-child(1) {
+  grid-area: inventory;
+}
+
+.content-grid.dashboard-grid > .panel:nth-child(2) {
+  grid-area: order;
+}
+
+.content-grid.dashboard-grid > .panel:nth-child(3) {
+  grid-area: student;
+}
+
+.content-grid.dashboard-grid > .panel:nth-child(4) {
+  grid-area: suggestion;
+}
+
+.dashboard-main .panel {
+  border: 1px solid #dfe8f8;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 16px rgba(28, 53, 91, 0.06);
+}
+
+.dashboard-main .panel-header {
+  border-bottom: 1px solid #ebf1fc;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.dashboard-main .panel-title h2 {
+  margin: 0;
+  color: #1f3150;
+  font-size: 21px;
+  letter-spacing: -0.3px;
+}
+
+.dashboard-main .panel-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  border-radius: 8px;
+  background: #eaf2ff;
+}
+
+.dashboard-main .student-request-panel.full-width {
+  grid-column: auto;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-bottom-card {
+  margin-top: 14px;
+  border: 1px solid #dfe8f8;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 6px 12px rgba(29, 56, 95, 0.06);
+}
+
+.sidebar-bottom-card p {
+  margin: 0;
+  color: #5f7397;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.sidebar-bottom-card strong {
+  display: block;
+  margin-top: 4px;
+  color: #2f6fed;
+  font-size: 12px;
+}
+
+@media (max-width: 1024px) {
+  .content-grid.dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "inventory"
+      "order"
+      "insight"
+      "student";
+  }
+}
+
 .academic-backfill-form {
   margin-top: 16px;
   padding-top: 16px;

@@ -1,0 +1,38 @@
+﻿[Frontend 5173 Run Report]
+Date: 2026-05-19
+Workspace: C:\Users\LG\OneDrive\바탕 화면\capss\capstone_conv
+Target: front/store-dashboard-frontend-main
+
+1) 5173 port owner check
+- Command: Get-NetTCPConnection -LocalPort 5173 -State Listen
+- Result: PID 27052 (node.exe) was listening on localhost:5173
+
+2) Port cleanup
+- Action: Stop-Process -Id 27052 -Force
+- Result: Existing listener process stopped
+
+3) Frontend dev server restart on 5173
+- Command: npm run dev -- --port 5173 --strictPort --host localhost
+- Method: Started as background process from front/store-dashboard-frontend-main
+- Log file:
+  - outputs/reports/frontend_dev_5173_stdout.log
+  - outputs/reports/frontend_dev_5173_stderr.log
+- Startup log result: Vite ready, Local http://localhost:5173/
+
+4) localhost:5173 access check
+- Command: Invoke-WebRequest http://localhost:5173
+- Result: HTTP 200 (content length 836)
+
+5) /api/dashboard call check
+- Command: Invoke-WebRequest http://localhost:8080/api/dashboard
+- Result: HTTP 200 (content length 105)
+
+6) CORS compatibility check for 5173 origin
+- Command: Invoke-WebRequest with Origin=http://localhost:5173
+- Result: HTTP 200, Access-Control-Allow-Origin=http://localhost:5173
+
+Final conclusion
+- Frontend dev server is running on port 5173 successfully.
+- Backend API /api/dashboard responds normally.
+- CORS for origin localhost:5173 is valid.
+- Current frontend-backend integration condition is 정상.

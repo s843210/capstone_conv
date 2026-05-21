@@ -41,6 +41,28 @@ public interface DailySalesRepository extends JpaRepository<DailySales, Long> {
             @Param("keyword") String keyword
     );
 
+    @Query(value = """
+            SELECT
+                p.plu_code AS "pluCode",
+                p.name AS name,
+                COALESCE(p.current_stock, 0) AS "currentStock",
+                COALESCE(SUM(d.sales_qty), 0) AS "salesQty"
+            FROM daily_sales d
+            JOIN product p ON p.plu_code = d.plu_code
+            WHERE d.updated_at = (
+                    SELECT MAX(latest.updated_at)
+                    FROM daily_sales latest
+                  )
+              AND p.is_active = true
+              AND d.sales_qty > 0
+            GROUP BY p.plu_code, p.name, p.current_stock
+            ORDER BY COALESCE(SUM(d.sales_qty), 0) DESC, p.name ASC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<TopSalesProductProjection> findTopSellingProductsByLatestUpload(
+            @Param("limit") int limit
+    );
+
     @Modifying
     @Query(value = """
             INSERT INTO daily_sales (sales_date, plu_code, sales_qty, updated_at)

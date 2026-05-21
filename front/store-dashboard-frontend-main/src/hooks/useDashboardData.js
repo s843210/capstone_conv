@@ -53,6 +53,7 @@ export function useDashboardData() {
         name: i.itemName,
         stock: i.currentStock,
         target: i.recommendedStock,
+        salesQty: i.salesQty || 0,
       })),
     [raw.inventoryStats],
   );
@@ -62,7 +63,9 @@ export function useDashboardData() {
     () =>
       raw.recommendations.map((r) => ({
         name: r.productName,
+        category: r.category || "기타/미분류",
         current: r.currentStock,
+        predicted: r.predictedSales,
         recommended: r.recommendedOrderQuantity,
         reason: r.aiReason,
       })),

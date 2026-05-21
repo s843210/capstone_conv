@@ -18,7 +18,7 @@ function InventoryPanel({ isActive }) {
   const [categories, setCategories] = useState([]);
   const [categoryError, setCategoryError] = useState(null);
 
-  const { items, loading, error, hasMore, observerTarget } = useInfiniteScroll({
+  const { items, loading, error, hasMore, totalElements, observerTarget } = useInfiniteScroll({
     enabled: isActive,
     query: debouncedQuery,
     category: selectedCategory,
@@ -75,21 +75,20 @@ function InventoryPanel({ isActive }) {
     return list;
   }, [items, sortOrder]);
 
-  const summary = useMemo(() => {
-    const total = sortedItems.length;
-    const checkTargets = sortedItems.filter(
-      (item) => Number(item.currentStock || 0) < Number(item.recommendedStock || 0),
-    ).length;
-    return {
-      total,
-      checkTargets,
-      orderNeeded: checkTargets,
-    };
-  }, [sortedItems]);
-
   return (
     <section className="inventory-page">
       <article className="panel inventory-filter-panel">
+        <div className="inventory-filter-header">
+          <div>
+            <h2>재고 관리</h2>
+            <p>상품명, PLU 코드, 카테고리별로 재고를 확인합니다.</p>
+          </div>
+          <div className="inventory-total-pill">
+            <span>전체 상품 수</span>
+            <strong>{totalElements}</strong>
+          </div>
+        </div>
+
         <div className="inventory-tools">
           <div className="search-wrap">
             <label htmlFor="inventory-search">검색</label>
@@ -131,21 +130,6 @@ function InventoryPanel({ isActive }) {
               ))}
             </select>
           </div>
-        </div>
-      </article>
-
-      <article className="summary-card-grid">
-        <div className="summary-soft-card">
-          <span>전체 상품 수</span>
-          <strong>{summary.total}</strong>
-        </div>
-        <div className="summary-soft-card">
-          <span>재고 확인 대상</span>
-          <strong>{summary.checkTargets}</strong>
-        </div>
-        <div className="summary-soft-card">
-          <span>발주 필요 상품</span>
-          <strong>{summary.orderNeeded}</strong>
         </div>
       </article>
 

@@ -4,7 +4,6 @@ const MENU_ITEMS = [
   { key: "dashboard", label: "대시보드" },
   { key: "inventory", label: "재고 관리" },
   { key: "order", label: "발주 추천" },
-  { key: "analysis", label: "데이터 분석" },
   { key: "studentRequests", label: "학생 요청 현황" },
   { key: "suggestions", label: "건의사항" },
   { key: "settings", label: "설정" },

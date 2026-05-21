@@ -38,9 +38,9 @@ public class StudentSuggestionService {
     }
 
     @Transactional
-    public StudentSuggestionResponseDto createSuggestion(StudentSuggestionCreateDto request) {
+    public StudentSuggestionResponseDto createSuggestion(String writer, StudentSuggestionCreateDto request) {
         StudentSuggestion suggestion = StudentSuggestion.builder()
-                .writer(required(request.getWriter(), "writer"))
+                .writer(required(writer, "writer"))
                 .title(required(request.getTitle(), "title"))
                 .content(required(request.getContent(), "content"))
                 .status("UNREAD")
@@ -50,9 +50,9 @@ public class StudentSuggestionService {
     }
 
     @Transactional
-    public StudentSuggestionResponseDto updateSuggestion(Long id, StudentSuggestionUpdateDto request) {
+    public StudentSuggestionResponseDto updateSuggestion(Long id, String writer, StudentSuggestionUpdateDto request) {
         StudentSuggestion suggestion = findSuggestion(id);
-        validateOwner(suggestion, request.getWriter());
+        validateOwner(suggestion, writer);
 
         suggestion.setTitle(required(request.getTitle(), "title"));
         suggestion.setContent(required(request.getContent(), "content"));
@@ -68,8 +68,8 @@ public class StudentSuggestionService {
     }
 
     @Transactional
-    public StudentSuggestionBulkDeleteResponseDto deleteSuggestions(StudentSuggestionBulkDeleteDto request) {
-        String writer = required(request.getWriter(), "writer");
+    public StudentSuggestionBulkDeleteResponseDto deleteSuggestions(String writer, StudentSuggestionBulkDeleteDto request) {
+        String safeWriter = required(writer, "writer");
         int removedCount = 0;
         int failedCount = 0;
 
@@ -81,7 +81,7 @@ public class StudentSuggestionService {
 
             try {
                 StudentSuggestion suggestion = findSuggestion(id);
-                validateOwner(suggestion, writer);
+                validateOwner(suggestion, safeWriter);
                 studentSuggestionRepository.delete(suggestion);
                 removedCount++;
             } catch (RuntimeException exc) {

@@ -4,11 +4,10 @@ import {SuggestionDetailScreenProps} from '../types';
 import {styles} from '../styles/commonStyles';
 
 type Props = SuggestionDetailScreenProps & {
-  currentUser: string;
-  removeSuggestion: (suggestionId: string, currentUser: string) => Promise<boolean>;
+  removeSuggestion: (suggestionId: string) => Promise<boolean>;
 };
 
-export default function SuggestionDetailScreen({navigation, route, currentUser, removeSuggestion}: Props) {
+export default function SuggestionDetailScreen({navigation, route, removeSuggestion}: Props) {
   const {suggestion} = route.params;
 
   const handleRemove = () => {
@@ -18,7 +17,7 @@ export default function SuggestionDetailScreen({navigation, route, currentUser, 
         text: '삭제',
         style: 'destructive',
         onPress: async () => {
-          const removed = await removeSuggestion(suggestion.id, currentUser);
+          const removed = await removeSuggestion(suggestion.id);
           if (!removed) {
             Alert.alert('삭제 오류', '건의사항 삭제 중 오류가 발생했습니다.');
             return;
@@ -84,4 +83,3 @@ const localStyles = StyleSheet.create({
     fontSize: 14,
   },
 });
-

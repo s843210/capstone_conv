@@ -11,7 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class StudentSuggestionCreateDto {
 
-    @NotBlank(message = "writer는 필수입니다")
     @Size(max = 50, message = "writer는 50자 이하로 입력해 주세요")
     private String writer;
 

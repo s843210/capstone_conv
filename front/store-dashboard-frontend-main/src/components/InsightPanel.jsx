@@ -1,4 +1,4 @@
-﻿function InsightPanel({ insights }) {
+function InsightPanel({ insights, onViewAll }) {
   const rows = insights.slice(0, 6);
 
   return (
@@ -8,7 +8,7 @@
           <span className="head-icon" aria-hidden="true">💭</span>
           건의사항
         </h2>
-        <button className="mini-action primary" type="button">등록하기</button>
+        <button className="mini-action primary" type="button" onClick={onViewAll}>전체확인</button>
       </div>
 
       <div className="table-wrap small">

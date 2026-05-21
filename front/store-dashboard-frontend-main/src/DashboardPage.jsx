@@ -16,10 +16,8 @@ import { useDashboardData } from "./hooks/useDashboardData";
 const POLL_INTERVAL_MS = 5000;
 const PAGE_META = {
   dashboard: { title: "운영 대시보드", description: "재고, 수요 예측, 발주 추천 정보를 한눈에 확인합니다." },
-  product: { title: "상품 관리", description: "상품 정보와 카테고리를 관리할 수 있습니다." },
-  products: { title: "상품 관리", description: "상품 정보와 카테고리를 관리할 수 있습니다." },
   inventory: { title: "재고 관리", description: "현재 재고 상태와 부족 상품을 확인할 수 있습니다." },
-  order: { title: "발주 관리", description: "AI 추천 발주량과 발주 현황을 확인할 수 있습니다." },
+  order: { title: "발주 추천", description: "AI 추천 발주량과 발주 현황을 확인할 수 있습니다." },
   analysis: { title: "데이터 분석", description: "판매/재고 데이터를 기반으로 운영 현황을 분석합니다." },
   studentRequests: { title: "학생 신청 관리", description: "학생 상품 요청과 처리 상태를 관리할 수 있습니다." },
   suggestions: { title: "건의사항", description: "사용자 건의사항과 의견을 확인할 수 있습니다." },
@@ -87,10 +85,6 @@ function DashboardPage({ onLogout }) {
   const [suggestions, setSuggestions] = useState([]);
   const [requestError, setRequestError] = useState("");
   const [suggestionError, setSuggestionError] = useState("");
-  const [productNameQuery, setProductNameQuery] = useState("");
-  const [productPluQuery, setProductPluQuery] = useState("");
-  const [productCategory, setProductCategory] = useState("전체");
-  const [productSalesStatus, setProductSalesStatus] = useState("전체");
   const [orderQuery, setOrderQuery] = useState("");
   const [orderCategory, setOrderCategory] = useState("전체");
   const [orderSort, setOrderSort] = useState("desc");
@@ -165,33 +159,6 @@ function DashboardPage({ onLogout }) {
     [inventoryList],
   );
 
-  const categoryRows = useMemo(() => {
-    const groups = new Map();
-
-    inventoryRows.forEach((item) => {
-      const key = item.name?.includes("음료")
-        ? "음료"
-        : item.name?.includes("디저트") || item.name?.includes("빵")
-          ? "디저트"
-          : item.name?.includes("즉석") || item.name?.includes("간편")
-            ? "간편식"
-            : "기타";
-
-      const prev = groups.get(key) || { stock: 0, target: 0 };
-      groups.set(key, {
-        stock: prev.stock + Number(item.stock || 0),
-        target: prev.target + Number(item.target || 0),
-      });
-    });
-
-    return Array.from(groups.entries())
-      .map(([name, value]) => {
-        const ratio = value.target > 0 ? Math.min((value.stock / value.target) * 100, 100) : 100;
-        return { name, ratio: Math.max(0, Math.round(ratio)) };
-      })
-      .slice(0, 4);
-  }, [inventoryRows]);
-
   const suggestionRows = useMemo(
     () => suggestions.map((item) => ({
       id: item.id,
@@ -229,65 +196,6 @@ function DashboardPage({ onLogout }) {
     () => PAGE_META[activePage] || PAGE_META.dashboard,
     [activePage],
   );
-
-  const productRows = useMemo(
-    () =>
-      inventoryList.map((item, idx) => {
-        const stock = Number(item.stock || 0);
-        const target = Number(item.target || 0);
-        const ratio = target > 0 ? stock / target : 1;
-        const category =
-          item.name?.includes("음료")
-            ? "음료"
-            : item.name?.includes("디저트") || item.name?.includes("빵")
-              ? "디저트"
-              : item.name?.includes("즉석") || item.name?.includes("간편")
-                ? "간편식"
-                : "기타";
-        const salesStatus = ratio < 0.5 ? "판매 대기" : "판매중";
-        const salesVolume = Math.max(0, stock);
-        const updatedAt = nowLabel;
-
-        return {
-          name: item.name,
-          plu: `PLU-${String(idx + 1).padStart(4, "0")}`,
-          category,
-          salesStatus,
-          salesVolume,
-          updatedAt,
-        };
-      }),
-    [inventoryList, nowLabel],
-  );
-
-  const productCategories = useMemo(
-    () => ["전체", ...Array.from(new Set(productRows.map((row) => row.category)))],
-    [productRows],
-  );
-
-  const filteredProductRows = useMemo(
-    () =>
-      productRows.filter((row) => {
-        const byName = !productNameQuery || row.name.toLowerCase().includes(productNameQuery.toLowerCase());
-        const byPlu = !productPluQuery || row.plu.toLowerCase().includes(productPluQuery.toLowerCase());
-        const byCategory = productCategory === "전체" || row.category === productCategory;
-        const bySalesStatus = productSalesStatus === "전체" || row.salesStatus === productSalesStatus;
-        return byName && byPlu && byCategory && bySalesStatus;
-      }),
-    [productRows, productNameQuery, productPluQuery, productCategory, productSalesStatus],
-  );
-
-  const productSummary = useMemo(() => {
-    const total = productRows.length;
-    const onSale = productRows.filter((row) => row.salesStatus === "판매중").length;
-    const managed = productRows.filter((row) => row.category !== "기타").length;
-    return {
-      total,
-      onSale,
-      managed,
-      newItems: Math.min(total, 7),
-    };
-  }, [productRows]);
 
   const orderRows = useMemo(
     () =>
@@ -508,24 +416,6 @@ function DashboardPage({ onLogout }) {
                     <strong>{lowStockItems}</strong>
                     <em>건</em>
                   </div>
-
-                  <div className="category-ratio">
-                    <p className="category-ratio-title">카테고리별 재고 충족률</p>
-                    {categoryRows.map((row, idx) => {
-                      const fillClass = ["blue", "purple", "green", "orange"][idx % 4];
-                      return (
-                        <div className="ratio-row" key={row.name}>
-                          <div className="ratio-top">
-                            <span>{row.name}</span>
-                            <strong>{row.ratio}%</strong>
-                          </div>
-                          <div className="ratio-bar">
-                            <div className={`ratio-fill ${fillClass}`} style={{ width: `${row.ratio}%` }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
 
                 <div className="table-wrap">
@@ -550,7 +440,9 @@ function DashboardPage({ onLogout }) {
                     <span className="head-icon purple" aria-hidden="true">📊</span>
                     우선 발주 추천 상품 TOP10
                   </h2>
-                  <button className="mini-action" type="button">전체보기</button>
+                  <button className="mini-action" type="button" onClick={() => setActivePage("order")}>
+                    전체보기
+                  </button>
                 </div>
 
                 <div className="table-wrap">
@@ -604,7 +496,13 @@ function DashboardPage({ onLogout }) {
                     <span className="head-icon" aria-hidden="true">💭</span>
                     건의사항
                   </h2>
-                  <button className="mini-action primary" type="button">등록하기</button>
+                  <button
+                    className="mini-action primary"
+                    type="button"
+                    onClick={() => setActivePage("suggestions")}
+                  >
+                    전체확인
+                  </button>
                 </div>
 
                 <div className="table-wrap small">
@@ -651,106 +549,6 @@ function DashboardPage({ onLogout }) {
         )}
 
         {activePage === "inventory" && <InventoryPanel isActive={activePage === "inventory"} />}
-
-        {activePage === "product" && (
-          <section className="requests-page">
-            <article className="summary-card-grid request-summary-grid">
-              <div className="summary-soft-card">
-                <span>전체 상품 수</span>
-                <strong>{productSummary.total}</strong>
-              </div>
-              <div className="summary-soft-card">
-                <span>판매 중 상품</span>
-                <strong>{productSummary.onSale}</strong>
-              </div>
-              <div className="summary-soft-card">
-                <span>관리 대상 상품</span>
-                <strong>{productSummary.managed}</strong>
-              </div>
-              <div className="summary-soft-card">
-                <span>최근 등록 상품</span>
-                <strong>{productSummary.newItems}</strong>
-              </div>
-            </article>
-
-            <article className="panel inventory-filter-panel">
-              <div className="inventory-tools product-tools">
-                <div className="search-wrap">
-                  <label htmlFor="product-name-search">상품명 검색</label>
-                  <input
-                    id="product-name-search"
-                    value={productNameQuery}
-                    onChange={(event) => setProductNameQuery(event.target.value)}
-                    placeholder="상품명 검색"
-                  />
-                </div>
-                <div className="search-wrap">
-                  <label htmlFor="product-plu-search">PLU 코드 검색</label>
-                  <input
-                    id="product-plu-search"
-                    value={productPluQuery}
-                    onChange={(event) => setProductPluQuery(event.target.value)}
-                    placeholder="PLU 코드 검색"
-                  />
-                </div>
-                <div className="select-wrap">
-                  <label htmlFor="product-category">카테고리</label>
-                  <select
-                    id="product-category"
-                    value={productCategory}
-                    onChange={(event) => setProductCategory(event.target.value)}
-                  >
-                    {productCategories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="select-wrap">
-                  <label htmlFor="product-sales-status">판매 상태</label>
-                  <select
-                    id="product-sales-status"
-                    value={productSalesStatus}
-                    onChange={(event) => setProductSalesStatus(event.target.value)}
-                  >
-                    <option value="전체">전체</option>
-                    <option value="판매중">판매중</option>
-                    <option value="판매 대기">판매 대기</option>
-                  </select>
-                </div>
-              </div>
-            </article>
-
-            <article className="panel inventory-table-panel">
-              <div className="inventory-table-head product-table-head">
-                <span>상품명</span>
-                <span>PLU 코드</span>
-                <span>카테고리</span>
-                <span>판매 상태</span>
-                <span>최근 판매량</span>
-                <span>최근 수정일</span>
-              </div>
-
-              {filteredProductRows.map((row) => (
-                <div className="inventory-table-row product-table-row" key={row.plu}>
-                  <span className="item-name">{row.name}</span>
-                  <span className="item-plu">{row.plu}</span>
-                  <span>{row.category}</span>
-                  <span
-                    className={`request-status ${
-                      row.salesStatus === "판매중" ? "status-done" : "status-pending"
-                    }`}
-                  >
-                    {row.salesStatus}
-                  </span>
-                  <span>{row.salesVolume}개</span>
-                  <span>{row.updatedAt}</span>
-                </div>
-              ))}
-            </article>
-          </section>
-        )}
 
         {activePage === "order" && (
           <section className="requests-page">

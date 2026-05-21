@@ -7,11 +7,10 @@ const MAX_TITLE_LENGTH = 50;
 const MIN_CONTENT_LENGTH = 10;
 
 type Props = SuggestionEditScreenProps & {
-  currentUser: string;
-  updateSuggestion: (suggestion: Suggestion, currentUser: string) => Promise<boolean>;
+  updateSuggestion: (suggestion: Suggestion) => Promise<boolean>;
 };
 
-export default function SuggestionEditScreen({navigation, route, currentUser, updateSuggestion}: Props) {
+export default function SuggestionEditScreen({navigation, route, updateSuggestion}: Props) {
   const {suggestion} = route.params;
   const [title, setTitle] = useState(suggestion.title);
   const [content, setContent] = useState(suggestion.content);
@@ -48,7 +47,7 @@ export default function SuggestionEditScreen({navigation, route, currentUser, up
         updatedAt: new Date().toLocaleString('ko-KR'),
       };
 
-      const saved = await updateSuggestion(nextSuggestion, currentUser);
+      const saved = await updateSuggestion(nextSuggestion);
       if (!saved) {
         Alert.alert('수정 오류', '건의사항 수정 중 오류가 발생했습니다.');
         return;
@@ -112,5 +111,4 @@ const localStyles = StyleSheet.create({
     fontSize: 15,
   },
 });
-
 

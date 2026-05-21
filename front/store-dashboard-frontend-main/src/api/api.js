@@ -1,4 +1,21 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const AUTH_TOKEN_STORAGE_KEY = "coopsket_admin_access_token";
+
+export function getAuthToken() {
+  return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+}
+
+export function setAuthToken(token) {
+  if (token) {
+    window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+    return;
+  }
+  window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+}
+
+export function clearAuthToken() {
+  window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+}
 
 function canParseJson(response) {
   const contentType = response.headers.get("content-type") || "";
@@ -33,10 +50,12 @@ async function fetchWithErrorHandling(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;
 
   const hasBody = options.body !== undefined && !(options.body instanceof FormData);
+  const token = getAuthToken();
 
   const response = await fetch(url, {
     headers: {
       ...(hasBody ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
     ...options,
@@ -56,6 +75,22 @@ async function fetchWithErrorHandling(endpoint, options = {}) {
   }
 
   return response.text();
+}
+
+/** 관리자 로그인 */
+export function loginAdmin({ id, password }) {
+  return fetchWithErrorHandling("/api/auth/admin/login", {
+    method: "POST",
+    body: JSON.stringify({
+      loginId: id,
+      password,
+    }),
+  });
+}
+
+/** 현재 로그인 사용자 조회 */
+export function fetchCurrentUser() {
+  return fetchWithErrorHandling("/api/auth/me");
 }
 
 /** 대시보드 전체 데이터 조회 */

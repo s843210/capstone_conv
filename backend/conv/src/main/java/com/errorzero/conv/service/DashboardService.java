@@ -60,7 +60,7 @@ public class DashboardService {
         }
 
         return aiPredictionRepository
-                .findTop20ByTargetDateAndRecommendedOrderGreaterThanOrderByRecommendedOrderDesc(targetDate, 0)
+                .findAllByTargetDateAndRecommendedOrderGreaterThanOrderByRecommendedOrderDesc(targetDate, 1)
                 .stream()
                 .map(this::toOrderRecommendation)
                 .collect(Collectors.toList());

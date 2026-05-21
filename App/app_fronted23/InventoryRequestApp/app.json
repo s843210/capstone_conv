@@ -2,6 +2,7 @@
   "expo": {
     "name": "InventoryRequestApp",
     "slug": "InventoryRequestApp",
+    "scheme": "inventoryrequestapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,6 +36,9 @@
       "eas": {
         "projectId": "d7d69ed2-9c8c-4df5-86a2-5d183396dc1b"
       }
-    }
+    },
+    "plugins": [
+      "@react-native-google-signin/google-signin"
+    ]
   }
 }

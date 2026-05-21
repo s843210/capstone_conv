@@ -1,4 +1,4 @@
-import {BASE_URL} from './client';
+import {BASE_URL, getApiAuthHeaders} from './client';
 import {Suggestion} from '../types';
 
 const REQUEST_TIMEOUT_MS = 8000;
@@ -14,23 +14,22 @@ export type SuggestionRecord = {
 };
 
 type CreateSuggestionInput = {
-  writer: string;
   title: string;
   content: string;
 };
 
-type UpdateSuggestionInput = CreateSuggestionInput & {
+type UpdateSuggestionInput = {
   id: string;
+  title: string;
+  content: string;
 };
 
 type DeleteSuggestionInput = {
   id: string;
-  writer: string;
 };
 
 type BulkDeleteSuggestionInput = {
   ids: string[];
-  writer: string;
 };
 
 export type BulkDeleteSuggestionResponse = {
@@ -106,7 +105,9 @@ export function toSuggestion(record: SuggestionRecord): Suggestion {
 export async function fetchSuggestions(): Promise<Suggestion[]> {
   try {
     const params = new URLSearchParams({limit: '500'});
-    const response = await fetchWithTimeout(`${BASE_URL}/api/student/suggestions?${params.toString()}`);
+    const response = await fetchWithTimeout(`${BASE_URL}/api/student/suggestions?${params.toString()}`, {
+      headers: getApiAuthHeaders(),
+    });
 
     if (!response.ok) {
       throw new Error(await readErrorMessage(response, '건의사항 목록 조회 실패'));
@@ -126,7 +127,7 @@ export async function createSuggestion(payload: CreateSuggestionInput): Promise<
   try {
     const response = await fetchWithTimeout(`${BASE_URL}/api/student/suggestions`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', ...getApiAuthHeaders()},
       body: JSON.stringify(payload),
     });
 
@@ -147,9 +148,8 @@ export async function updateSuggestion(payload: UpdateSuggestionInput): Promise<
   try {
     const response = await fetchWithTimeout(`${BASE_URL}/api/student/suggestions/${payload.id}`, {
       method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', ...getApiAuthHeaders()},
       body: JSON.stringify({
-        writer: payload.writer,
         title: payload.title,
         content: payload.content,
       }),
@@ -170,9 +170,9 @@ export async function updateSuggestion(payload: UpdateSuggestionInput): Promise<
 
 export async function deleteSuggestion(payload: DeleteSuggestionInput): Promise<void> {
   try {
-    const params = new URLSearchParams({writer: payload.writer});
-    const response = await fetchWithTimeout(`${BASE_URL}/api/student/suggestions/${payload.id}?${params.toString()}`, {
+    const response = await fetchWithTimeout(`${BASE_URL}/api/student/suggestions/${payload.id}`, {
       method: 'DELETE',
+      headers: getApiAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -196,9 +196,8 @@ export async function deleteSuggestionsBulk(
 
     const response = await fetchWithTimeout(`${BASE_URL}/api/student/suggestions/bulk`, {
       method: 'DELETE',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', ...getApiAuthHeaders()},
       body: JSON.stringify({
-        writer: payload.writer,
         ids: numericIds,
       }),
     });

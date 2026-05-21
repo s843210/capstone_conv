@@ -22,6 +22,19 @@ spring:
       max-request-size: 20MB
 
 app:
+  auth:
+    admin:
+      login-id: ${ADMIN_LOGIN_ID:}
+      password: ${ADMIN_PASSWORD:}
+      name: ${ADMIN_NAME:admin}
+      email: ${ADMIN_EMAIL:}
+    google:
+      client-ids: ${GOOGLE_CLIENT_IDS:}
+      allowed-domain: ${GOOGLE_ALLOWED_DOMAIN:}
+  jwt:
+    secret: ${JWT_SECRET:local-development-jwt-secret-change-this-before-release}
+    issuer: ${JWT_ISSUER:campus-store}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
   ai:
     base-url: ${AI_BASE_URL:http://127.0.0.1:8000}
   sales:

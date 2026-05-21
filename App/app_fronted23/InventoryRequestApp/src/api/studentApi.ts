@@ -1,5 +1,5 @@
 ﻿// 학생 상품 조회/요청 저장 API 함수 모음
-import {BASE_URL} from './client';
+import {BASE_URL, getApiAuthHeaders} from './client';
 import {Product} from '../types';
 
 const REQUEST_TIMEOUT_MS = 8000;
@@ -10,7 +10,6 @@ export type StudentRequestItemInput = {
 };
 
 export type SubmitStudentRequestInput = {
-  studentId: string;
   salesDate?: string;
   items: StudentRequestItemInput[];
 };
@@ -24,7 +23,6 @@ export type SubmitStudentRequestResponse = {
 };
 
 export type DeleteStudentRequestInput = {
-  studentId: string;
   salesDate?: string;
   pluCode: string;
 };
@@ -66,7 +64,9 @@ async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Respon
 
 export async function fetchStudentProducts(): Promise<Product[]> {
   try {
-    const response = await fetchWithTimeout(`${BASE_URL}/api/student/products`);
+    const response = await fetchWithTimeout(`${BASE_URL}/api/student/products`, {
+      headers: getApiAuthHeaders(),
+    });
 
     if (!response.ok) {
       throw new Error('상품 목록 조회 실패');
@@ -89,9 +89,9 @@ export async function submitStudentRequest(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...getApiAuthHeaders(),
       },
       body: JSON.stringify({
-        studentId: payload.studentId,
         salesDate: payload.salesDate,
         items: payload.items,
       }),
@@ -121,14 +121,15 @@ export async function submitStudentRequest(
   }
 }
 
-export async function fetchStudentRequests(studentId: string): Promise<StudentRequestRecord[]> {
+export async function fetchStudentRequests(): Promise<StudentRequestRecord[]> {
   try {
     const params = new URLSearchParams({
-      studentId,
       limit: '100',
     });
 
-    const response = await fetchWithTimeout(`${BASE_URL}/api/student/requests?${params.toString()}`);
+    const response = await fetchWithTimeout(`${BASE_URL}/api/student/requests?${params.toString()}`, {
+      headers: getApiAuthHeaders(),
+    });
 
     if (!response.ok) {
       throw new Error('내 요청 목록 조회 실패');
@@ -148,7 +149,6 @@ export async function deleteStudentRequest(
 ): Promise<void> {
   try {
     const params = new URLSearchParams({
-      studentId: payload.studentId,
       pluCode: payload.pluCode,
     });
 
@@ -158,6 +158,7 @@ export async function deleteStudentRequest(
 
     const response = await fetchWithTimeout(`${BASE_URL}/api/student/requests?${params.toString()}`, {
       method: 'DELETE',
+      headers: getApiAuthHeaders(),
     });
 
     if (!response.ok) {

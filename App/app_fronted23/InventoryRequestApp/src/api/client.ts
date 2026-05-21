@@ -3,4 +3,20 @@
 // - iOS Simulator: http://localhost:8080
 // - 실제 휴대폰: http://백엔드컴퓨터IP:8080
 // - ngrok: https://xxxx.ngrok-free.app
-export const BASE_URL = 'http://10.181.253.230:8080';
+export const BASE_URL = 'http://10.63.213.230:8080';
+
+let apiAuthToken: string | null = null;
+
+export function setApiAuthToken(token: string | null): void {
+  apiAuthToken = token;
+}
+
+export function getApiAuthHeaders(): Record<string, string> {
+  if (!apiAuthToken) {
+    return {};
+  }
+
+  return {
+    Authorization: `Bearer ${apiAuthToken}`,
+  };
+}

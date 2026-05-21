@@ -16,6 +16,8 @@ import SuggestionDetailScreen from './src/screens/SuggestionDetailScreen';
 import SuggestionEditScreen from './src/screens/SuggestionEditScreen';
 import {STORAGE_KEYS} from './src/data/appConstants';
 import {loadSuggestions, saveSuggestions} from './src/data/suggestionStorage';
+import {loginGoogle, loginStudentDev} from './src/api/authApi';
+import {setApiAuthToken} from './src/api/client';
 import {deleteStudentRequest, fetchStudentRequests, submitStudentRequest} from './src/api/studentApi';
 import {
   createSuggestion,
@@ -48,9 +50,10 @@ export default function App() {
       let nextUser = '';
 
       try {
-        const [storedRequests, storedUser, storedSuggestions] = await Promise.all([
+        const [storedRequests, storedUser, storedAuthToken, storedSuggestions] = await Promise.all([
           AsyncStorage.getItem(STORAGE_KEYS.requests),
           AsyncStorage.getItem(STORAGE_KEYS.user),
+          AsyncStorage.getItem(STORAGE_KEYS.authToken),
           loadSuggestions(),
           new Promise(resolve => setTimeout(resolve, SPLASH_TEST_DELAY_MS)),
         ]);
@@ -66,7 +69,11 @@ export default function App() {
           }
         }
 
-        if (storedUser && storedUser.trim()) {
+        if (storedAuthToken && storedAuthToken.trim()) {
+          setApiAuthToken(storedAuthToken.trim());
+        }
+
+        if (storedUser && storedUser.trim() && storedAuthToken && storedAuthToken.trim()) {
           nextUser = storedUser.trim();
         }
 
@@ -94,7 +101,7 @@ export default function App() {
 
     const syncRequests = async () => {
       try {
-        const serverRequests = await fetchStudentRequests(currentUser);
+        const serverRequests = await fetchStudentRequests();
         if (cancelled) {
           return;
         }
@@ -173,7 +180,6 @@ export default function App() {
       }
 
       await deleteStudentRequest({
-        studentId: currentUser,
         salesDate: targetRequest.salesDate,
         pluCode: targetRequest.pluCode,
       });
@@ -195,7 +201,6 @@ export default function App() {
       }
 
       const response = await submitStudentRequest({
-        studentId: currentUser,
         salesDate: targetRequest.salesDate,
         items: [
           {
@@ -218,8 +223,34 @@ export default function App() {
 
   const loginUser = async (name: string): Promise<boolean> => {
     try {
-      await AsyncStorage.setItem(STORAGE_KEYS.user, name);
-      setCurrentUser(name);
+      const normalizedName = name.trim();
+      const auth = await loginStudentDev({
+        loginId: normalizedName,
+        name: normalizedName,
+      });
+      const loginId = auth.user.loginId || normalizedName;
+      await AsyncStorage.multiSet([
+        [STORAGE_KEYS.user, loginId],
+        [STORAGE_KEYS.authToken, auth.accessToken],
+      ]);
+      setApiAuthToken(auth.accessToken);
+      setCurrentUser(loginId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const loginGoogleUser = async (idToken: string): Promise<boolean> => {
+    try {
+      const auth = await loginGoogle({idToken});
+      const loginId = auth.user.loginId || auth.user.email || auth.user.name;
+      await AsyncStorage.multiSet([
+        [STORAGE_KEYS.user, loginId],
+        [STORAGE_KEYS.authToken, auth.accessToken],
+      ]);
+      setApiAuthToken(auth.accessToken);
+      setCurrentUser(loginId);
       return true;
     } catch {
       return false;
@@ -229,7 +260,6 @@ export default function App() {
   const addSuggestion = async (suggestion: Suggestion): Promise<boolean> => {
     try {
       const savedSuggestion = await createSuggestion({
-        writer: currentUser || suggestion.writer,
         title: suggestion.title,
         content: suggestion.content,
       });
@@ -244,7 +274,6 @@ export default function App() {
 
   const updateSuggestion = async (
     nextSuggestion: Suggestion,
-    requestUser: string,
   ): Promise<boolean> => {
     try {
       const currentSuggestions = suggestionsRef.current;
@@ -255,7 +284,6 @@ export default function App() {
 
       const savedSuggestion = await updateSuggestionOnServer({
         id: targetSuggestion.id,
-        writer: requestUser,
         title: nextSuggestion.title,
         content: nextSuggestion.content,
       });
@@ -268,7 +296,7 @@ export default function App() {
     }
   };
 
-  const removeSuggestion = async (suggestionId: string, requestUser: string): Promise<boolean> => {
+  const removeSuggestion = async (suggestionId: string): Promise<boolean> => {
     try {
       const currentSuggestions = suggestionsRef.current;
       const targetSuggestion = currentSuggestions.find(item => item.id === suggestionId);
@@ -278,7 +306,6 @@ export default function App() {
 
       await deleteSuggestionFromServer({
         id: targetSuggestion.id,
-        writer: requestUser,
       });
 
       const nextSuggestions = currentSuggestions.filter(item => item.id !== suggestionId);
@@ -292,7 +319,6 @@ export default function App() {
 
   const removeSuggestionsBulk = async (
     suggestionIds: string[],
-    requestUser: string,
   ): Promise<{removedCount: number; failedCount: number}> => {
     try {
       let removedCount = 0;
@@ -308,7 +334,6 @@ export default function App() {
 
       const response = await deleteSuggestionsBulkFromServer({
         ids: targetIds,
-        writer: requestUser,
       });
       removedCount = response.removedCount;
       failedCount = suggestionIds.length - removedCount;
@@ -324,7 +349,8 @@ export default function App() {
 
   const logoutUser = async (): Promise<boolean> => {
     try {
-      await AsyncStorage.removeItem(STORAGE_KEYS.user);
+      await AsyncStorage.multiRemove([STORAGE_KEYS.user, STORAGE_KEYS.authToken]);
+      setApiAuthToken(null);
       setCurrentUser('');
       return true;
     } catch {
@@ -342,14 +368,14 @@ export default function App() {
         initialRouteName={currentUser ? 'ProductList' : 'Login'}
         screenOptions={{headerShown: true}}>
         <Stack.Screen name="Login" options={{headerShown: false}}>
-          {props => <LoginScreen {...props} loginUser={loginUser} />}
+          {props => <LoginScreen {...props} loginUser={loginUser} loginGoogleUser={loginGoogleUser} />}
         </Stack.Screen>
         <Stack.Screen name="ProductList" options={{headerShown: false, title: '상품 목록'}}>
           {props => <ProductListScreen {...props} currentUser={currentUser} logoutUser={logoutUser} />}
         </Stack.Screen>
         <Stack.Screen name="ProductDetail" component={ProductDetailScreen} options={{title: '상품 상세'}} />
         <Stack.Screen name="RequestQty" options={{title: '수량 요청'}}>
-          {props => <RequestQtyScreen {...props} addRequest={addRequest} currentUser={currentUser} />}
+          {props => <RequestQtyScreen {...props} addRequest={addRequest} />}
         </Stack.Screen>
         <Stack.Screen name="RequestDone" component={RequestDoneScreen} options={{title: '요청 완료'}} />
         <Stack.Screen name="MyRequests" options={{title: '내 요청 목록', headerBackTitle: '상품 목록'}}>
@@ -369,7 +395,6 @@ export default function App() {
             <SuggestionsScreen
               {...props}
               suggestions={suggestions}
-              currentUser={currentUser}
               removeSuggestion={removeSuggestion}
               removeSuggestionsBulk={removeSuggestionsBulk}
             />
@@ -388,7 +413,6 @@ export default function App() {
           {props => (
             <SuggestionEditScreen
               {...props}
-              currentUser={currentUser}
               updateSuggestion={updateSuggestion}
             />
           )}
@@ -397,7 +421,6 @@ export default function App() {
           {props => (
             <SuggestionDetailScreen
               {...props}
-              currentUser={currentUser}
               removeSuggestion={removeSuggestion}
             />
           )}
@@ -406,10 +429,6 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-
-
-
 
 
 

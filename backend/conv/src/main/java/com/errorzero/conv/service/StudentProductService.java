@@ -56,8 +56,8 @@ public class StudentProductService {
     }
 
     @Transactional
-    public StudentRequestResponseDto submitRequest(StudentRequestCreateDto request) {
-        String studentId = request.getStudentId().trim();
+    public StudentRequestResponseDto submitRequest(String studentId, StudentRequestCreateDto request) {
+        String safeStudentId = required(studentId, "studentId");
         LocalDate salesDate = resolveSalesDate(request.getSalesDate());
         List<StudentRequestCreateDto.ItemDto> items = request.getItems();
 
@@ -69,12 +69,12 @@ public class StudentProductService {
         for (StudentRequestCreateDto.ItemDto item : items) {
             String pluCode = item.getPluCode().trim();
             int quantity = item.getQuantity();
-            studentProductRequestRepository.upsert(studentId, salesDate, pluCode, quantity);
+            studentProductRequestRepository.upsert(safeStudentId, salesDate, pluCode, quantity);
             totalQuantity += quantity;
         }
 
         return StudentRequestResponseDto.builder()
-                .studentId(studentId)
+                .studentId(safeStudentId)
                 .salesDate(salesDate)
                 .itemCount(items.size())
                 .totalQuantity(totalQuantity)
@@ -167,6 +167,14 @@ public class StudentProductService {
             return null;
         }
         return value.trim();
+    }
+
+    private String required(String value, String fieldName) {
+        String normalized = normalize(value);
+        if (normalized == null) {
+            throw new IllegalArgumentException(fieldName + "는 필수입니다");
+        }
+        return normalized;
     }
 
     private LocalDate resolveSalesDate(LocalDate salesDate) {

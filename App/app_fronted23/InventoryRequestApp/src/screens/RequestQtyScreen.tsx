@@ -7,10 +7,9 @@ import {submitStudentRequest} from '../api/studentApi';
 
 type Props = RequestQtyScreenProps & {
   addRequest: (item: RequestItem) => Promise<boolean>;
-  currentUser: string;
 };
 
-export default function RequestQtyScreen({navigation, route, addRequest, currentUser}: Props) {
+export default function RequestQtyScreen({navigation, route, addRequest}: Props) {
   const {product} = route.params;
   const [qty, setQty] = useState('1');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,7 +63,6 @@ export default function RequestQtyScreen({navigation, route, addRequest, current
           try {
             // 백엔드에 학생 요청을 먼저 저장
             const response = await submitStudentRequest({
-              studentId: currentUser,
               items: [
                 {
                   pluCode: product.pluCode,

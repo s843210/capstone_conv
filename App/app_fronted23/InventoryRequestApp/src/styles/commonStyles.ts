@@ -85,6 +85,41 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 15,
   },
+  loginPrimaryBtnDisabled: {
+    opacity: 0.65,
+  },
+  loginGoogleBtn: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+  },
+  loginGoogleBtnDisabled: {
+    opacity: 0.65,
+  },
+  loginGoogleBtnText: {
+    color: '#1F2937',
+    fontWeight: '800',
+    fontSize: 15,
+  },
+  loginDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  loginDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+  },
+  loginDividerText: {
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 12,
+    fontWeight: '700',
+    marginHorizontal: 10,
+  },
   heroCard: {
     marginTop: 36,
     borderRadius: 24,
@@ -380,6 +415,5 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
   },
 });
-
 
 

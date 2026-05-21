@@ -1,7 +1,7 @@
 ﻿import { useState } from "react";
 import "./LoginPage.css";
 
-function LoginPage({ onLogin }) {
+function LoginPage({ onLogin, isLoading = false, serverError = "" }) {
   const [form, setForm] = useState({
     id: "",
     password: "",
@@ -14,8 +14,12 @@ function LoginPage({ onLogin }) {
     if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isLoading) {
+      return;
+    }
 
     if (!form.id.trim()) {
       setError("아이디를 입력해주세요.");
@@ -27,8 +31,10 @@ function LoginPage({ onLogin }) {
       return;
     }
 
-    onLogin(form);
+    await onLogin(form);
   };
+
+  const visibleError = error || serverError;
 
   return (
     <div className="login-page">
@@ -90,6 +96,7 @@ function LoginPage({ onLogin }) {
               placeholder="아이디를 입력하세요"
               value={form.id}
               onChange={handleChange}
+              disabled={isLoading}
             />
 
             <label htmlFor="password">비밀번호</label>
@@ -101,12 +108,13 @@ function LoginPage({ onLogin }) {
               placeholder="비밀번호를 입력하세요"
               value={form.password}
               onChange={handleChange}
+              disabled={isLoading}
             />
 
-            {error && <p className="login-error">{error}</p>}
+            {visibleError && <p className="login-error">{visibleError}</p>}
 
-            <button type="submit" className="login-button">
-              로그인
+            <button type="submit" className="login-button" disabled={isLoading}>
+              {isLoading ? "로그인 중..." : "로그인"}
             </button>
           </form>
         </section>

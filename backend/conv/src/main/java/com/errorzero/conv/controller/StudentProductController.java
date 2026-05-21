@@ -1,9 +1,11 @@
 package com.errorzero.conv.controller;
 
+import com.errorzero.conv.domain.UserRole;
 import com.errorzero.conv.dto.StudentProductResponseDto;
 import com.errorzero.conv.dto.StudentRequestCreateDto;
 import com.errorzero.conv.dto.StudentRequestDashboardResponseDto;
 import com.errorzero.conv.dto.StudentRequestResponseDto;
+import com.errorzero.conv.security.AuthUserPrincipal;
 import com.errorzero.conv.service.StudentProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +16,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,27 +52,51 @@ public class StudentProductController {
     @GetMapping("/requests")
     public ResponseEntity<List<StudentRequestDashboardResponseDto>> getRequests(
             @RequestParam(defaultValue = "100") @Min(1) @Max(500) int limit,
-            @RequestParam(defaultValue = "") String studentId
+            @RequestParam(defaultValue = "") String studentId,
+            @AuthenticationPrincipal AuthUserPrincipal principal
     ) {
-        return ResponseEntity.ok(studentProductService.getDashboardRequests(limit, studentId));
+        return ResponseEntity.ok(studentProductService.getDashboardRequests(
+                limit,
+                resolveStudentFilter(principal, studentId)
+        ));
     }
 
     @Operation(summary = "학생 상품 신청 저장", description = "학생이 선택한 상품별 신청 수량을 저장합니다. 같은 학생/판매일/상품으로 다시 신청하면 수량을 갱신합니다.")
     @PostMapping("/requests")
     public ResponseEntity<StudentRequestResponseDto> submitRequest(
-            @Valid @RequestBody StudentRequestCreateDto request
+            @Valid @RequestBody StudentRequestCreateDto request,
+            @AuthenticationPrincipal AuthUserPrincipal principal
     ) {
-        return ResponseEntity.ok(studentProductService.submitRequest(request));
+        return ResponseEntity.ok(studentProductService.submitRequest(resolveStudentId(principal), request));
     }
 
     @Operation(summary = "학생 상품 신청 삭제", description = "학생 앱 내 요청 목록에서 삭제한 상품 신청을 대시보드에서도 제거합니다.")
     @DeleteMapping("/requests")
     public ResponseEntity<Void> deleteRequest(
-            @RequestParam @NotBlank(message = "studentId는 필수입니다") String studentId,
+            @RequestParam(defaultValue = "") String studentId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate salesDate,
-            @RequestParam @NotBlank(message = "pluCode는 필수입니다") String pluCode
+            @RequestParam @NotBlank(message = "pluCode는 필수입니다") String pluCode,
+            @AuthenticationPrincipal AuthUserPrincipal principal
     ) {
-        studentProductService.deleteRequest(studentId, salesDate, pluCode);
+        studentProductService.deleteRequest(resolveStudentFilter(principal, studentId), salesDate, pluCode);
         return ResponseEntity.noContent().build();
+    }
+
+    private String resolveStudentFilter(AuthUserPrincipal principal, String requestedStudentId) {
+        if (isAdmin(principal)) {
+            return requestedStudentId;
+        }
+        return resolveStudentId(principal);
+    }
+
+    private boolean isAdmin(AuthUserPrincipal principal) {
+        return principal != null && principal.role() == UserRole.ADMIN;
+    }
+
+    private String resolveStudentId(AuthUserPrincipal principal) {
+        if (principal == null || principal.loginId() == null || principal.loginId().isBlank()) {
+            throw new IllegalArgumentException("학생 인증 정보가 없습니다.");
+        }
+        return principal.loginId().trim();
     }
 }

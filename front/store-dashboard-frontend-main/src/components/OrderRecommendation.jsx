@@ -1,4 +1,4 @@
-﻿function OrderRecommendation({ orderList }) {
+function OrderRecommendation({ orderList, onViewAll }) {
   const rows = orderList.slice(0, 10);
 
   return (
@@ -8,7 +8,7 @@
           <span className="head-icon purple" aria-hidden="true">📊</span>
           우선 발주 추천 상품 TOP10
         </h2>
-        <button className="mini-action" type="button">전체보기</button>
+        <button className="mini-action" type="button" onClick={onViewAll}>전체보기</button>
       </div>
 
       <div className="table-wrap">

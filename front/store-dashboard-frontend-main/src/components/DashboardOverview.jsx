@@ -11,7 +11,9 @@ function DashboardOverview({
   orderList,
   insights,
   onNavigateInventory,
+  onNavigateOrder,
   onNavigateStudentRequests,
+  onNavigateSuggestions,
 }) {
   const now = new Date();
   const nowLabel = now.toLocaleString("ko-KR", {
@@ -33,7 +35,7 @@ function DashboardOverview({
           onNavigateInventory={onNavigateInventory}
         />
 
-        <OrderRecommendation orderList={orderList} />
+        <OrderRecommendation orderList={orderList} onViewAll={onNavigateOrder} />
 
         <StudentRequestPanel
           limit={15}
@@ -41,7 +43,7 @@ function DashboardOverview({
           onViewAll={onNavigateStudentRequests}
         />
 
-        <InsightPanel insights={insights} />
+        <InsightPanel insights={insights} onViewAll={onNavigateSuggestions} />
       </section>
 
       <section className="status-bar">

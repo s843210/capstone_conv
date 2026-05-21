@@ -14,11 +14,9 @@ import {Suggestion, SuggestionsScreenProps} from '../types';
 
 type Props = SuggestionsScreenProps & {
   suggestions: Suggestion[];
-  currentUser: string;
-  removeSuggestion: (suggestionId: string, requestUser: string) => Promise<boolean>;
+  removeSuggestion: (suggestionId: string) => Promise<boolean>;
   removeSuggestionsBulk: (
     suggestionIds: string[],
-    requestUser: string,
   ) => Promise<{removedCount: number; failedCount: number}>;
 };
 
@@ -119,7 +117,6 @@ function ItemCard({item, isSelectMode, isSelected, onToggleSelect, onOpenDetail}
 export default function SuggestionsScreen({
   navigation,
   suggestions,
-  currentUser,
   removeSuggestion: _removeSuggestion,
   removeSuggestionsBulk,
 }: Props) {
@@ -171,7 +168,7 @@ export default function SuggestionsScreen({
           onPress: async () => {
             setIsDeleting(true);
             try {
-              const {removedCount, failedCount} = await removeSuggestionsBulk(selectedSuggestionIds, currentUser);
+              const {removedCount, failedCount} = await removeSuggestionsBulk(selectedSuggestionIds);
 
               if (removedCount === 0) {
                 Alert.alert('삭제 오류', '삭제할 수 있는 건의사항이 없습니다.');

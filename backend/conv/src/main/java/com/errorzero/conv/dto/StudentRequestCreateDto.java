@@ -17,7 +17,6 @@ import java.util.List;
 @NoArgsConstructor
 public class StudentRequestCreateDto {
 
-    @NotBlank(message = "studentId는 필수입니다")
     private String studentId;
 
     private LocalDate salesDate;

@@ -82,11 +82,33 @@ class StudentProductServiceTest {
         when(studentProductRequestRepository.upsert("20240001", salesDate, "8809962586353", 2))
                 .thenReturn(1);
 
-        StudentRequestResponseDto response = studentProductService.submitRequest(request);
+        StudentRequestResponseDto response = studentProductService.submitRequest("20240001", request);
 
         assertThat(response.getStudentId()).isEqualTo("20240001");
         assertThat(response.getItemCount()).isEqualTo(1);
         assertThat(response.getTotalQuantity()).isEqualTo(2);
+        verify(studentProductRequestRepository).upsert("20240001", salesDate, "8809962586353", 2);
+    }
+
+    @Test
+    void submitRequest_usesAuthenticatedStudentIdOverPayload() {
+        LocalDate salesDate = LocalDate.of(2026, 4, 24);
+        StudentRequestCreateDto request = request("spoof-student", salesDate, item("8809962586353", 2));
+        Product product = Product.builder()
+                .pluCode("8809962586353")
+                .name("대정)참치마요삼각김밥2편")
+                .category("주먹밥")
+                .currentStock(10)
+                .isActive(true)
+                .build();
+
+        when(productRepository.findAllByPluCodeInAndIsActiveTrue(anyCollection())).thenReturn(List.of(product));
+        when(studentProductRequestRepository.upsert("20240001", salesDate, "8809962586353", 2))
+                .thenReturn(1);
+
+        StudentRequestResponseDto response = studentProductService.submitRequest("20240001", request);
+
+        assertThat(response.getStudentId()).isEqualTo("20240001");
         verify(studentProductRequestRepository).upsert("20240001", salesDate, "8809962586353", 2);
     }
 
@@ -100,7 +122,7 @@ class StudentProductServiceTest {
                 item(" 8809962586353 ", 2)
         );
 
-        assertThatThrownBy(() -> studentProductService.submitRequest(request))
+        assertThatThrownBy(() -> studentProductService.submitRequest("20240001", request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("중복된 상품");
 
@@ -115,7 +137,7 @@ class StudentProductServiceTest {
 
         when(productRepository.findAllByPluCodeInAndIsActiveTrue(anyCollection())).thenReturn(List.of());
 
-        assertThatThrownBy(() -> studentProductService.submitRequest(request))
+        assertThatThrownBy(() -> studentProductService.submitRequest("20240001", request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("활성 상품");
     }

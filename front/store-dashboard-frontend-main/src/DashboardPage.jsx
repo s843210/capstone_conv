@@ -19,7 +19,7 @@ const PAGE_META = {
   inventory: { title: "재고 관리", description: "현재 재고 상태와 부족 상품을 확인할 수 있습니다." },
   order: { title: "발주 추천", description: "AI 추천 발주량과 발주 현황을 확인할 수 있습니다." },
   analysis: { title: "데이터 분석", description: "판매/재고 데이터를 기반으로 운영 현황을 분석합니다." },
-  studentRequests: { title: "학생 신청 관리", description: "학생 상품 요청과 처리 상태를 관리할 수 있습니다." },
+  studentRequests: { title: "학생 신청 관리", description: "학생 상품 신청 목록을 확인할 수 있습니다." },
   suggestions: { title: "건의사항", description: "사용자 건의사항과 의견을 확인할 수 있습니다." },
   settings: { title: "운영 관리", description: "데이터 업로드 및 운영 설정을 관리합니다." },
 };
@@ -35,13 +35,6 @@ function formatRequestedAt(value) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function normalizeSuggestionStatus(value) {
-  const status = String(value || "UNREAD").trim().toUpperCase();
-  if (status === "DONE") return { label: "반영완료", code: "done" };
-  if (status === "REVIEWING") return { label: "검토중", code: "reviewing" };
-  return { label: "미확인", code: "unread" };
 }
 
 function formatDisplayDate(value) {
@@ -90,7 +83,6 @@ function DashboardPage({ onLogout }) {
   const [orderSort, setOrderSort] = useState("desc");
   const [orderStockFilter, setOrderStockFilter] = useState("전체");
   const [suggestionQuery, setSuggestionQuery] = useState("");
-  const [suggestionStatus, setSuggestionStatus] = useState("전체");
   const [suggestionSort, setSuggestionSort] = useState("latest");
 
   const {
@@ -98,9 +90,6 @@ function DashboardPage({ onLogout }) {
     error,
     inventoryList,
     orderList,
-    totalItems,
-    normalItems,
-    lowStockItems,
     refreshDashboard,
   } = useDashboardData();
 
@@ -150,13 +139,14 @@ function DashboardPage({ onLogout }) {
   const inventoryRows = useMemo(
     () =>
       [...inventoryList]
-        .sort((a, b) => {
-          const ratioA = a.target > 0 ? a.stock / a.target : 1;
-          const ratioB = b.target > 0 ? b.stock / b.target : 1;
-          return ratioA - ratioB;
-        })
+        .sort((a, b) => Number(b.salesQty || 0) - Number(a.salesQty || 0))
         .slice(0, 10),
     [inventoryList],
+  );
+
+  const maxInventorySales = useMemo(
+    () => Math.max(...inventoryRows.map((item) => Number(item.salesQty || 0)), 1),
+    [inventoryRows],
   );
 
   const suggestionRows = useMemo(
@@ -165,7 +155,6 @@ function DashboardPage({ onLogout }) {
       title: item.title,
       preview: item.content,
       writer: item.writer,
-      status: item.status,
       time: formatRequestedAt(item.updatedAt || item.createdAt),
     })),
     [suggestions],
@@ -200,22 +189,15 @@ function DashboardPage({ onLogout }) {
   const orderRows = useMemo(
     () =>
       orderList.map((item) => {
-        const category =
-          item.name?.includes("음료")
-            ? "음료"
-            : item.name?.includes("디저트") || item.name?.includes("빵")
-              ? "디저트"
-              : item.name?.includes("즉석") || item.name?.includes("간편")
-                ? "간편식"
-                : "기타";
+        const category = item.category || "기타/미분류";
         const stock = Number(item.current || 0);
+        const predicted = Number(item.predicted || 0);
         const recommended = Number(item.recommended || 0);
-        const forecast = stock + recommended;
         return {
           name: item.name,
           category,
           stock,
-          forecast,
+          predicted,
           recommended,
         };
       }),
@@ -231,8 +213,8 @@ function DashboardPage({ onLogout }) {
     const byText = orderRows.filter((row) => !orderQuery || row.name.toLowerCase().includes(orderQuery.toLowerCase()));
     const byCategory = byText.filter((row) => orderCategory === "전체" || row.category === orderCategory);
     const byStock = byCategory.filter((row) => {
-      if (orderStockFilter === "부족") return row.stock < row.forecast * 0.5;
-      if (orderStockFilter === "여유") return row.stock >= row.forecast * 0.5;
+      if (orderStockFilter === "부족") return row.stock < row.predicted * 0.75;
+      if (orderStockFilter === "여유") return row.stock >= row.predicted * 0.75;
       return true;
     });
     const sorted = [...byStock].sort((a, b) =>
@@ -244,7 +226,7 @@ function DashboardPage({ onLogout }) {
   const orderSummary = useMemo(() => {
     const targetCount = filteredOrderRows.length;
     const totalQty = filteredOrderRows.reduce((sum, row) => sum + row.recommended, 0);
-    const priority = filteredOrderRows.filter((row) => row.stock < row.forecast * 0.5).length;
+    const priority = filteredOrderRows.filter((row) => row.stock < row.predicted * 0.75).length;
     const predictionDate = extractPredictionDate(orderList);
     return {
       targetCount,
@@ -266,42 +248,19 @@ function DashboardPage({ onLogout }) {
     };
   }, [inventoryList, orderList, nowLabel]);
 
-  const suggestionRowsDetailed = useMemo(
-    () =>
-      suggestionRows.map((row) => {
-        const status = normalizeSuggestionStatus(row.status);
-        const statusCode = status.code;
-        const statusLabel = status.label;
-        return { ...row, statusCode, statusLabel };
-      }),
-    [suggestionRows],
-  );
-
   const filteredSuggestionRows = useMemo(() => {
-    let list = suggestionRowsDetailed.filter(
+    let list = suggestionRows.filter(
       (item) =>
         !suggestionQuery ||
         item.title.toLowerCase().includes(suggestionQuery.toLowerCase()) ||
         item.preview.toLowerCase().includes(suggestionQuery.toLowerCase()),
     );
 
-    if (suggestionStatus !== "전체") {
-      list = list.filter((item) => item.statusLabel === suggestionStatus);
-    }
-
     if (suggestionSort === "oldest") {
       list = [...list].reverse();
     }
     return list;
-  }, [suggestionRowsDetailed, suggestionQuery, suggestionStatus, suggestionSort]);
-
-  const suggestionSummary = useMemo(() => {
-    const total = suggestionRowsDetailed.length;
-    const unread = suggestionRowsDetailed.filter((item) => item.statusCode === "unread").length;
-    const reviewing = suggestionRowsDetailed.filter((item) => item.statusCode === "reviewing").length;
-    const done = suggestionRowsDetailed.filter((item) => item.statusCode === "done").length;
-    return { total, unread, reviewing, done };
-  }, [suggestionRowsDetailed]);
+  }, [suggestionRows, suggestionQuery, suggestionSort]);
 
   const analysisCategoryRows = useMemo(() => {
     const groups = new Map();
@@ -383,54 +342,42 @@ function DashboardPage({ onLogout }) {
                     <span className="head-icon" aria-hidden="true">📦</span>
                     재고 현황
                   </h2>
+                  <button
+                    className="mini-action primary"
+                    type="button"
+                    onClick={() => setActivePage("inventory")}
+                  >
+                    전체보기
+                  </button>
                 </div>
 
-                <div className="stat-grid">
-                  <div className="stat-card">
-                    <span className="stat-label">전체 품목 수</span>
-                    <span className="stat-value">{totalItems}</span>
-                    <em>개</em>
-                  </div>
-                  <div className="stat-card">
-                    <span className="stat-label">정상 재고</span>
-                    <span className="stat-value">{normalItems}</span>
-                    <em>개</em>
-                  </div>
-                  <div className="stat-card">
-                    <span className="stat-label">부족 품목</span>
-                    <span className="stat-value">{lowStockItems}</span>
-                    <em>개</em>
-                  </div>
-                  <div className="stat-card">
-                    <span className="stat-label">정상 비율</span>
-                    <span className="stat-value">
-                      {totalItems > 0 ? Math.round((normalItems / totalItems) * 100) : 0}
-                    </span>
-                    <em>%</em>
-                  </div>
-                </div>
-
-                <div className="inventory-bottom">
-                  <div className="low-stock-box">
-                    <span>재고 부족 경고</span>
-                    <strong>{lowStockItems}</strong>
-                    <em>건</em>
-                  </div>
-                </div>
-
-                <div className="table-wrap">
-                  <div className="thead row">
-                    <span>순위</span>
-                    <span>상품명</span>
-                    <span>재고/기준</span>
-                  </div>
-                  {inventoryRows.map((item, idx) => (
-                    <div className="row" key={`${item.name}-${idx}`}>
-                      <span className="rank">{idx + 1}</span>
-                      <span className="prod">{item.name}</span>
-                      <span className="qty-badge">{item.stock}/{item.target}</span>
+                <div className="sales-leaderboard">
+                  <div className="leaderboard-head">
+                    <div>
+                      <span>최근 파일 판매량</span>
+                      <strong>TOP 10</strong>
                     </div>
-                  ))}
+                    <span className="leaderboard-chip">최신 업로드</span>
+                  </div>
+
+                  <div className="leaderboard-list">
+                    {inventoryRows.map((item, idx) => {
+                      const salesQty = Number(item.salesQty || 0);
+                      const percentage = Math.max(8, Math.round((salesQty / maxInventorySales) * 100));
+                      return (
+                        <div className={`leaderboard-item rank-${idx + 1}`} key={`${item.name}-${idx}`}>
+                          <span className="leaderboard-rank">{idx + 1}</span>
+                          <div className="leaderboard-info">
+                            <strong>{item.name}</strong>
+                            <div className="leaderboard-bar" aria-hidden="true">
+                              <span style={{ width: `${percentage}%` }} />
+                            </div>
+                          </div>
+                          <span className="leaderboard-value">{salesQty}개</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </article>
 
@@ -476,14 +423,12 @@ function DashboardPage({ onLogout }) {
                   <div className="thead row request-head">
                     <span>요청 상품명</span>
                     <span>요청 수량</span>
-                    <span>요청 상태</span>
                     <span>요청 일시</span>
                   </div>
                   {studentRequests.slice(0, 15).map((request) => (
                     <div className="row request-row" key={`${request.studentId}-${request.salesDate}-${request.pluCode}`}>
                       <span className="prod">{request.productName}</span>
                       <span>{request.quantity}개</span>
-                      <span className="request-status">검토중</span>
                       <span>{formatRequestedAt(request.requestedAt)}</span>
                     </div>
                   ))}
@@ -539,10 +484,6 @@ function DashboardPage({ onLogout }) {
               <div className="status-cell">
                 <span>다음 점검 항목</span>
                 <strong>재고/요청 동기화</strong>
-              </div>
-              <div className="status-cell">
-                <span>데이터 업데이트 주기</span>
-                <strong>약 1분</strong>
               </div>
             </section>
           </>
@@ -637,12 +578,12 @@ function DashboardPage({ onLogout }) {
                   <span>{idx + 1}</span>
                   <span className="item-name">{row.name}</span>
                   <span>{row.stock}개</span>
-                  <span>{row.forecast}개</span>
+                  <span>{row.predicted}개</span>
                   <span>
                     <em className="qty-badge">{row.recommended}개</em>
                   </span>
                   <span>
-                    {row.stock < row.forecast * 0.5 ? (
+                    {row.stock < row.predicted * 0.75 ? (
                       <span className="soft-status is-check">우선</span>
                     ) : (
                       <span className="soft-status is-watch">일반</span>
@@ -731,25 +672,6 @@ function DashboardPage({ onLogout }) {
 
         {activePage === "suggestions" && (
           <section className="requests-page">
-            <article className="summary-card-grid request-summary-grid">
-              <div className="summary-soft-card">
-                <span>전체 건의사항 수</span>
-                <strong>{suggestionSummary.total}</strong>
-              </div>
-              <div className="summary-soft-card">
-                <span>미확인</span>
-                <strong>{suggestionSummary.unread}</strong>
-              </div>
-              <div className="summary-soft-card">
-                <span>검토 중</span>
-                <strong>{suggestionSummary.reviewing}</strong>
-              </div>
-              <div className="summary-soft-card">
-                <span>반영 완료</span>
-                <strong>{suggestionSummary.done}</strong>
-              </div>
-            </article>
-
             <article className="panel inventory-filter-panel">
               <div className="inventory-tools suggestion-tools">
                 <div className="search-wrap">
@@ -761,19 +683,6 @@ function DashboardPage({ onLogout }) {
                     value={suggestionQuery}
                     onChange={(event) => setSuggestionQuery(event.target.value)}
                   />
-                </div>
-                <div className="select-wrap">
-                  <label htmlFor="suggestion-status">상태</label>
-                  <select
-                    id="suggestion-status"
-                    value={suggestionStatus}
-                    onChange={(event) => setSuggestionStatus(event.target.value)}
-                  >
-                    <option value="전체">전체 상태</option>
-                    <option value="미확인">미확인</option>
-                    <option value="검토중">검토중</option>
-                    <option value="반영완료">반영완료</option>
-                  </select>
                 </div>
                 <div className="select-wrap">
                   <label htmlFor="suggestion-sort">정렬</label>
@@ -792,7 +701,6 @@ function DashboardPage({ onLogout }) {
             <article className="panel requests-list-panel">
               <div className="request-toolbar">
                 <h2>건의사항 목록</h2>
-                <button className="mini-action primary" type="button">건의사항 등록</button>
               </div>
 
               {suggestionError && <p className="panel-error">{suggestionError}</p>}
@@ -813,9 +721,7 @@ function DashboardPage({ onLogout }) {
                         <p>작성자: {item.writer || "-"}</p>
                       </div>
                       <div className="request-card-meta">
-                        <span className={`request-status status-${item.statusCode}`}>{item.statusLabel}</span>
                         <span>{item.time}</span>
-                        <button className="mini-action" type="button">상세보기</button>
                       </div>
                     </div>
                   ))}
@@ -829,7 +735,7 @@ function DashboardPage({ onLogout }) {
 
         {activePage === "settings" && (
           <div className="settings-stack">
-            <SalesUploadPanel />
+            <SalesUploadPanel onUploadComplete={() => refreshDashboard().catch(() => {})} />
             <InventoryUploadPanel />
             <WeatherContextPanel />
             <AiRunPanel onPredictionComplete={() => refreshDashboard().catch(() => {})} />

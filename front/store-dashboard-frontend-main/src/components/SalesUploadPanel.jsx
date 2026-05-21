@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { uploadDailySales } from "../api/api";
 
-function SalesUploadPanel() {
+function SalesUploadPanel({ onUploadComplete }) {
   const [salesFiles, setSalesFiles] = useState([]);
   const [masterFiles, setMasterFiles] = useState([]);
   const [salesDate, setSalesDate] = useState("");
@@ -27,6 +27,9 @@ function SalesUploadPanel() {
         dryRun,
       });
       setResult(payload);
+      if (!dryRun) {
+        onUploadComplete?.(payload);
+      }
     } catch (err) {
       setError(err.message || "판매 데이터 업로드 중 오류가 발생했습니다.");
     } finally {

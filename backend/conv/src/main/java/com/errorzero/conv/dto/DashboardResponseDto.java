@@ -27,6 +27,7 @@ public class DashboardResponseDto {
         private final String itemName;
         private final int currentStock;
         private final int recommendedStock;
+        private final int salesQty;
     }
 
     @Getter
@@ -35,7 +36,9 @@ public class DashboardResponseDto {
     public static class OrderRecommendation {
         private final String pluCode;
         private final String productName;
+        private final String category;
         private final int currentStock;
+        private final int predictedSales;
         private final int recommendedOrderQuantity;
         private final String aiReason;
     }

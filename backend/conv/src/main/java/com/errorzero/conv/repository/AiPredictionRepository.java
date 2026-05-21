@@ -20,6 +20,9 @@ public interface AiPredictionRepository extends JpaRepository<AiPrediction, Long
 
     List<AiPrediction> findAllByTargetDateAndProductIn(LocalDate targetDate, Collection<Product> products);
 
+    @Query("SELECT MAX(a.targetDate) FROM AiPrediction a")
+    Optional<LocalDate> findLatestTargetDate();
+
     @Query("SELECT MAX(a.targetDate) FROM AiPrediction a WHERE a.recommendedOrder > 1")
     Optional<LocalDate> findLatestRecommendedTargetDate();
 

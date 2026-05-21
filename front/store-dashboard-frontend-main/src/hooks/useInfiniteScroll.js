@@ -18,29 +18,58 @@ export function useInfiniteScroll({
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [totalElements, setTotalElements] = useState(0);
   const observerTarget = useRef(null);
   const isRequestInFlight = useRef(false);
   const isPageAdvancePending = useRef(false);
+  const requestKeyRef = useRef(`${query}\u0000${category}\u0000${sort}`);
+  const isResetPending = useRef(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const requestKey = `${query}\u0000${category}\u0000${sort}`;
+    if (requestKeyRef.current === requestKey) return;
+
+    requestKeyRef.current = requestKey;
+    isRequestInFlight.current = false;
+    isPageAdvancePending.current = false;
+    isResetPending.current = true;
+    setItems([]);
+    setPage(0);
+    setHasMore(true);
+    setLoading(true);
+    setError(null);
+    setTotalElements(0);
+  }, [enabled, query, category, sort]);
 
   // 페이지 데이터 로드
   useEffect(() => {
-    if (!enabled || !hasMore || isRequestInFlight.current) return;
+    if (!enabled) return;
+
+    const requestKey = `${query}\u0000${category}\u0000${sort}`;
+    if (requestKeyRef.current !== requestKey) return;
+    if (isResetPending.current && page !== 0) return;
+
+    if (!hasMore || isRequestInFlight.current) return;
 
     let cancelled = false;
     isRequestInFlight.current = true;
+    isResetPending.current = false;
+    const requestedPage = page;
 
     fetchInventory({
-      page,
+      page: requestedPage,
       q: query,
       category,
       sort,
     })
       .then((data) => {
         if (cancelled) return;
-        if (Array.isArray(data?.items)) {
-          setItems((prev) => [...prev, ...data.items]);
-        }
+        const nextItems = Array.isArray(data?.items) ? data.items : [];
+        setItems((prev) => (requestedPage === 0 ? nextItems : [...prev, ...nextItems]));
         setHasMore(Boolean(data?.hasNext));
+        setTotalElements(Number(data?.totalElements || 0));
       })
       .catch((err) => {
         if (!cancelled) {
@@ -96,9 +125,11 @@ export function useInfiniteScroll({
   const reset = useCallback(() => {
     isRequestInFlight.current = false;
     isPageAdvancePending.current = false;
+    isResetPending.current = true;
     setItems([]);
     setPage(0);
     setHasMore(true);
+    setTotalElements(0);
     setError(null);
   }, []);
 
@@ -107,6 +138,7 @@ export function useInfiniteScroll({
     loading,
     error,
     hasMore,
+    totalElements,
     observerTarget,
     reset,
   };

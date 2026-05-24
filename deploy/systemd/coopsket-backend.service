@@ -1,0 +1,15 @@
+[Unit]
+Description=Coopsket Spring Boot Backend
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/capston_conv/backend/conv
+EnvironmentFile=/home/ubuntu/capston_conv/backend/conv/.env
+ExecStart=/usr/bin/java -jar /home/ubuntu/capston_conv/backend/conv/build/libs/conv-0.0.1-SNAPSHOT.jar
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

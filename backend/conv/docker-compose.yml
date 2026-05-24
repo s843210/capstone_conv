@@ -4,15 +4,16 @@ services:
   db:
     image: postgres:15
     container_name: campus-store-db
+    restart: unless-stopped
     ports:
-      - "${DB_PORT}:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-      TZ: Asia/Seoul # 한국 시간대 설정 (중요)
+      TZ: Asia/Seoul
     volumes:
       - pgdata:/var/lib/postgresql/data
 
 volumes:
-  pgdata: # 컨테이너를 껐다 켜도 데이터가 날아가지 않게 저장
+  pgdata:

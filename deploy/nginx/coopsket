@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name 13.124.92.75;
+    server_name coop1925.duckdns.org 13.124.92.75;
 
     root /var/www/coopsket;
     index index.html;

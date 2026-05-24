@@ -20,7 +20,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:19006",
                         "http://10.63.213.230:8081",
                         "http://10.63.213.230:19006",
-                        "http://13.124.92.75"
+                        "http://13.124.92.75",
+                        "https://coop1925.duckdns.org"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")

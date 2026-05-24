@@ -2,7 +2,6 @@ import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   Text,
-  TextInput,
   Pressable,
   Alert,
   View,
@@ -16,14 +15,11 @@ import {styles} from '../styles/commonStyles';
 import {GOOGLE_SIGN_IN_SCOPES, GOOGLE_WEB_CLIENT_ID, hasGoogleClientId} from '../config/googleAuth';
 
 type Props = LoginScreenProps & {
-  loginUser: (name: string) => Promise<boolean>;
   loginGoogleUser: (idToken: string) => Promise<boolean>;
 };
 
-export default function LoginScreen({navigation, loginUser, loginGoogleUser}: Props) {
-  const [name, setName] = useState('');
+export default function LoginScreen({navigation, loginGoogleUser}: Props) {
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
-  const [isDevSubmitting, setIsDevSubmitting] = useState(false);
 
   useEffect(() => {
     if (!hasGoogleClientId) {
@@ -85,32 +81,6 @@ export default function LoginScreen({navigation, loginUser, loginGoogleUser}: Pr
     }
   };
 
-  const startDevLogin = async () => {
-    if (isDevSubmitting) {
-      return;
-    }
-
-    const trimmedName = name.trim();
-    if (!trimmedName) {
-      Alert.alert('입력 필요', '이름 또는 학번을 입력해 주세요.');
-      return;
-    }
-    if (trimmedName.length < 2) {
-      Alert.alert('입력 오류', '이름 또는 학번을 2자 이상 입력해 주세요.');
-      return;
-    }
-
-    setIsDevSubmitting(true);
-    const saved = await loginUser(trimmedName);
-    setIsDevSubmitting(false);
-    if (!saved) {
-      Alert.alert('로그인 오류', '사용자 정보를 저장하지 못했습니다. 다시 시도해 주세요.');
-      return;
-    }
-
-    navigation.replace('ProductList');
-  };
-
   return (
     <SafeAreaView style={styles.loginPage}>
       <KeyboardAvoidingView
@@ -146,27 +116,6 @@ export default function LoginScreen({navigation, loginUser, loginGoogleUser}: Pr
               <Text style={styles.loginGoogleBtnText}>
                 {isGoogleSubmitting ? 'Google 로그인 중...' : 'Google로 로그인'}
               </Text>
-            </Pressable>
-
-            <View style={styles.loginDividerRow}>
-              <View style={styles.loginDividerLine} />
-              <Text style={styles.loginDividerText}>개발용 임시 로그인</Text>
-              <View style={styles.loginDividerLine} />
-            </View>
-
-            <TextInput
-              placeholder="학번 또는 이름을 입력하세요"
-              placeholderTextColor="rgba(255,255,255,0.72)"
-              value={name}
-              onChangeText={setName}
-              style={styles.loginInput}
-              editable={!isDevSubmitting}
-            />
-            <Pressable
-              style={[styles.loginPrimaryBtn, isDevSubmitting && styles.loginPrimaryBtnDisabled]}
-              onPress={startDevLogin}
-              disabled={isDevSubmitting}>
-              <Text style={styles.loginPrimaryBtnText}>{isDevSubmitting ? '로그인 중...' : '임시 로그인하기'}</Text>
             </Pressable>
           </View>
         </View>

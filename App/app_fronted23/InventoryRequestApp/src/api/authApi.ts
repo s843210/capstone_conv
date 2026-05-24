@@ -17,12 +17,6 @@ export type AuthResponse = {
   user: AuthUserRecord;
 };
 
-type StudentDevLoginInput = {
-  loginId: string;
-  name: string;
-  email?: string;
-};
-
 type GoogleLoginInput = {
   idToken: string;
 };
@@ -59,29 +53,6 @@ async function readErrorMessage(response: Response, fallback: string): Promise<s
     return payload?.message || fallback;
   } catch {
     return fallback;
-  }
-}
-
-export async function loginStudentDev(payload: StudentDevLoginInput): Promise<AuthResponse> {
-  try {
-    const response = await fetchWithTimeout(`${BASE_URL}/api/auth/student/dev-login`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error(await readErrorMessage(response, '로그인 실패'));
-    }
-
-    const auth = (await response.json()) as AuthResponse;
-    setApiAuthToken(auth.accessToken);
-    return auth;
-  } catch (error) {
-    if (__DEV__) {
-      console.log('[loginStudentDev] error', error);
-    }
-    throw new Error(toUserMessage('로그인 실패', error));
   }
 }
 

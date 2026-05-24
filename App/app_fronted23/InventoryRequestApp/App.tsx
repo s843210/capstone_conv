@@ -16,7 +16,7 @@ import SuggestionDetailScreen from './src/screens/SuggestionDetailScreen';
 import SuggestionEditScreen from './src/screens/SuggestionEditScreen';
 import {STORAGE_KEYS} from './src/data/appConstants';
 import {loadSuggestions, saveSuggestions} from './src/data/suggestionStorage';
-import {loginGoogle, loginStudentDev} from './src/api/authApi';
+import {loginGoogle} from './src/api/authApi';
 import {setApiAuthToken} from './src/api/client';
 import {deleteStudentRequest, fetchStudentRequests, submitStudentRequest} from './src/api/studentApi';
 import {
@@ -221,26 +221,6 @@ export default function App() {
     }
   };
 
-  const loginUser = async (name: string): Promise<boolean> => {
-    try {
-      const normalizedName = name.trim();
-      const auth = await loginStudentDev({
-        loginId: normalizedName,
-        name: normalizedName,
-      });
-      const loginId = auth.user.loginId || normalizedName;
-      await AsyncStorage.multiSet([
-        [STORAGE_KEYS.user, loginId],
-        [STORAGE_KEYS.authToken, auth.accessToken],
-      ]);
-      setApiAuthToken(auth.accessToken);
-      setCurrentUser(loginId);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   const loginGoogleUser = async (idToken: string): Promise<boolean> => {
     try {
       const auth = await loginGoogle({idToken});
@@ -368,7 +348,7 @@ export default function App() {
         initialRouteName={currentUser ? 'ProductList' : 'Login'}
         screenOptions={{headerShown: true}}>
         <Stack.Screen name="Login" options={{headerShown: false}}>
-          {props => <LoginScreen {...props} loginUser={loginUser} loginGoogleUser={loginGoogleUser} />}
+          {props => <LoginScreen {...props} loginGoogleUser={loginGoogleUser} />}
         </Stack.Screen>
         <Stack.Screen name="ProductList" options={{headerShown: false, title: '상품 목록'}}>
           {props => <ProductListScreen {...props} currentUser={currentUser} logoutUser={logoutUser} />}
@@ -429,8 +409,6 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-
 
 
 

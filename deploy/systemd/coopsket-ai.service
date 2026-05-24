@@ -1,0 +1,15 @@
+[Unit]
+Description=Coopsket AI FastAPI Server
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/capston_conv/Ai
+EnvironmentFile=/home/ubuntu/capston_conv/backend/conv/.env
+ExecStart=/home/ubuntu/capston_conv/Ai/.venv/bin/python -m uvicorn src.api_server:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

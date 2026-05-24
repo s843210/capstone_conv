@@ -1,0 +1,56 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [kiro]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+
+            echo "========== 1. 코드 동기화 =========="
+            cd /home/ubuntu/capston_conv
+            git pull
+            git lfs pull
+
+            echo "========== 2. 백엔드 빌드 + 재시작 =========="
+            cd /home/ubuntu/capston_conv/backend/conv
+            set -a; source .env; set +a
+            chmod +x ./gradlew
+            ./gradlew clean build -x test
+            sudo systemctl restart coopsket-backend
+            sleep 5
+            sudo systemctl is-active coopsket-backend || { echo "ERROR: 백엔드 시작 실패"; exit 1; }
+
+            echo "========== 3. AI 서비스 배포 =========="
+            cd /home/ubuntu/capston_conv/Ai
+            source .venv/bin/activate
+            pip install --upgrade pip -q
+            pip install -r requirements.txt -q
+            deactivate
+            sudo systemctl restart coopsket-ai
+            sleep 3
+            sudo systemctl is-active coopsket-ai || { echo "ERROR: AI 서비스 시작 실패"; exit 1; }
+
+            echo "========== 4. 프론트엔드 빌드 + 배포 =========="
+            cd /home/ubuntu/capston_conv/front/store-dashboard-frontend-main
+            npm ci
+            npm run build
+            sudo mkdir -p /var/www/coopsket
+            sudo rsync -a --delete dist/ /var/www/coopsket/
+            sudo systemctl reload nginx
+
+            echo "========== 배포 완료! =========="
+            echo "Backend: $(sudo systemctl is-active coopsket-backend)"
+            echo "AI: $(sudo systemctl is-active coopsket-ai)"
+            echo "Nginx: $(sudo systemctl is-active nginx)"

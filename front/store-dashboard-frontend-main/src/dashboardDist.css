@@ -37,6 +37,12 @@
   display: none;
 }
 
+.dashboard-dist .sidebar-close-btn,
+.dashboard-dist .mobile-menu-btn,
+.dashboard-dist .sidebar-backdrop {
+  display: none;
+}
+
 .dashboard-dist .logo {
   margin: 0;
   color: var(--blue);
@@ -283,6 +289,18 @@
   border-radius: 10px;
   background: #fff;
   font-size: 16px;
+}
+
+.dashboard-dist .mobile-menu-btn {
+  width: 38px;
+  height: 38px;
+  margin: 0 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: #3569d5;
+  font-size: 18px;
+  font-weight: 800;
 }
 
 .dashboard-dist .content-grid.dashboard-grid {
@@ -1176,6 +1194,111 @@
 
   .dashboard-dist .analysis-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-dist.dashboard-layout {
+    display: block;
+    min-height: 100vh;
+  }
+
+  .dashboard-dist .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 70;
+    width: min(82vw, 286px);
+    min-height: 100vh;
+    padding: 0;
+    border-right: 1px solid var(--line);
+    background: transparent;
+    box-shadow: 16px 0 34px rgba(31, 58, 99, 0.18);
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+  }
+
+  .dashboard-dist .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .dashboard-dist .sidebar-content {
+    height: 100vh;
+    padding: 16px 12px;
+    background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+    box-sizing: border-box;
+  }
+
+  .dashboard-dist .brand-area {
+    position: relative;
+    padding-right: 42px;
+  }
+
+  .dashboard-dist .sidebar-close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border: 1px solid #dbe7ff;
+    border-radius: 10px;
+    background: #fff;
+    color: #3569d5;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .dashboard-dist .sidebar-peek {
+    display: none;
+  }
+
+  .dashboard-dist .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    border: 0;
+    background: rgba(18, 35, 64, 0.28);
+    cursor: pointer;
+  }
+
+  .dashboard-dist .dashboard-main {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+  }
+
+  .dashboard-dist .top-header {
+    gap: 10px;
+    flex-direction: column;
+  }
+
+  .dashboard-dist .mobile-menu-btn {
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  .dashboard-dist .top-header h1 {
+    font-size: 26px;
+  }
+
+  .dashboard-dist .header-right {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-dist .content-grid.dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "inventory"
+      "order"
+      "requests"
+      "suggestions";
   }
 }
 

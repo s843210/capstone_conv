@@ -1,4 +1,5 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./DashboardPage.css";
 import "./dashboardDist.css";
 import Sidebar from "./components/Sidebar";
@@ -23,6 +24,24 @@ const PAGE_META = {
   suggestions: { title: "건의사항", description: "사용자 건의사항과 의견을 확인할 수 있습니다." },
   settings: { title: "운영 관리", description: "데이터 업로드 및 운영 설정을 관리합니다." },
 };
+const PAGE_PATHS = {
+  dashboard: "/",
+  inventory: "/inventory",
+  order: "/order",
+  studentRequests: "/student-requests",
+  suggestions: "/suggestions",
+  settings: "/settings",
+};
+const PATH_TO_PAGE = Object.fromEntries(Object.entries(PAGE_PATHS).map(([page, path]) => [path, page]));
+
+function pathToPage(pathname) {
+  const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+  return PATH_TO_PAGE[normalizedPath] || "dashboard";
+}
+
+function pageToPath(page) {
+  return PAGE_PATHS[page] || PAGE_PATHS.dashboard;
+}
 
 function formatRequestedAt(value) {
   if (!value) return "-";
@@ -73,7 +92,10 @@ function extractPredictionDate(orderList) {
 }
 
 function DashboardPage({ onLogout }) {
-  const [activePage, setActivePage] = useState("dashboard");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activePage = pathToPage(location.pathname);
+  const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [studentRequests, setStudentRequests] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [requestError, setRequestError] = useState("");
@@ -92,6 +114,28 @@ function DashboardPage({ onLogout }) {
     orderList,
     refreshDashboard,
   } = useDashboardData();
+
+  const handlePageChange = useCallback((page) => {
+    navigate(pageToPath(page));
+    setMobileSidebarOpen(false);
+  }, [navigate]);
+
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [activePage]);
+
+  useEffect(() => {
+    if (!isMobileSidebarOpen) return undefined;
+
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") {
+        setMobileSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isMobileSidebarOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -315,11 +359,33 @@ function DashboardPage({ onLogout }) {
 
   return (
     <div className="dashboard-layout dashboard-dist">
-      <Sidebar activePage={activePage} onPageChange={setActivePage} onLogout={onLogout} />
+      <Sidebar
+        activePage={activePage}
+        isOpen={isMobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
+        onPageChange={handlePageChange}
+        onLogout={onLogout}
+      />
+      {isMobileSidebarOpen && (
+        <button
+          className="sidebar-backdrop"
+          type="button"
+          aria-label="메뉴 닫기"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
 
       <main className="dashboard-main">
         <header className="top-header dashboard-header" key={`header-${activePage}`}>
           <div>
+            <button
+              className="mobile-menu-btn"
+              type="button"
+              aria-label="메뉴 열기"
+              onClick={() => setMobileSidebarOpen(true)}
+            >
+              ☰
+            </button>
             <h1>{currentPageMeta.title}</h1>
             <p>{currentPageMeta.description}</p>
           </div>
@@ -345,7 +411,7 @@ function DashboardPage({ onLogout }) {
                   <button
                     className="mini-action primary"
                     type="button"
-                    onClick={() => setActivePage("inventory")}
+                    onClick={() => handlePageChange("inventory")}
                   >
                     전체보기
                   </button>
@@ -387,7 +453,7 @@ function DashboardPage({ onLogout }) {
                     <span className="head-icon purple" aria-hidden="true">📊</span>
                     우선 발주 추천 상품 TOP10
                   </h2>
-                  <button className="mini-action" type="button" onClick={() => setActivePage("order")}>
+                  <button className="mini-action" type="button" onClick={() => handlePageChange("order")}>
                     전체보기
                   </button>
                 </div>
@@ -414,7 +480,7 @@ function DashboardPage({ onLogout }) {
                     <span className="head-icon" aria-hidden="true">📨</span>
                     학생 요청 현황
                   </h2>
-                  <button className="mini-action" type="button" onClick={() => setActivePage("studentRequests")}>전체보기</button>
+                  <button className="mini-action" type="button" onClick={() => handlePageChange("studentRequests")}>전체보기</button>
                 </div>
 
                 {requestError && <p className="panel-error">{requestError}</p>}
@@ -444,7 +510,7 @@ function DashboardPage({ onLogout }) {
                   <button
                     className="mini-action primary"
                     type="button"
-                    onClick={() => setActivePage("suggestions")}
+                    onClick={() => handlePageChange("suggestions")}
                   >
                     전체확인
                   </button>

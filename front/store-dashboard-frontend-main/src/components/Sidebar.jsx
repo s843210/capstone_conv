@@ -9,14 +9,17 @@ const MENU_ITEMS = [
   { key: "settings", label: "설정" },
 ];
 
-function Sidebar({ activePage, onPageChange, onLogout }) {
+function Sidebar({ activePage, isOpen = false, onClose, onPageChange, onLogout }) {
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? "open" : ""}`} aria-label="관리자 메뉴">
       <div className="sidebar-content">
         <div className="sidebar-top">
           <div className="logo-area brand-area">
             <h2 className="logo">COOPSKET</h2>
             <p className="sidebar-subtitle">IT Convenience Store</p>
+            <button className="sidebar-close-btn" type="button" aria-label="메뉴 닫기" onClick={onClose}>
+              ×
+            </button>
           </div>
 
           <nav className="menu">

@@ -73,6 +73,11 @@ Ai/data/processed/product_master.csv
 Ai/data/processed/sales_with_calendar.csv
 
 ### Local generated presentation / analysis files ###
+*.ppt
+*.pptx
+*.pps
+*.ppsx
+outputs/*/presentations/
 CampusStore_App_Backend_AI_MVP_*.pptx
 actual_vs_recommendation_*.csv
 ppt_candidate_actual_vs_recommendation_*.csv

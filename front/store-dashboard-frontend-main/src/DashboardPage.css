@@ -737,6 +737,37 @@
   color: #0f172a;
 }
 
+.sales-upload-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+}
+
+.sales-upload-status strong {
+  min-width: 48px;
+  font-size: 14px;
+  color: #1d4ed8;
+}
+
+.sales-upload-status span {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.sales-upload-status.failure {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.sales-upload-status.failure strong {
+  color: #dc2626;
+}
+
 .sales-upload-message {
   margin: 12px 0 0;
   font-size: 13px;

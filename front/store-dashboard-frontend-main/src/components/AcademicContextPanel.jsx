@@ -40,7 +40,7 @@ function AcademicContextPanel() {
         setToDate(response.maxRuleDate);
       }
     } catch (err) {
-      setError(err.message || "학사 컨텍스트 업로드 중 오류가 발생했습니다.");
+      setError("학사일정 업로드에 실패했습니다.");
     } finally {
       setLoadingUpload(false);
     }
@@ -65,7 +65,7 @@ function AcademicContextPanel() {
       });
       setBackfillResult(response);
     } catch (err) {
-      setError(err.message || "학사 컨텍스트 백필 중 오류가 발생했습니다.");
+      setError("학사일정 백필에 실패했습니다.");
     } finally {
       setLoadingBackfill(false);
     }
@@ -113,7 +113,7 @@ function AcademicContextPanel() {
             checked={dryRun}
             onChange={(event) => setDryRun(event.target.checked)}
           />
-          <span>DRY RUN (DB 저장 없이 파싱 결과만 확인)</span>
+          <span>DRY RUN (DB 저장 없이 실행 테스트)</span>
         </label>
 
         <div className="sales-upload-actions">
@@ -141,58 +141,25 @@ function AcademicContextPanel() {
         </div>
       </form>
 
-      {error && <p className="panel-error">⚠️ {error}</p>}
+      {error && <p className="panel-error">실패: {error}</p>}
 
       {uploadResult && (
         <div className="sales-upload-result">
           <h3>업로드 결과</h3>
-          <div className="sales-upload-metrics">
-            <div>
-              <strong>파싱 행</strong>
-              <span>{uploadResult.parsedRuleRows}</span>
-            </div>
-            <div>
-              <strong>저장 행</strong>
-              <span>{uploadResult.savedRuleRows}</span>
-            </div>
-            <div>
-              <strong>무시 행</strong>
-              <span>{uploadResult.ignoredRuleRows}</span>
-            </div>
-            <div>
-              <strong>오류 행</strong>
-              <span>{uploadResult.invalidRuleRows}</span>
-            </div>
-            <div>
-              <strong>월~금</strong>
-              <span>
-                {uploadResult.monday}/{uploadResult.tuesday}/{uploadResult.wednesday}/
-                {uploadResult.thursday}/{uploadResult.friday}
-              </span>
-            </div>
-            <div>
-              <strong>기본값</strong>
-              <span>{uploadResult.defaultCount}</span>
-            </div>
+          <div className="sales-upload-status success">
+            <strong>성공</strong>
+            <span>{dryRun ? "실행 테스트가 완료되었습니다." : "학사일정 업로드가 완료되었습니다."}</span>
           </div>
-          <p className="sales-upload-message">{uploadResult.message}</p>
         </div>
       )}
 
       {backfillResult && (
         <div className="sales-upload-result">
           <h3>백필 결과</h3>
-          <div className="sales-upload-metrics">
-            <div>
-              <strong>성공</strong>
-              <span>{backfillResult.successCount}</span>
-            </div>
-            <div>
-              <strong>실패</strong>
-              <span>{backfillResult.failureCount}</span>
-            </div>
+          <div className={`sales-upload-status ${backfillResult.failureCount > 0 ? "failure" : "success"}`}>
+            <strong>{backfillResult.failureCount > 0 ? "실패" : "성공"}</strong>
+            <span>{backfillResult.failureCount > 0 ? "백필 실행 중 일부 문제가 발생했습니다." : "백필이 완료되었습니다."}</span>
           </div>
-          <p className="sales-upload-message">{backfillResult.status}</p>
         </div>
       )}
     </div>

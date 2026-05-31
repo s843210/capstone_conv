@@ -28,7 +28,7 @@ function WeatherContextPanel() {
       });
       setResult(response);
     } catch (err) {
-      setError(err.message || "날씨/Context 갱신 중 오류가 발생했습니다.");
+      setError("날씨/Context 갱신에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ function WeatherContextPanel() {
             checked={dryRun}
             onChange={(event) => setDryRun(event.target.checked)}
           />
-          <span>DRY RUN (DB 저장 없이 조회만 확인)</span>
+          <span>DRY RUN (DB 저장 없이 실행 테스트)</span>
         </label>
 
         <div className="sales-upload-actions">
@@ -75,34 +75,15 @@ function WeatherContextPanel() {
         </div>
       </form>
 
-      {error && <p className="panel-error">{error}</p>}
+      {error && <p className="panel-error">실패: {error}</p>}
 
       {result && (
         <div className="sales-upload-result">
           <h3>갱신 결과</h3>
-          <div className="sales-upload-metrics">
-            <div>
-              <strong>상태</strong>
-              <span>{result.status}</span>
-            </div>
-            <div>
-              <strong>대상일</strong>
-              <span>{result.targetDate || "-"}</span>
-            </div>
-            <div>
-              <strong>평균기온</strong>
-              <span>{result.avgTempC ?? "-"}</span>
-            </div>
-            <div>
-              <strong>강수량</strong>
-              <span>{result.precipitationMm ?? "-"}</span>
-            </div>
-            <div>
-              <strong>비 여부</strong>
-              <span>{result.isRain ?? "-"}</span>
-            </div>
+          <div className="sales-upload-status success">
+            <strong>성공</strong>
+            <span>{dryRun ? "실행 테스트가 완료되었습니다." : "날씨/Context 갱신이 완료되었습니다."}</span>
           </div>
-          <p className="sales-upload-message">{result.message || result.runId}</p>
         </div>
       )}
     </div>

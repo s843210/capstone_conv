@@ -26,7 +26,7 @@ function ProductMasterUploadPanel() {
       const response = await uploadProductMaster({ files, dryRun });
       setResult(response);
     } catch (err) {
-      setError(err.message || "Product master upload failed.");
+      setError("Product master upload failed.");
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ function ProductMasterUploadPanel() {
             checked={dryRun}
             onChange={(event) => setDryRun(event.target.checked)}
           />
-          <span>DRY RUN (parse only, do not save)</span>
+          <span>DRY RUN (save nothing, test only)</span>
         </label>
 
         <div className="sales-upload-actions">
@@ -74,57 +74,15 @@ function ProductMasterUploadPanel() {
         </div>
       </form>
 
-      {error && <p className="panel-error">{error}</p>}
+      {error && <p className="panel-error">Failed: {error}</p>}
 
       {result && (
         <div className="sales-upload-result">
           <h3>Result</h3>
-          <div className="sales-upload-metrics">
-            <div>
-              <strong>Files</strong>
-              <span>{result.fileCount}</span>
-            </div>
-            <div>
-              <strong>Raw rows</strong>
-              <span>{result.rawRowCount}</span>
-            </div>
-            <div>
-              <strong>Parsed PLU</strong>
-              <span>{result.parsedRowCount}</span>
-            </div>
-            <div>
-              <strong>Duplicates</strong>
-              <span>{result.duplicatePluCount}</span>
-            </div>
-            <div>
-              <strong>Saved</strong>
-              <span>{result.upsertedCount}</span>
-            </div>
+          <div className="sales-upload-status success">
+            <strong>Success</strong>
+            <span>{dryRun ? "Test completed successfully." : "Product master upload completed."}</span>
           </div>
-
-          <p className="sales-upload-message">{result.message}</p>
-
-          {Array.isArray(result.fileSamples) && result.fileSamples.length > 0 && (
-            <div className="sales-upload-unmatched">
-              <strong>Files</strong>
-              <ul>
-                {result.fileSamples.map((sample) => (
-                  <li key={sample}>{sample}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {Array.isArray(result.duplicateSamples) && result.duplicateSamples.length > 0 && (
-            <div className="sales-upload-unmatched">
-              <strong>Duplicate PLU samples</strong>
-              <ul>
-                {result.duplicateSamples.map((sample) => (
-                  <li key={sample}>{sample}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       )}
     </div>

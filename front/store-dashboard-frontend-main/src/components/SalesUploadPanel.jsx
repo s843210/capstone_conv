@@ -31,7 +31,7 @@ function SalesUploadPanel({ onUploadComplete }) {
         onUploadComplete?.(payload);
       }
     } catch (err) {
-      setError(err.message || "판매 데이터 업로드 중 오류가 발생했습니다.");
+      setError("판매 데이터 업로드에 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -90,7 +90,7 @@ function SalesUploadPanel({ onUploadComplete }) {
             checked={dryRun}
             onChange={(event) => setDryRun(event.target.checked)}
           />
-          <span>DRY RUN (DB 저장 없이 매칭 결과만 확인)</span>
+          <span>DRY RUN (DB 저장 없이 실행 테스트)</span>
         </label>
 
         <div className="sales-upload-actions">
@@ -100,50 +100,15 @@ function SalesUploadPanel({ onUploadComplete }) {
         </div>
       </form>
 
-      {error && <p className="panel-error">{error}</p>}
+      {error && <p className="panel-error">실패: {error}</p>}
 
       {result && (
         <div className="sales-upload-result">
           <h3>실행 결과</h3>
-          <div className="sales-upload-metrics">
-            <div>
-              <strong>원본 행</strong>
-              <span>{result.rawRowCount}</span>
-            </div>
-            <div>
-              <strong>매칭 행</strong>
-              <span>{result.matchedRowCount}</span>
-            </div>
-            <div>
-              <strong>미매칭</strong>
-              <span>{result.unmatchedRowCount}</span>
-            </div>
-            <div>
-              <strong>적재 대상</strong>
-              <span>{result.uniqueDailySalesCount}</span>
-            </div>
-            <div>
-              <strong>신규</strong>
-              <span>{result.insertedCount}</span>
-            </div>
-            <div>
-              <strong>갱신</strong>
-              <span>{result.updatedCount}</span>
-            </div>
+          <div className="sales-upload-status success">
+            <strong>성공</strong>
+            <span>{dryRun ? "실행 테스트가 완료되었습니다." : "판매 데이터 업로드가 완료되었습니다."}</span>
           </div>
-
-          <p className="sales-upload-message">{result.message}</p>
-
-          {Array.isArray(result.unmatchedSamples) && result.unmatchedSamples.length > 0 && (
-            <div className="sales-upload-unmatched">
-              <strong>미매칭 샘플</strong>
-              <ul>
-                {result.unmatchedSamples.map((name) => (
-                  <li key={name}>{name}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       )}
     </div>

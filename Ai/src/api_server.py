@@ -33,7 +33,7 @@ class RecommendationPolicy(BaseModel):
     exclude_uncategorized: bool = True
     require_sales_history: bool = True
     require_current_stock: bool = True
-    only_positive_recommendations: bool = False
+    only_positive_recommendations: bool = True
 
 
 class PredictRequest(BaseModel):
@@ -141,13 +141,48 @@ def _db_base_date(target: date | None) -> tuple[date, date]:
 def _read_db_feature_source(base_date: date, policy: RecommendationPolicy) -> pd.DataFrame:
     active_filter = "AND p.is_active = true" if policy.require_current_stock else ""
     category_filter = "AND COALESCE(NULLIF(p.category, ''), '미분류') <> '미분류'" if policy.exclude_uncategorized else ""
+    history_filter = (
+        "AND EXISTS ("
+        "SELECT 1 FROM daily_sales history "
+        "WHERE history.plu_code = p.plu_code "
+        "AND history.sales_date <= %(base_date)s"
+        ")"
+        if policy.require_sales_history
+        else ""
+    )
+    start_date = base_date - timedelta(days=28)
     sql = f"""
+        WITH candidate_products AS (
+            SELECT
+                p.plu_code,
+                COALESCE(NULLIF(p.name, ''), p.plu_code) AS product_name,
+                COALESCE(NULLIF(p.category, ''), '미분류') AS product_category,
+                COALESCE(p.current_stock, 0) AS current_stock,
+                COALESCE(p.is_active, false) AS is_active
+            FROM product p
+            WHERE 1 = 1
+              {active_filter}
+              {category_filter}
+              {history_filter}
+        ),
+        date_window AS (
+            SELECT generate_series(%(start_date)s::date, %(base_date)s::date, interval '1 day')::date AS sales_date
+        ),
+        sales AS (
+            SELECT
+                sales_date,
+                plu_code,
+                SUM(sales_qty) AS sales_qty
+            FROM daily_sales
+            WHERE sales_date BETWEEN %(start_date)s AND %(base_date)s
+            GROUP BY sales_date, plu_code
+        )
         SELECT
-            d.sales_date AS date,
-            d.plu_code,
-            COALESCE(NULLIF(p.name, ''), d.plu_code) AS product_name,
-            COALESCE(NULLIF(p.category, ''), '미분류') AS product_category,
-            d.sales_qty,
+            dw.sales_date AS date,
+            cp.plu_code,
+            cp.product_name,
+            cp.product_category,
+            COALESCE(s.sales_qty, 0) AS sales_qty,
             COALESCE(c.avg_temp_c, 0) AS avg_temp,
             COALESCE(c.precipitation_mm, 0) AS rainfall,
             COALESCE(c.is_vacation, 0) AS is_vacation,
@@ -157,18 +192,16 @@ def _read_db_feature_source(base_date: date, policy: RecommendationPolicy) -> pd
             COALESCE(c.wednesday_class_count, 0) AS wednesday_class_count,
             COALESCE(c.thursday_class_count, 0) AS thursday_class_count,
             COALESCE(c.friday_class_count, 0) AS friday_class_count,
-            COALESCE(p.current_stock, 0) AS current_stock,
-            COALESCE(p.is_active, false) AS is_active
-        FROM daily_sales d
-        JOIN product p ON p.plu_code = d.plu_code
-        LEFT JOIN daily_context c ON c.target_date = d.sales_date
-        WHERE d.sales_date <= %(base_date)s
-          {active_filter}
-          {category_filter}
-        ORDER BY d.plu_code, d.sales_date
+            cp.current_stock,
+            cp.is_active
+        FROM candidate_products cp
+        CROSS JOIN date_window dw
+        LEFT JOIN sales s ON s.plu_code = cp.plu_code AND s.sales_date = dw.sales_date
+        LEFT JOIN daily_context c ON c.target_date = dw.sales_date
+        ORDER BY cp.plu_code, dw.sales_date
     """
     with _db_connection() as conn:
-        df = pd.read_sql_query(sql, conn, params={"base_date": base_date})
+        df = pd.read_sql_query(sql, conn, params={"start_date": start_date, "base_date": base_date})
     if df.empty:
         raise ValueError(f"No DB sales rows found for base_date <= {base_date}")
     return df
@@ -222,10 +255,11 @@ def _build_monthly_v2_features_from_db(source: pd.DataFrame, base_date: date) ->
     return df[df["date"] == pd.Timestamp(base_date)].copy().reset_index(drop=True)
 
 
-def _to_recommended_qty(predicted_sales: float) -> int:
+def _to_recommended_qty(predicted_sales: float, current_stock: float = 0) -> int:
     if pd.isna(predicted_sales) or predicted_sales <= 0:
         return 0
-    qty = int(math.ceil(float(predicted_sales) * 1.2))
+    stock = 0 if pd.isna(current_stock) else max(float(current_stock), 0)
+    qty = int(math.ceil(float(predicted_sales) * 1.2 - stock))
     return 0 if qty < 2 else qty
 
 
@@ -305,9 +339,14 @@ def _predict_from_db(target: date | None, policy: RecommendationPolicy) -> tuple
             "product_name": valid_features["product_name"].astype(str).values,
             "product_category": valid_features["product_category"].astype(str).values,
             "predicted_sales_qty": preds.astype(float).values,
+            "current_stock": pd.to_numeric(valid_features["current_stock"], errors="coerce").fillna(0).values,
         }
     )
-    out_df["recommended_order_qty"] = out_df["predicted_sales_qty"].map(_to_recommended_qty).astype(int)
+    out_df["recommended_order_qty"] = [
+        _to_recommended_qty(predicted_sales, current_stock)
+        for predicted_sales, current_stock in zip(out_df["predicted_sales_qty"], out_df["current_stock"])
+    ]
+    out_df["recommended_order_qty"] = out_df["recommended_order_qty"].astype(int)
     out_df = _apply_policy(out_df, policy)
     _write_db_prediction_outputs(out_df)
 

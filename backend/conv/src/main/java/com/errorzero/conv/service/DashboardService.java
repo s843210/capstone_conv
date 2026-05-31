@@ -114,10 +114,10 @@ public class DashboardService {
     }
 
     private int calculateRecommendedOrder(AiPrediction prediction) {
-        if (prediction == null || prediction.getProduct() == null) {
+        if (prediction == null) {
             return 0;
         }
-        return Math.max(safeInt(prediction.getPredictedSales()) - safeInt(prediction.getProduct().getCurrentStock()), 0);
+        return Math.max(safeInt(prediction.getRecommendedOrder()), 0);
     }
 
     private OrderRecommendation toOrderRecommendation(AiPrediction prediction) {

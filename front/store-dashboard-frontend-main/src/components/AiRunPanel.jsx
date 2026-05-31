@@ -3,7 +3,6 @@ import { runAiPrediction } from "../api/api";
 
 function AiRunPanel({ onPredictionComplete }) {
   const [targetDate, setTargetDate] = useState("");
-  const [onlyPositiveRecommendations, setOnlyPositiveRecommendations] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -17,7 +16,7 @@ function AiRunPanel({ onPredictionComplete }) {
     try {
       const response = await runAiPrediction({
         targetDate,
-        onlyPositiveRecommendations,
+        onlyPositiveRecommendations: true,
       });
       setResult(response);
       onPredictionComplete?.(response);
@@ -50,15 +49,6 @@ function AiRunPanel({ onPredictionComplete }) {
             onChange={(event) => setTargetDate(event.target.value)}
           />
           <small>비우면 FastAPI가 CSV 최신 예측일을 사용합니다.</small>
-        </label>
-
-        <label className="sales-upload-checkbox">
-          <input
-            type="checkbox"
-            checked={onlyPositiveRecommendations}
-            onChange={(event) => setOnlyPositiveRecommendations(event.target.checked)}
-          />
-          <span>추천 수량이 1개 이상인 상품만 저장</span>
         </label>
 
         <div className="sales-upload-actions">

@@ -4,7 +4,6 @@ import { backfillAcademicContext, uploadAcademicContext } from "../api/api";
 function AcademicContextPanel() {
   const [academicFile, setAcademicFile] = useState(null);
   const [headcountFile, setHeadcountFile] = useState(null);
-  const [dryRun, setDryRun] = useState(true);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
@@ -31,7 +30,7 @@ function AcademicContextPanel() {
       const response = await uploadAcademicContext({
         academicFile,
         headcountFile,
-        dryRun,
+        dryRun: false,
       });
       setUploadResult(response);
 
@@ -107,18 +106,9 @@ function AcademicContextPanel() {
           <small>{headcountFile ? headcountFile.name : "미선택 시 기존/기본값 사용"}</small>
         </label>
 
-        <label className="sales-upload-checkbox">
-          <input
-            type="checkbox"
-            checked={dryRun}
-            onChange={(event) => setDryRun(event.target.checked)}
-          />
-          <span>DRY RUN (DB 저장 없이 실행 테스트)</span>
-        </label>
-
         <div className="sales-upload-actions">
           <button className="sales-upload-button" type="submit" disabled={loadingUpload}>
-            {loadingUpload ? "처리 중..." : dryRun ? "DRY RUN 실행" : "규칙 저장 실행"}
+            {loadingUpload ? "처리 중..." : "규칙 저장 실행"}
           </button>
         </div>
       </form>
@@ -148,7 +138,7 @@ function AcademicContextPanel() {
           <h3>업로드 결과</h3>
           <div className="sales-upload-status success">
             <strong>성공</strong>
-            <span>{dryRun ? "실행 테스트가 완료되었습니다." : "학사일정 업로드가 완료되었습니다."}</span>
+            <span>학사일정 업로드가 완료되었습니다.</span>
           </div>
         </div>
       )}

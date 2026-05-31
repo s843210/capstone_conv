@@ -5,7 +5,6 @@ function SalesUploadPanel({ onUploadComplete }) {
   const [salesFiles, setSalesFiles] = useState([]);
   const [masterFiles, setMasterFiles] = useState([]);
   const [salesDate, setSalesDate] = useState("");
-  const [dryRun, setDryRun] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -24,12 +23,10 @@ function SalesUploadPanel({ onUploadComplete }) {
         salesFiles,
         masterFiles,
         salesDate,
-        dryRun,
+        dryRun: false,
       });
       setResult(payload);
-      if (!dryRun) {
-        onUploadComplete?.(payload);
-      }
+      onUploadComplete?.(payload);
     } catch (err) {
       setError("판매 데이터 업로드에 실패했습니다.");
     } finally {
@@ -84,18 +81,9 @@ function SalesUploadPanel({ onUploadComplete }) {
           />
         </label>
 
-        <label className="sales-upload-checkbox">
-          <input
-            type="checkbox"
-            checked={dryRun}
-            onChange={(event) => setDryRun(event.target.checked)}
-          />
-          <span>DRY RUN (DB 저장 없이 실행 테스트)</span>
-        </label>
-
         <div className="sales-upload-actions">
           <button className="sales-upload-button" type="submit" disabled={!canSubmit}>
-            {loading ? "처리 중..." : dryRun ? "DRY RUN 실행" : "DB 적재 실행"}
+            {loading ? "처리 중..." : "DB 적재 실행"}
           </button>
         </div>
       </form>
@@ -107,7 +95,7 @@ function SalesUploadPanel({ onUploadComplete }) {
           <h3>실행 결과</h3>
           <div className="sales-upload-status success">
             <strong>성공</strong>
-            <span>{dryRun ? "실행 테스트가 완료되었습니다." : "판매 데이터 업로드가 완료되었습니다."}</span>
+            <span>판매 데이터 업로드가 완료되었습니다.</span>
           </div>
         </div>
       )}

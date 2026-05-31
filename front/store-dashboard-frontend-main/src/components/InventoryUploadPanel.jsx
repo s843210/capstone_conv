@@ -3,7 +3,6 @@ import { uploadInventoryStock } from "../api/api";
 
 function InventoryUploadPanel() {
   const [file, setFile] = useState(null);
-  const [dryRun, setDryRun] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -25,7 +24,7 @@ function InventoryUploadPanel() {
     setLoading(true);
 
     try {
-      const response = await uploadInventoryStock({ file, dryRun });
+      const response = await uploadInventoryStock({ file, dryRun: false });
       setResult(response);
     } catch (err) {
       setError("현재고 업로드에 실패했습니다.");
@@ -59,18 +58,9 @@ function InventoryUploadPanel() {
           <small>{file ? file.name : "선택된 파일 없음"}</small>
         </label>
 
-        <label className="sales-upload-checkbox">
-          <input
-            type="checkbox"
-            checked={dryRun}
-            onChange={(event) => setDryRun(event.target.checked)}
-          />
-          <span>DRY RUN (DB 저장 없이 실행 테스트)</span>
-        </label>
-
         <div className="sales-upload-actions">
           <button className="sales-upload-button" type="submit" disabled={!canSubmit}>
-            {loading ? "처리 중..." : dryRun ? "DRY RUN 실행" : "재고 반영 실행"}
+            {loading ? "처리 중..." : "재고 반영 실행"}
           </button>
         </div>
       </form>
@@ -82,7 +72,7 @@ function InventoryUploadPanel() {
           <h3>실행 결과</h3>
           <div className="sales-upload-status success">
             <strong>성공</strong>
-            <span>{dryRun ? "실행 테스트가 완료되었습니다." : "현재고 업로드가 완료되었습니다."}</span>
+            <span>현재고 업로드가 완료되었습니다.</span>
           </div>
         </div>
       )}

@@ -10,7 +10,6 @@ function formatToday() {
 function WeatherContextPanel() {
   const today = useMemo(() => formatToday(), []);
   const [targetDate, setTargetDate] = useState(today);
-  const [dryRun, setDryRun] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
@@ -24,7 +23,7 @@ function WeatherContextPanel() {
     try {
       const response = await syncWeatherContext({
         targetDate,
-        dryRun,
+        dryRun: false,
       });
       setResult(response);
     } catch (err) {
@@ -59,18 +58,9 @@ function WeatherContextPanel() {
           <small>AI 예측 실행 날짜와 같은 날짜로 맞추면 됩니다.</small>
         </label>
 
-        <label className="sales-upload-checkbox">
-          <input
-            type="checkbox"
-            checked={dryRun}
-            onChange={(event) => setDryRun(event.target.checked)}
-          />
-          <span>DRY RUN (DB 저장 없이 실행 테스트)</span>
-        </label>
-
         <div className="sales-upload-actions">
           <button className="sales-upload-button" type="submit" disabled={loading}>
-            {loading ? "갱신 중..." : dryRun ? "날씨 조회 테스트" : "날씨/Context 갱신"}
+            {loading ? "갱신 중..." : "날씨/Context 갱신"}
           </button>
         </div>
       </form>
@@ -82,7 +72,7 @@ function WeatherContextPanel() {
           <h3>갱신 결과</h3>
           <div className="sales-upload-status success">
             <strong>성공</strong>
-            <span>{dryRun ? "실행 테스트가 완료되었습니다." : "날씨/Context 갱신이 완료되었습니다."}</span>
+            <span>날씨/Context 갱신이 완료되었습니다.</span>
           </div>
         </div>
       )}

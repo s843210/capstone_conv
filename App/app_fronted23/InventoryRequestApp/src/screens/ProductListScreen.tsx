@@ -18,8 +18,6 @@ type Props = ProductListScreenProps & {
   logoutUser: () => Promise<boolean>;
 };
 
-type StockState = 'available' | 'low' | 'soldout';
-
 const categoryIconMap: Record<string, string> = {
   음료: '🥤',
   과자: '🍪',
@@ -42,25 +40,6 @@ const getCategoryIcon = (rawCategory: string): string => {
   if (category.includes('생활')) return '🧻';
 
   return '📦';
-};
-
-const getStockState = (stock?: number): StockState => {
-  if (typeof stock !== 'number') {
-    return 'available';
-  }
-  if (stock <= 0) {
-    return 'soldout';
-  }
-  if (stock <= 5) {
-    return 'low';
-  }
-  return 'available';
-};
-
-const stockBadgeText: Record<StockState, string> = {
-  available: '요청 가능',
-  low: '재고 부족',
-  soldout: '품절',
 };
 
 export default function ProductListScreen({navigation, currentUser, logoutUser}: Props) {
@@ -235,7 +214,6 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
             keyExtractor={item => item.pluCode}
             renderItem={({item}) => {
               const icon = getCategoryIcon(item.category);
-              const stockState = getStockState(item.stock);
               const stockLabel = typeof item.stock === 'number' ? `재고 ${Math.max(0, item.stock)}개` : '재고 정보 없음';
 
               return (
@@ -251,28 +229,6 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
                       <Text style={localStyles.productName}>{item.name}</Text>
                       <Text style={localStyles.productMeta}>
                         {item.category} {'\u00B7'} {stockLabel}
-                      </Text>
-                    </View>
-
-                    <View
-                      style={[
-                        localStyles.stockBadge,
-                        stockState === 'available'
-                          ? localStyles.stockBadge_available
-                          : stockState === 'low'
-                            ? localStyles.stockBadge_low
-                            : localStyles.stockBadge_soldout,
-                      ]}>
-                      <Text
-                        style={[
-                          localStyles.stockBadgeText,
-                          stockState === 'available'
-                            ? localStyles.stockBadgeText_available
-                            : stockState === 'low'
-                              ? localStyles.stockBadgeText_low
-                              : localStyles.stockBadgeText_soldout,
-                        ]}>
-                        {stockBadgeText[stockState]}
                       </Text>
                     </View>
                   </View>
@@ -485,33 +441,6 @@ const localStyles = StyleSheet.create({
     color: '#64748B',
     fontSize: 13,
   },
-  stockBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  stockBadge_available: {
-    backgroundColor: '#DCFCE7',
-  },
-  stockBadge_low: {
-    backgroundColor: '#FEF3C7',
-  },
-  stockBadge_soldout: {
-    backgroundColor: '#E5E7EB',
-  },
-  stockBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  stockBadgeText_available: {
-    color: '#166534',
-  },
-  stockBadgeText_low: {
-    color: '#92400E',
-  },
-  stockBadgeText_soldout: {
-    color: '#475569',
-  },
   emptyWrap: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -581,4 +510,3 @@ const localStyles = StyleSheet.create({
     fontSize: 14,
   },
 });
-

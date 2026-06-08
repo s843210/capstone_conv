@@ -9,4 +9,5 @@ public class StudentProductResponseDto {
     private String pluCode;
     private String name;
     private String category;
+    private int stock;
 }

@@ -64,6 +64,7 @@ class StudentProductServiceTest {
         assertThat(result.get(0).getPluCode()).isEqualTo("8809962586353");
         assertThat(result.get(0).getName()).isEqualTo("대정)참치마요삼각김밥2편");
         assertThat(result.get(0).getCategory()).isEqualTo("주먹밥");
+        assertThat(result.get(0).getStock()).isEqualTo(10);
     }
 
     @Test

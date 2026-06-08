@@ -105,7 +105,8 @@ public class StudentProductService {
         return new StudentProductResponseDto(
                 product.getPluCode(),
                 product.getName(),
-                product.getCategory()
+                product.getCategory(),
+                Math.max(0, product.getCurrentStock() != null ? product.getCurrentStock() : 0)
         );
     }
 

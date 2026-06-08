@@ -236,6 +236,7 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
             renderItem={({item}) => {
               const icon = getCategoryIcon(item.category);
               const stockState = getStockState(item.stock);
+              const stockLabel = typeof item.stock === 'number' ? `재고 ${Math.max(0, item.stock)}개` : '재고 정보 없음';
 
               return (
                 <Pressable
@@ -249,7 +250,7 @@ export default function ProductListScreen({navigation, currentUser, logoutUser}:
                     <View style={localStyles.productInfoWrap}>
                       <Text style={localStyles.productName}>{item.name}</Text>
                       <Text style={localStyles.productMeta}>
-                        {item.category} {'\u00B7'} 재고 {typeof item.stock === 'number' ? item.stock : '-'}개
+                        {item.category} {'\u00B7'} {stockLabel}
                       </Text>
                     </View>
 
@@ -580,5 +581,4 @@ const localStyles = StyleSheet.create({
     fontSize: 14,
   },
 });
-
 

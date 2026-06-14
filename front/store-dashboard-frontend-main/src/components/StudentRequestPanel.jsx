@@ -1,20 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchStudentRequests } from "../api/api";
+import { formatShortDateTime24 } from "../utils/dateFormat";
 
 const POLL_INTERVAL_MS = 5000;
-
-function formatRequestedAt(value) {
-  if (!value) return "-";
-  const requestedAt = new Date(value);
-  if (Number.isNaN(requestedAt.getTime())) return value;
-
-  return requestedAt.toLocaleString("ko-KR", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function StudentRequestPanel({
   limit = 15,
@@ -58,7 +46,7 @@ function StudentRequestPanel({
     () =>
       requests.map((request) => ({
         ...request,
-        requestedAtLabel: formatRequestedAt(request.requestedAt),
+        requestedAtLabel: formatShortDateTime24(request.requestedAt),
       })),
     [requests],
   );

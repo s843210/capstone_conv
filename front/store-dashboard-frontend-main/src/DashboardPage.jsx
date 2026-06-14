@@ -13,6 +13,7 @@ import StudentRequestPage from "./components/StudentRequestPage";
 import WeatherContextPanel from "./components/WeatherContextPanel";
 import { fetchStudentRequests, fetchStudentSuggestions } from "./api/api";
 import { useDashboardData } from "./hooks/useDashboardData";
+import { formatFullDateTime24, formatShortDateTime24 } from "./utils/dateFormat";
 
 const POLL_INTERVAL_MS = 5000;
 const PAGE_META = {
@@ -41,19 +42,6 @@ function pathToPage(pathname) {
 
 function pageToPath(page) {
   return PAGE_PATHS[page] || PAGE_PATHS.dashboard;
-}
-
-function formatRequestedAt(value) {
-  if (!value) return "-";
-  const requestedAt = new Date(value);
-  if (Number.isNaN(requestedAt.getTime())) return value;
-
-  return requestedAt.toLocaleString("ko-KR", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 function formatDisplayDate(value) {
@@ -199,20 +187,13 @@ function DashboardPage({ onLogout }) {
       title: item.title,
       preview: item.content,
       writer: item.writer,
-      time: formatRequestedAt(item.updatedAt || item.createdAt),
+      time: formatShortDateTime24(item.updatedAt || item.createdAt),
     })),
     [suggestions],
   );
 
   const nowLabel = useMemo(
-    () =>
-      new Date().toLocaleString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+    () => formatFullDateTime24(new Date()),
     [],
   );
   const dateLabel = useMemo(
@@ -495,7 +476,7 @@ function DashboardPage({ onLogout }) {
                     <div className="row request-row" key={`${request.studentId}-${request.salesDate}-${request.pluCode}`}>
                       <span className="prod">{request.productName}</span>
                       <span>{request.quantity}개</span>
-                      <span>{formatRequestedAt(request.requestedAt)}</span>
+                      <span>{formatShortDateTime24(request.requestedAt)}</span>
                     </div>
                   ))}
                 </div>

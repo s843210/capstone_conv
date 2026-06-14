@@ -2,6 +2,7 @@
 import OrderRecommendation from "./OrderRecommendation";
 import InsightPanel from "./InsightPanel";
 import StudentRequestPanel from "./StudentRequestPanel";
+import { formatFullDateTime24 } from "../utils/dateFormat";
 
 function DashboardOverview({
   inventoryList,
@@ -16,13 +17,7 @@ function DashboardOverview({
   onNavigateSuggestions,
 }) {
   const now = new Date();
-  const nowLabel = now.toLocaleString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const nowLabel = formatFullDateTime24(now);
 
   return (
     <>

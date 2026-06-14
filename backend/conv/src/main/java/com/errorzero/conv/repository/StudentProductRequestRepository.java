@@ -14,11 +14,18 @@ public interface StudentProductRequestRepository extends JpaRepository<StudentPr
     @Modifying
     @Query(value = """
             INSERT INTO student_product_request (student_id, sales_date, plu_code, quantity, created_at, updated_at)
-            VALUES (:studentId, :salesDate, :pluCode, :quantity, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            VALUES (
+                :studentId,
+                :salesDate,
+                :pluCode,
+                :quantity,
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Seoul',
+                CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Seoul'
+            )
             ON CONFLICT (student_id, sales_date, plu_code)
             DO UPDATE SET
                 quantity = EXCLUDED.quantity,
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Seoul'
             """, nativeQuery = true)
     int upsert(@Param("studentId") String studentId,
                @Param("salesDate") LocalDate salesDate,
